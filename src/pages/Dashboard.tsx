@@ -4,6 +4,7 @@ import { HealthScoreCard } from '@/components/dashboard/HealthScoreCard';
 import { DailyResultCard } from '@/components/dashboard/DailyResultCard';
 import { AISummaryCard } from '@/components/dashboard/AISummaryCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
+import { RecentCommunityFeed } from '@/components/dashboard/RecentCommunityFeed';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
@@ -118,6 +119,9 @@ export default function Dashboard() {
         {todayReport?.ai_comment && (
           <AISummaryCard summary={todayReport.ai_comment} />
         )}
+
+        {/* Recent Community Feed */}
+        <RecentCommunityFeed />
 
         {/* Quick Actions */}
         <QuickActions />
