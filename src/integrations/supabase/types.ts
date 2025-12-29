@@ -152,21 +152,33 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          drawdown_status: string | null
           id: string
+          insight_text: string | null
+          profile_type: string | null
+          risk_level: string | null
           score: number
           status: Database["public"]["Enums"]["report_status"]
         }
         Insert: {
           created_at?: string
           date: string
+          drawdown_status?: string | null
           id?: string
+          insight_text?: string | null
+          profile_type?: string | null
+          risk_level?: string | null
           score: number
           status?: Database["public"]["Enums"]["report_status"]
         }
         Update: {
           created_at?: string
           date?: string
+          drawdown_status?: string | null
           id?: string
+          insight_text?: string | null
+          profile_type?: string | null
+          risk_level?: string | null
           score?: number
           status?: Database["public"]["Enums"]["report_status"]
         }
@@ -241,6 +253,7 @@ export type Database = {
           created_at: string
           id: string
           is_bot_message: boolean
+          is_highlight: boolean | null
           is_pinned: boolean
           parent_id: string | null
           updated_at: string
@@ -252,6 +265,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_bot_message?: boolean
+          is_highlight?: boolean | null
           is_pinned?: boolean
           parent_id?: string | null
           updated_at?: string
@@ -263,6 +277,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_bot_message?: boolean
+          is_highlight?: boolean | null
           is_pinned?: boolean
           parent_id?: string | null
           updated_at?: string
