@@ -43,27 +43,27 @@ export function AffiliateStats({ affiliate, referrals, commissions }: AffiliateS
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       {stats.map((stat) => (
         <Card
           key={stat.title}
           className={stat.highlight ? 'border-primary/50 bg-primary/5' : ''}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3">
+            <CardTitle className="text-[10px] font-medium text-muted-foreground leading-tight">
               {stat.title}
             </CardTitle>
-            <stat.icon className={`h-4 w-4 ${stat.highlight ? 'text-primary' : 'text-muted-foreground'}`} />
+            <stat.icon className={`h-3.5 w-3.5 ${stat.highlight ? 'text-primary' : 'text-muted-foreground'}`} />
           </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${stat.highlight ? 'text-primary' : ''}`}>
+          <CardContent className="p-3 pt-0">
+            <div className={`text-lg font-bold ${stat.highlight ? 'text-primary' : ''}`}>
               {stat.value}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
               {stat.description}
             </p>
             {stat.title === 'Saldo Disponível' && pendingCommissions > 0 && (
-              <p className="text-xs text-yellow-500 mt-1">
+              <p className="text-[10px] text-yellow-500 mt-0.5">
                 + R$ {pendingCommissions.toFixed(2)} pendente
               </p>
             )}

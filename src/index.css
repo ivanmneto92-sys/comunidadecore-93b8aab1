@@ -141,16 +141,27 @@
   }
 }
 
-/* Custom scrollbar for dark mode */
+/* Custom scrollbar - Hidden by default */
 @layer utilities {
+  /* Hide scrollbar completely */
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Thin transparent scrollbar (alternative) */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
+    scrollbar-color: transparent transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -158,8 +169,8 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted));
-    border-radius: 3px;
+    background-color: transparent;
+    border-radius: 2px;
   }
 
   /* Status indicator utilities */
@@ -182,5 +193,14 @@
   /* Glass effect for cards */
   .glass {
     @apply bg-card/80 backdrop-blur-sm border border-border/50;
+  }
+
+  /* Safe area utilities for iOS/Android */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
   }
 }

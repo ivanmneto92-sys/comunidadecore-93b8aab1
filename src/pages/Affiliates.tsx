@@ -101,14 +101,14 @@ export default function Affiliates() {
               commissions={commissions}
             />
 
-            {/* Tables Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* Tables Grid - Stack on mobile */}
+            <div className="space-y-4">
               <ReferralsTable referrals={referrals} />
               <CommissionsTable commissions={commissions} />
             </div>
 
-            {/* Payout Section */}
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* Payout Section - Stack on mobile */}
+            <div className="space-y-4">
               <PayoutRequestForm affiliate={affiliate} onRequest={requestPayout} />
               <PayoutHistory payouts={payouts} />
             </div>

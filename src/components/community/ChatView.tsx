@@ -198,15 +198,15 @@ export function ChatView({ channel }: ChatViewProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Channel header */}
-      <div className="px-4 py-3 border-b border-border">
-        <h2 className="font-semibold">{channel.name}</h2>
+      <div className="px-4 py-2 border-b border-border shrink-0">
+        <h2 className="font-medium text-sm">{channel.name}</h2>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 px-4">
-        <div className="py-4 space-y-4">
+      <ScrollArea className="flex-1 px-3">
+        <div className="py-3 space-y-3">
           {messages.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-8">
+            <p className="text-center text-xs text-muted-foreground py-6">
               Nenhuma mensagem ainda. Seja o primeiro a enviar!
             </p>
           ) : (
@@ -217,33 +217,33 @@ export function ChatView({ channel }: ChatViewProps) {
               return (
                 <div key={message.id}>
                   {showDate && (
-                    <div className="flex items-center gap-2 my-4">
+                    <div className="flex items-center gap-2 my-3">
                       <div className="flex-1 h-px bg-border" />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {formatDate(message.created_at)}
                       </span>
                       <div className="flex-1 h-px bg-border" />
                     </div>
                   )}
                   
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium shrink-0">
+                  <div className="flex gap-2">
+                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium shrink-0">
                       {message.is_bot_message 
                         ? '🤖' 
                         : (message.profiles?.display_name?.[0] || '?').toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-medium text-sm">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-medium text-xs">
                           {message.is_bot_message 
                             ? 'CORE Bot' 
                             : message.profiles?.display_name || 'Usuário'}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground">
                           {formatTime(message.created_at)}
                         </span>
                       </div>
-                      <p className="text-sm text-foreground/90 break-words">
+                      <p className="text-xs text-foreground/90 break-words">
                         {message.content}
                       </p>
                     </div>
@@ -258,16 +258,16 @@ export function ChatView({ channel }: ChatViewProps) {
 
       {/* Input */}
       {canSendMessages ? (
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-border">
+        <form onSubmit={handleSendMessage} className="p-3 border-t border-border shrink-0">
           <div className="flex gap-2">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={`Mensagem em #${channel.name.toLowerCase()}`}
-              className="flex-1"
+              className="flex-1 h-9 text-sm"
               disabled={sending}
             />
-            <Button type="submit" size="icon" disabled={!newMessage.trim() || sending}>
+            <Button type="submit" size="icon" className="h-9 w-9" disabled={!newMessage.trim() || sending}>
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -277,10 +277,10 @@ export function ChatView({ channel }: ChatViewProps) {
           </div>
         </form>
       ) : (
-        <div className="p-4 border-t border-border text-center text-sm text-muted-foreground">
+        <div className="p-3 border-t border-border text-center text-xs text-muted-foreground shrink-0">
           {channel.is_bot_only 
-            ? 'Este canal é apenas para postagens automáticas.' 
-            : 'Este canal é apenas para administradores.'}
+            ? 'Canal apenas para postagens automáticas.' 
+            : 'Canal apenas para administradores.'}
         </div>
       )}
     </div>
