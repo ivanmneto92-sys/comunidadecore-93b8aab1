@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter no mínimo 6 caracteres');
@@ -23,9 +24,18 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   const from = location.state?.from?.pathname || '/';
+  
+  // Capture referral code from URL
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('referral_code', refCode);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user) {
@@ -98,6 +108,35 @@ export default function Auth() {
             });
           }
         } else {
+          // Handle referral after successful signup
+          const referralCode = localStorage.getItem('referral_code');
+          if (referralCode) {
+            // Update the newly created user's profile with referred_by
+            const { data: { user: newUser } } = await supabase.auth.getUser();
+            if (newUser) {
+              await supabase
+                .from('profiles')
+                .update({ referred_by: referralCode })
+                .eq('id', newUser.id);
+              
+              // Find the affiliate and create referral record
+              const { data: affiliateData } = await supabase
+                .from('affiliates')
+                .select('id')
+                .eq('affiliate_code', referralCode)
+                .single();
+              
+              if (affiliateData) {
+                await supabase.from('referrals').insert([{
+                  affiliate_id: affiliateData.id,
+                  referred_user_id: newUser.id,
+                }]);
+              }
+              
+              localStorage.removeItem('referral_code');
+            }
+          }
+          
           toast({
             title: 'Conta criada!',
             description: 'Você já pode acessar o CORE HUB'

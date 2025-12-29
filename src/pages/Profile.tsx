@@ -1,15 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAffiliate } from '@/hooks/useAffiliate';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { User, LogOut, Loader2, Save, Crown, Shield, Calendar } from 'lucide-react';
+import { User, LogOut, Loader2, Save, Crown, Shield, Calendar, Users, ChevronRight, Wallet } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -20,8 +22,10 @@ const tierConfig = {
 };
 
 export default function Profile() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, membership, isAdmin, isModerator, loading: profileLoading } = useUserProfile();
+  const { affiliate } = useAffiliate();
   const { toast } = useToast();
   
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
@@ -139,6 +143,37 @@ export default function Profile() {
                 <Calendar className="h-4 w-4" />
                 <span>Membro desde {memberSince}</span>
               </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Affiliate Program Card */}
+        <Card className="border-primary/20 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/affiliates')}>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" />
+                Programa de Afiliados
+              </CardTitle>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <CardDescription>Indique amigos e ganhe comissões</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {affiliate ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Saldo disponível:</span>
+                </div>
+                <span className="text-lg font-bold text-primary">
+                  R$ {Number(affiliate.available_balance).toFixed(2)}
+                </span>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Torne-se um afiliado e comece a ganhar hoje!
+              </p>
             )}
           </CardContent>
         </Card>
