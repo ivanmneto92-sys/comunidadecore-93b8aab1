@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -7,8 +7,8 @@ import { DailyReportForm } from '@/components/admin/DailyReportForm';
 import { HealthScoreForm } from '@/components/admin/HealthScoreForm';
 import { TutorialManager } from '@/components/admin/TutorialManager';
 import { ChannelManager } from '@/components/admin/ChannelManager';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare } from 'lucide-react';
-import { useEffect } from 'react';
+import { AffiliateManager } from '@/components/admin/AffiliateManager';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -50,7 +50,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <Tabs defaultValue="results" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-card">
+          <TabsList className="grid w-full grid-cols-5 bg-card">
             <TabsTrigger value="results" className="flex items-center gap-1 text-xs">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Resultados</span>
@@ -66,6 +66,10 @@ export default function Admin() {
             <TabsTrigger value="channels" className="flex items-center gap-1 text-xs">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Canais</span>
+            </TabsTrigger>
+            <TabsTrigger value="affiliates" className="flex items-center gap-1 text-xs">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Afiliados</span>
             </TabsTrigger>
           </TabsList>
 
@@ -83,6 +87,10 @@ export default function Admin() {
 
           <TabsContent value="channels" className="mt-4">
             <ChannelManager />
+          </TabsContent>
+
+          <TabsContent value="affiliates" className="mt-4">
+            <AffiliateManager />
           </TabsContent>
         </Tabs>
       </div>
