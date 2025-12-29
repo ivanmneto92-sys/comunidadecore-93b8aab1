@@ -1,13 +1,5 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
@@ -31,54 +23,46 @@ const tierLabels: Record<string, string> = {
 export function CommissionsTable({ commissions }: CommissionsTableProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <DollarSign className="h-4 w-4" />
           Histórico de Comissões
         </CardTitle>
-        <CardDescription>
-          Todas as comissões geradas pelas suas indicações
+        <CardDescription className="text-xs">
+          Comissões das suas indicações
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {commissions.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhuma comissão registrada</p>
-            <p className="text-sm">Suas comissões aparecerão aqui quando suas indicações assinarem</p>
+          <div className="text-center py-6 text-muted-foreground">
+            <DollarSign className="h-10 w-10 mx-auto mb-3 opacity-50" />
+            <p className="text-sm">Nenhuma comissão registrada</p>
+            <p className="text-xs">Aparecerão aqui quando suas indicações assinarem</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Plano</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead className="text-right">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {commissions.map((commission) => {
-                const status = statusConfig[commission.status] || statusConfig.pending;
-                return (
-                  <TableRow key={commission.id}>
-                    <TableCell>
+          <div className="space-y-3">
+            {commissions.map((commission) => {
+              const status = statusConfig[commission.status] || statusConfig.pending;
+              return (
+                <div key={commission.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm text-primary">
+                        R$ {Number(commission.amount).toFixed(2)}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {tierLabels[commission.tier] || commission.tier}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(commission.created_at), 'dd MMM yyyy', { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{tierLabels[commission.tier] || commission.tier}</Badge>
-                    </TableCell>
-                    <TableCell className="font-medium text-primary">
-                      R$ {Number(commission.amount).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                    </p>
+                  </div>
+                  <Badge variant={status.variant} className="text-[10px]">{status.label}</Badge>
+                </div>
+              );
+            })}
+          </div>
         )}
       </CardContent>
     </Card>

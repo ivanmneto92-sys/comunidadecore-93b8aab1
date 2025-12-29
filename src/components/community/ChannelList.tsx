@@ -1,4 +1,3 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface Channel {
@@ -18,59 +17,24 @@ interface ChannelListProps {
   onSelectChannel: (channel: Channel) => void;
 }
 
-const categoryLabels: Record<string, string> = {
-  oficial: 'Oficial',
-  educacao: 'Educação',
-  suporte: 'Suporte',
-  comunidade: 'Comunidade',
-  general: 'Geral',
-};
-
 export function ChannelList({ channels, selectedChannel, onSelectChannel }: ChannelListProps) {
-  // Group channels by category
-  const groupedChannels = channels.reduce((acc, channel) => {
-    const category = channel.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(channel);
-    return acc;
-  }, {} as Record<string, Channel[]>);
-
-  const categoryOrder = ['oficial', 'educacao', 'suporte', 'comunidade', 'general'];
-  const sortedCategories = Object.keys(groupedChannels).sort(
-    (a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
-  );
-
   return (
-    <ScrollArea className="w-64 border-r border-border bg-sidebar hidden md:block">
-      <div className="p-3 space-y-4">
-        {sortedCategories.map((category) => (
-          <div key={category}>
-            <h3 className="px-2 mb-2 text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-              {categoryLabels[category] || category}
-            </h3>
-            <div className="space-y-0.5">
-              {groupedChannels[category].map((channel) => (
-                <button
-                  key={channel.id}
-                  onClick={() => onSelectChannel(channel)}
-                  className={cn(
-                    'flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm transition-colors',
-                    'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                    selectedChannel?.id === channel.id
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground'
-                  )}
-                >
-                  <span>{channel.icon || '#'}</span>
-                  <span className="truncate">{channel.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
+    <div className="flex gap-2 px-4 py-2 overflow-x-auto scrollbar-hidden border-b border-border bg-card/50">
+      {channels.map((channel) => (
+        <button
+          key={channel.id}
+          onClick={() => onSelectChannel(channel)}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors shrink-0',
+            selectedChannel?.id === channel.id
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+          )}
+        >
+          <span>{channel.icon || '#'}</span>
+          <span>{channel.name}</span>
+        </button>
+      ))}
+    </div>
   );
 }

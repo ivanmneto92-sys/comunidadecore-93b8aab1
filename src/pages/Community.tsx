@@ -59,37 +59,34 @@ export default function Community() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-5rem)]">
+      <div className="flex flex-col h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))]">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-border">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <MessageCircle className="h-6 w-6 text-primary-foreground" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+            <MessageCircle className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Comunidade</h1>
-            <p className="text-sm text-muted-foreground">CORE HUB</p>
+            <h1 className="text-lg font-bold">Comunidade</h1>
+            <p className="text-xs text-muted-foreground">CORE HUB</p>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Channel list (sidebar on desktop, tabs on mobile) */}
-          <ChannelList 
-            channels={channels} 
-            selectedChannel={selectedChannel} 
-            onSelectChannel={setSelectedChannel} 
-          />
+        {/* Channel list - horizontal scrollable pills */}
+        <ChannelList 
+          channels={channels} 
+          selectedChannel={selectedChannel} 
+          onSelectChannel={setSelectedChannel} 
+        />
 
-          {/* Chat view */}
-          <div className="flex-1 overflow-hidden">
-            {selectedChannel ? (
-              <ChatView channel={selectedChannel} />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                Selecione um canal
-              </div>
-            )}
-          </div>
+        {/* Chat view */}
+        <div className="flex-1 overflow-hidden">
+          {selectedChannel ? (
+            <ChatView channel={selectedChannel} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+              Selecione um canal
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

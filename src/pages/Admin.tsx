@@ -50,26 +50,26 @@ export default function Admin() {
 
         {/* Tabs */}
         <Tabs defaultValue="results" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-card">
-            <TabsTrigger value="results" className="flex items-center gap-1 text-xs">
+          <TabsList className="flex w-full overflow-x-auto scrollbar-hidden bg-card gap-1 p-1">
+            <TabsTrigger value="results" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Resultados</span>
+              <span>Resultados</span>
             </TabsTrigger>
-            <TabsTrigger value="health" className="flex items-center gap-1 text-xs">
+            <TabsTrigger value="health" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Health</span>
+              <span>Health</span>
             </TabsTrigger>
-            <TabsTrigger value="academy" className="flex items-center gap-1 text-xs">
+            <TabsTrigger value="academy" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <GraduationCap className="h-4 w-4" />
-              <span className="hidden sm:inline">Academy</span>
+              <span>Academy</span>
             </TabsTrigger>
-            <TabsTrigger value="channels" className="flex items-center gap-1 text-xs">
+            <TabsTrigger value="channels" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Canais</span>
+              <span>Canais</span>
             </TabsTrigger>
-            <TabsTrigger value="affiliates" className="flex items-center gap-1 text-xs">
+            <TabsTrigger value="affiliates" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Afiliados</span>
+              <span>Afiliados</span>
             </TabsTrigger>
           </TabsList>
 

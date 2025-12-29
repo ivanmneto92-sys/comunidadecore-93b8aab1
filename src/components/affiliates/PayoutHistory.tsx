@@ -1,13 +1,5 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { History } from 'lucide-react';
@@ -32,53 +24,45 @@ const methodLabels: Record<string, string> = {
 export function PayoutHistory({ payouts }: PayoutHistoryProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" />
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <History className="h-4 w-4" />
           Histórico de Saques
         </CardTitle>
-        <CardDescription>
-          Suas solicitações de saque anteriores
+        <CardDescription className="text-xs">
+          Suas solicitações anteriores
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {payouts.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhuma solicitação de saque</p>
+          <div className="text-center py-6 text-muted-foreground">
+            <History className="h-10 w-10 mx-auto mb-3 opacity-50" />
+            <p className="text-sm">Nenhuma solicitação de saque</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Método</TableHead>
-                <TableHead className="text-right">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payouts.map((payout) => {
-                const status = statusConfig[payout.status] || statusConfig.pending;
-                return (
-                  <TableRow key={payout.id}>
-                    <TableCell>
+          <div className="space-y-3">
+            {payouts.map((payout) => {
+              const status = statusConfig[payout.status] || statusConfig.pending;
+              return (
+                <div key={payout.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">
+                        R$ {Number(payout.amount).toFixed(2)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {methodLabels[payout.payment_method] || payout.payment_method}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(payout.created_at), 'dd MMM yyyy', { locale: ptBR })}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      R$ {Number(payout.amount).toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      {methodLabels[payout.payment_method] || payout.payment_method}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant={status.variant}>{status.label}</Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                    </p>
+                  </div>
+                  <Badge variant={status.variant} className="text-[10px]">{status.label}</Badge>
+                </div>
+              );
+            })}
+          </div>
         )}
       </CardContent>
     </Card>
