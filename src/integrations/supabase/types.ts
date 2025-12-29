@@ -461,6 +461,112 @@ export type Database = {
           },
         ]
       }
+      poll_options: {
+        Row: {
+          id: string
+          option_text: string
+          poll_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          id?: string
+          option_text: string
+          poll_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          id?: string
+          option_text?: string
+          poll_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          channel_id: string
+          closes_at: string | null
+          created_at: string | null
+          id: string
+          is_multiple_choice: boolean | null
+          question: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          closes_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_multiple_choice?: boolean | null
+          question: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          closes_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_multiple_choice?: boolean | null
+          question?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
