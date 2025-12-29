@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, X } from 'lucide-react';
+import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 
 interface Channel {
   id: string;
@@ -21,8 +20,6 @@ interface ChannelListPanelProps {
   channels: Channel[];
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
-  showCloseButton?: boolean;
-  onClose?: () => void;
 }
 
 const getChannelIcon = (channel: Channel) => {
@@ -53,9 +50,7 @@ const getChannelIcon = (channel: Channel) => {
 export function ChannelListPanel({ 
   channels, 
   selectedChannel, 
-  onSelectChannel,
-  showCloseButton,
-  onClose 
+  onSelectChannel
 }: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -86,12 +81,9 @@ export function ChannelListPanel({
       {/* Header */}
       <div className="p-3 border-b border-border shrink-0">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-foreground">Comunidade</h2>
-          {showCloseButton && onClose && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          )}
+          <h2 className="font-semibold text-foreground">CORE Community</h2>
+          {/* Visual indicator for navigation on mobile */}
+          <ChevronRight className="h-5 w-5 text-muted-foreground md:hidden" />
         </div>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
