@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCommunityPresence } from '@/hooks/useOnlinePresence';
 import { Loader2 } from 'lucide-react';
 import { ServerSidebar } from './ServerSidebar';
+import { ChannelListPanel } from './ChannelListPanel';
 import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
 import { cn } from '@/lib/utils';
@@ -45,6 +46,7 @@ export function DiscordLayout() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [threadMessage, setThreadMessage] = useState<Message | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChannelList, setShowChannelList] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -95,14 +97,17 @@ export function DiscordLayout() {
   return (
     <div className="flex h-full relative">
       {/* Mobile overlay */}
-      {sidebarOpen && (
+      {(sidebarOpen || showChannelList) && (
         <div 
           className="fixed inset-0 bg-background/80 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => {
+            setSidebarOpen(false);
+            setShowChannelList(false);
+          }}
         />
       )}
 
-      {/* Server Sidebar */}
+      {/* Server Sidebar - Hidden on mobile */}
       <div className={cn(
         'fixed inset-y-0 left-0 z-50 w-[72px] transform transition-transform md:relative md:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -113,6 +118,23 @@ export function DiscordLayout() {
           onSelectChannel={(channel) => {
             setSelectedChannel(channel);
             setSidebarOpen(false);
+            setShowChannelList(false);
+            setThreadMessage(null);
+          }}
+        />
+      </div>
+
+      {/* Channel List Panel - Desktop visible, mobile drawer */}
+      <div className={cn(
+        'fixed inset-y-0 left-[72px] z-50 w-[240px] transform transition-transform md:relative md:left-0 md:translate-x-0',
+        showChannelList ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      )}>
+        <ChannelListPanel
+          channels={channels}
+          selectedChannel={selectedChannel}
+          onSelectChannel={(channel) => {
+            setSelectedChannel(channel);
+            setShowChannelList(false);
             setThreadMessage(null);
           }}
         />
@@ -125,7 +147,10 @@ export function DiscordLayout() {
             channel={selectedChannel}
             isAdmin={isAdmin}
             onOpenThread={(message) => setThreadMessage(message)}
-            onOpenSidebar={() => setSidebarOpen(true)}
+            onOpenSidebar={() => {
+              setSidebarOpen(true);
+              setShowChannelList(true);
+            }}
             onlineCount={onlineCount}
             onlineUsers={onlineUsers}
           />
