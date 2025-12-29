@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ResultsFilter } from '@/components/results/ResultsFilter';
 import { ResultsChart } from '@/components/results/ResultsChart';
 import { DailyResultItem } from '@/components/results/DailyResultItem';
+import { TodayResultCard } from '@/components/results/TodayResultCard';
 import { PerformanceOverview } from '@/components/results/PerformanceOverview';
 import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
 import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
@@ -102,6 +103,21 @@ export default function Results() {
     return { totalTrades, avgWinRate, totalPnl, maxDrawdown, winDays, lossDays };
   }, [filteredReports]);
 
+  const todayResult = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayReport = reports.find((r) => r.date === today);
+    
+    if (!todayReport) {
+      return { pnlPercent: null, tradesCount: 0, winRate: 0 };
+    }
+    
+    return {
+      pnlPercent: Number(todayReport.pnl_percent),
+      tradesCount: todayReport.trades_count,
+      winRate: Number(todayReport.win_rate),
+    };
+  }, [reports]);
+
   const chartData = useMemo(() => {
     // Sort by date ascending for chart
     const sorted = [...filteredReports].sort((a, b) => 
@@ -146,6 +162,13 @@ export default function Results() {
 
         {/* Filters */}
         <ResultsFilter value={filter} onChange={setFilter} />
+
+        {/* Today's Result */}
+        <TodayResultCard 
+          pnlPercent={todayResult.pnlPercent} 
+          tradesCount={todayResult.tradesCount} 
+          winRate={todayResult.winRate} 
+        />
 
         {/* Performance Overview */}
         <PerformanceOverview metrics={metrics} />
