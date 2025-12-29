@@ -103,31 +103,20 @@ export function DiscordLayout() {
         />
       )}
 
-      {/* Mobile Drawer - Sidebars combined */}
+      {/* Mobile Drawer - Only Channel List */}
       {sidebarOpen && (
-        <div className="fixed inset-y-0 left-0 z-50 flex md:hidden">
-          <div className="w-[72px] shrink-0">
-            <ServerSidebar
-              channels={channels}
-              selectedChannel={selectedChannel}
-              onSelectChannel={(channel) => {
-                setSelectedChannel(channel);
-                setSidebarOpen(false);
-                setThreadMessage(null);
-              }}
-            />
-          </div>
-          <div className="w-[240px] shrink-0">
-            <ChannelListPanel
-              channels={channels}
-              selectedChannel={selectedChannel}
-              onSelectChannel={(channel) => {
-                setSelectedChannel(channel);
-                setSidebarOpen(false);
-                setThreadMessage(null);
-              }}
-            />
-          </div>
+        <div className="fixed inset-y-0 left-0 z-50 w-[280px] bg-background shadow-xl md:hidden">
+          <ChannelListPanel
+            channels={channels}
+            selectedChannel={selectedChannel}
+            onSelectChannel={(channel) => {
+              setSelectedChannel(channel);
+              setSidebarOpen(false);
+              setThreadMessage(null);
+            }}
+            showCloseButton
+            onClose={() => setSidebarOpen(false)}
+          />
         </div>
       )}
 

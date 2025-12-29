@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle } from 'lucide-react';
+import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 
 interface Channel {
   id: string;
@@ -20,6 +21,8 @@ interface ChannelListPanelProps {
   channels: Channel[];
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
+  showCloseButton?: boolean;
+  onClose?: () => void;
 }
 
 const getChannelIcon = (channel: Channel) => {
@@ -47,7 +50,13 @@ const getChannelIcon = (channel: Channel) => {
   }
 };
 
-export function ChannelListPanel({ channels, selectedChannel, onSelectChannel }: ChannelListPanelProps) {
+export function ChannelListPanel({ 
+  channels, 
+  selectedChannel, 
+  onSelectChannel,
+  showCloseButton,
+  onClose 
+}: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredChannels = channels.filter(channel =>
@@ -73,17 +82,24 @@ export function ChannelListPanel({ channels, selectedChannel, onSelectChannel }:
   };
 
   return (
-    <div className="h-full flex flex-col bg-secondary/40 border-r border-border">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="p-3 border-b border-border">
-        <h2 className="font-semibold text-foreground mb-3">Comunidade</h2>
+      <div className="p-3 border-b border-border shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold text-foreground">Comunidade</h2>
+          {showCloseButton && onClose && (
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar canal..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 bg-background/50 border-border/50 text-sm"
+            className="pl-8 h-8 bg-secondary/50 border-border/50 text-sm"
           />
         </div>
       </div>
@@ -109,7 +125,7 @@ export function ChannelListPanel({ channels, selectedChannel, onSelectChannel }:
                     )}
                   >
                     {getChannelIcon(channel)}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <div className="font-medium text-sm truncate">
                         {channel.name}
                       </div>
