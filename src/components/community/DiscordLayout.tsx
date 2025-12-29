@@ -7,7 +7,7 @@ import { ServerSidebar } from './ServerSidebar';
 import { ChannelListPanel } from './ChannelListPanel';
 import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
-import { cn } from '@/lib/utils';
+
 
 interface Channel {
   id: string;
@@ -46,7 +46,6 @@ export function DiscordLayout() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [threadMessage, setThreadMessage] = useState<Message | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showChannelList, setShowChannelList] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -95,71 +94,84 @@ export function DiscordLayout() {
   }
 
   return (
-    <div className="flex h-full relative">
+    <div className="flex h-full overflow-hidden">
       {/* Mobile overlay */}
-      {(sidebarOpen || showChannelList) && (
+      {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-background/80 z-40 md:hidden"
-          onClick={() => {
-            setSidebarOpen(false);
-            setShowChannelList(false);
-          }}
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Server Sidebar - Hidden on mobile */}
-      <div className={cn(
-        'fixed inset-y-0 left-0 z-50 w-[72px] transform transition-transform md:relative md:translate-x-0',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      )}>
+      {/* Mobile Drawer - Sidebars combined */}
+      {sidebarOpen && (
+        <div className="fixed inset-y-0 left-0 z-50 flex md:hidden">
+          <div className="w-[72px] shrink-0">
+            <ServerSidebar
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={(channel) => {
+                setSelectedChannel(channel);
+                setSidebarOpen(false);
+                setThreadMessage(null);
+              }}
+            />
+          </div>
+          <div className="w-[240px] shrink-0">
+            <ChannelListPanel
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={(channel) => {
+                setSelectedChannel(channel);
+                setSidebarOpen(false);
+                setThreadMessage(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop: Server Sidebar */}
+      <div className="hidden md:block w-[72px] shrink-0 h-full">
         <ServerSidebar
           channels={channels}
           selectedChannel={selectedChannel}
           onSelectChannel={(channel) => {
             setSelectedChannel(channel);
-            setSidebarOpen(false);
-            setShowChannelList(false);
             setThreadMessage(null);
           }}
         />
       </div>
 
-      {/* Channel List Panel - Desktop visible, mobile drawer */}
-      <div className={cn(
-        'fixed inset-y-0 left-[72px] z-50 w-[240px] transform transition-transform md:relative md:left-0 md:translate-x-0',
-        showChannelList ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      )}>
+      {/* Desktop: Channel List Panel */}
+      <div className="hidden md:block w-[240px] shrink-0 h-full border-r border-border">
         <ChannelListPanel
           channels={channels}
           selectedChannel={selectedChannel}
           onSelectChannel={(channel) => {
             setSelectedChannel(channel);
-            setShowChannelList(false);
             setThreadMessage(null);
           }}
         />
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {selectedChannel && (
           <ChatView
             channel={selectedChannel}
             isAdmin={isAdmin}
             onOpenThread={(message) => setThreadMessage(message)}
-            onOpenSidebar={() => {
-              setSidebarOpen(true);
-              setShowChannelList(true);
-            }}
+            onOpenSidebar={() => setSidebarOpen(true)}
             onlineCount={onlineCount}
             onlineUsers={onlineUsers}
           />
         )}
       </div>
 
-      {/* Thread Panel */}
+      {/* Thread Panel - Desktop */}
       {threadMessage && selectedChannel && (
-        <div className="hidden md:block w-80 border-l border-border shrink-0">
+        <div className="hidden md:block w-80 border-l border-border shrink-0 h-full overflow-hidden">
           <ThreadView
             parentMessage={threadMessage}
             channelId={selectedChannel.id}
