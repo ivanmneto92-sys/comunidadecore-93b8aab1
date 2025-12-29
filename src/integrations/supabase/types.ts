@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_metrics: {
+        Row: {
+          account_balance: number | null
+          created_at: string | null
+          date: string
+          day_return: number | null
+          deposits_1m: number | null
+          id: string
+          max_drawdown: number | null
+          month_return: number | null
+          quarter_return: number | null
+          total_profit: number | null
+          total_return: number | null
+          updated_at: string | null
+          week_return: number | null
+          withdrawals_1m: number | null
+        }
+        Insert: {
+          account_balance?: number | null
+          created_at?: string | null
+          date?: string
+          day_return?: number | null
+          deposits_1m?: number | null
+          id?: string
+          max_drawdown?: number | null
+          month_return?: number | null
+          quarter_return?: number | null
+          total_profit?: number | null
+          total_return?: number | null
+          updated_at?: string | null
+          week_return?: number | null
+          withdrawals_1m?: number | null
+        }
+        Update: {
+          account_balance?: number | null
+          created_at?: string | null
+          date?: string
+          day_return?: number | null
+          deposits_1m?: number | null
+          id?: string
+          max_drawdown?: number | null
+          month_return?: number | null
+          quarter_return?: number | null
+          total_profit?: number | null
+          total_return?: number | null
+          updated_at?: string | null
+          week_return?: number | null
+          withdrawals_1m?: number | null
+        }
+        Relationships: []
+      }
       affiliates: {
         Row: {
           affiliate_code: string
@@ -337,6 +388,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      monthly_returns: {
+        Row: {
+          created_at: string | null
+          id: string
+          month: string
+          return_percent: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          month: string
+          return_percent?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          month?: string
+          return_percent?: number | null
+        }
+        Relationships: []
       }
       payout_requests: {
         Row: {

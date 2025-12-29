@@ -2,8 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ResultsFilter } from '@/components/results/ResultsFilter';
 import { ResultsChart } from '@/components/results/ResultsChart';
-import { ResultsStats } from '@/components/results/ResultsStats';
 import { DailyResultItem } from '@/components/results/DailyResultItem';
+import { PerformanceOverview } from '@/components/results/PerformanceOverview';
+import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
+import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
+import { useAccountMetrics } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, BarChart3 } from 'lucide-react';
 import { subDays, startOfYear, parseISO, isAfter } from 'date-fns';
@@ -25,6 +28,7 @@ interface DailyReport {
 export default function Results() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const { metrics, monthlyReturns, growthData, loading: metricsLoading } = useAccountMetrics();
   const [filter, setFilter] = useState<FilterPeriod>('30d');
 
   useEffect(() => {
@@ -143,10 +147,16 @@ export default function Results() {
         {/* Filters */}
         <ResultsFilter value={filter} onChange={setFilter} />
 
-        {/* Stats */}
-        <ResultsStats stats={stats} />
+        {/* Performance Overview */}
+        <PerformanceOverview metrics={metrics} />
 
-        {/* Chart */}
+        {/* Growth Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <AccountGrowthChart data={growthData} />
+          <MonthlyReturnsChart data={monthlyReturns} />
+        </div>
+
+        {/* PnL Chart */}
         {chartData.length > 0 && <ResultsChart data={chartData} />}
 
         {/* Daily Results Feed */}
