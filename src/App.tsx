@@ -10,6 +10,7 @@ import Results from "./pages/Results";
 import Community from "./pages/Community";
 import Academy from "./pages/Academy";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,11 @@ const App = () => (
             <Route path="/profile" element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
