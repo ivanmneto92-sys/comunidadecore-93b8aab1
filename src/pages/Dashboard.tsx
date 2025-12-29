@@ -6,7 +6,8 @@ import { AISummaryCard } from '@/components/dashboard/AISummaryCard';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, TrendingUp } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import logoCore from '@/assets/logo-core.png';
 
 interface HealthScore {
   score: number;
@@ -80,14 +81,11 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="px-4 py-6 space-y-6">
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <TrendingUp className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src={logoCore} alt="CORE" className="h-8 w-auto" />
           <div>
-            <h1 className="text-xl font-bold">CORE HUB</h1>
-            <p className="text-sm text-muted-foreground">Dashboard</p>
+            <p className="text-xs text-muted-foreground">Dashboard</p>
           </div>
         </div>
 

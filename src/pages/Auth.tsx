@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, TrendingUp } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
+import logoCore from '@/assets/logo-core.png';
 
 const emailSchema = z.string().email('Email inválido');
 const passwordSchema = z.string().min(6, 'Senha deve ter no mínimo 6 caracteres');
@@ -152,11 +153,8 @@ export default function Auth() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
-        <div className="flex flex-col items-center space-y-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-            <TrendingUp className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold">CORE HUB</h1>
+        <div className="flex flex-col items-center space-y-3">
+          <img src={logoCore} alt="CORE" className="h-10 w-auto" />
           <p className="text-sm text-muted-foreground">Comunidade de Copy Trading</p>
         </div>
 
