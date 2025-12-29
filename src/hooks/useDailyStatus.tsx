@@ -55,6 +55,8 @@ export function useDailyStatus() {
       if (error) throw error;
       return data;
     },
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const { data: highlights, isLoading: isLoadingHighlights } = useQuery({
