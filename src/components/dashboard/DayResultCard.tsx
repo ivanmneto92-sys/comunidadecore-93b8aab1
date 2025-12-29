@@ -12,6 +12,21 @@ interface DayResultCardProps {
 export function DayResultCard({ pnlPercent, tradesCount, wins, losses, isRiskMode }: DayResultCardProps) {
   const isPositive = pnlPercent >= 0;
 
+  // Semantic fallback when no trades yet
+  if (tradesCount === 0 && !isRiskMode) {
+    return (
+      <Card>
+        <CardContent className="pt-4 pb-4">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Resultado do Dia</h3>
+          <p className="text-sm text-foreground">Sem operações até o momento</p>
+          <p className="text-xs text-muted-foreground/70 mt-1 italic">
+            Preservação também é estratégia
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (isRiskMode) {
     return (
       <Card>

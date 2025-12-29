@@ -19,7 +19,7 @@ export default function Dashboard() {
     profileType: 'normal' as const,
     riskLevel: 'baixo' as const,
     drawdownStatus: 'controlado' as const,
-    insightText: 'Mantenha o foco na gestão de risco e siga o plano operacional. O mercado apresenta condições normais para operação.',
+    insightText: 'O comportamento atual segue o padrão saudável do sistema. Dias como este priorizam consistência, não agressividade.',
   };
 
   const defaultResult = {
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-4">
+      <div className="px-4 py-6 space-y-5">
         {/* Header with Logo */}
         <div className="flex items-center justify-center pb-2">
           <img src={logoCore} alt="CORE" className="h-8 w-auto" />
@@ -55,18 +55,22 @@ export default function Dashboard() {
             />
 
             {/* 2. Resultado do Dia - Discreto */}
-            <DayResultCard
-              pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
-              tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
-              wins={dailyResult?.wins ?? defaultResult.wins}
-              losses={dailyResult?.losses ?? defaultResult.losses}
-              isRiskMode={isRiskMode}
-            />
+            <div className="pt-1">
+              <DayResultCard
+                pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
+                tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
+                wins={dailyResult?.wins ?? defaultResult.wins}
+                losses={dailyResult?.losses ?? defaultResult.losses}
+                isRiskMode={isRiskMode}
+              />
+            </div>
 
             {/* 3. Insight do CORE - IA */}
-            <CoreInsightCard
-              insightText={dailyStatus?.insightText || defaultStatus.insightText}
-            />
+            <div className="pt-2">
+              <CoreInsightCard
+                insightText={dailyStatus?.insightText || defaultStatus.insightText}
+              />
+            </div>
 
             {/* 4. Destaques da Comunidade - Curadoria */}
             <CommunityHighlights highlights={communityHighlights} />

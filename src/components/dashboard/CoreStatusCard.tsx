@@ -12,18 +12,21 @@ const statusConfig = {
   success: {
     label: 'Estável',
     emoji: '🟢',
+    contextPhrase: 'Condições dentro do padrão histórico',
     borderColor: 'border-status-success/30',
     bgColor: 'bg-status-success/5',
   },
   warning: {
     label: 'Atenção',
     emoji: '🟡',
+    contextPhrase: 'Mercado exige cautela adicional',
     borderColor: 'border-status-warning/30',
     bgColor: 'bg-status-warning/5',
   },
   danger: {
     label: 'Risco Elevado',
     emoji: '🔴',
+    contextPhrase: 'Momento de preservação de capital',
     borderColor: 'border-status-danger/30',
     bgColor: 'bg-status-danger/5',
   },
@@ -53,13 +56,14 @@ export function CoreStatusCard({ status, profileType, riskLevel, drawdownStatus 
   return (
     <Card className={cn('border-2', config.borderColor, config.bgColor)}>
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-foreground">CORE | Status Geral</h2>
           <div className="flex items-center gap-2">
             <span className="text-xl">{config.emoji}</span>
             <span className="text-sm font-medium text-foreground">{config.label}</span>
           </div>
         </div>
+        <p className="text-xs text-muted-foreground mb-4 text-right">{config.contextPhrase}</p>
         
         <div className="space-y-2">
           <div className="flex justify-between items-center py-2 border-b border-border/50">
