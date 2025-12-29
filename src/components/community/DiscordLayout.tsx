@@ -108,28 +108,26 @@ export function DiscordLayout() {
     <div className="flex h-full w-full overflow-hidden bg-background">
       {/* ===== MOBILE LAYOUT ===== */}
       <div className="flex h-full w-full md:hidden">
-        {mobileView === 'channels' ? (
-          // Show ServerSidebar + ChannelList side by side
-          <div className="flex h-full w-full">
-            <div className="w-[72px] shrink-0 h-full">
-              <ServerSidebar
-                channels={channels}
-                selectedChannel={selectedChannel}
-                onSelectChannel={handleSelectChannel}
-              />
-            </div>
-            <div className="flex-1 h-full overflow-hidden">
-              <ChannelListPanel
-                channels={channels}
-                selectedChannel={selectedChannel}
-                onSelectChannel={handleSelectChannel}
-              />
-            </div>
-          </div>
-        ) : (
-          // Show ChatView full screen
-          <div className="flex-1 flex flex-col h-full overflow-hidden">
-            {selectedChannel && (
+        {/* ServerSidebar - ALWAYS visible, compact */}
+        <div className="w-[52px] shrink-0 h-full">
+          <ServerSidebar
+            channels={channels}
+            selectedChannel={selectedChannel}
+            onSelectChannel={handleSelectChannel}
+            compact={true}
+          />
+        </div>
+        
+        {/* Main content area - switches between channels and chat */}
+        <div className="flex-1 h-full overflow-hidden">
+          {mobileView === 'channels' ? (
+            <ChannelListPanel
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={handleSelectChannel}
+            />
+          ) : (
+            selectedChannel && (
               <ChatView
                 channel={selectedChannel}
                 isAdmin={isAdmin}
@@ -138,9 +136,9 @@ export function DiscordLayout() {
                 onlineCount={onlineCount}
                 onlineUsers={onlineUsers}
               />
-            )}
-          </div>
-        )}
+            )
+          )}
+        </div>
       </div>
 
       {/* Mobile Thread Modal */}

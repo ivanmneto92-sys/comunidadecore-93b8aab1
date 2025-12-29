@@ -17,9 +17,10 @@ interface ServerSidebarProps {
   channels: Channel[];
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
+  compact?: boolean;
 }
 
-export function ServerSidebar({ channels, selectedChannel, onSelectChannel }: ServerSidebarProps) {
+export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false }: ServerSidebarProps) {
   // Group channels by category
   const groupedChannels = channels.reduce((acc, channel) => {
     if (!acc[channel.category]) {
@@ -36,12 +37,23 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel }: Se
     return '#';
   };
 
+  // Dynamic sizes based on compact mode
+  const iconSize = compact ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-lg';
+  const logoSize = compact ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-xl';
+  const indicatorHeight = compact ? 'h-6' : 'h-10';
+  const indicatorHoverHeight = compact ? 'group-hover:h-4' : 'group-hover:h-5';
+  const containerPadding = compact ? 'py-2 px-1' : 'py-3 px-2';
+  const dividerWidth = compact ? 'w-6' : 'w-8';
+
   return (
-    <div className="flex flex-col h-full bg-secondary/50 py-3 px-2">
+    <div className={cn('flex flex-col h-full bg-secondary/30', containerPadding)}>
       {/* Logo/Home */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="w-12 h-12 mx-auto mb-2 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl hover:rounded-xl transition-all">
+          <button className={cn(
+            'mx-auto mb-1.5 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-bold hover:rounded-xl transition-all',
+            logoSize
+          )}>
             C
           </button>
         </TooltipTrigger>
@@ -50,12 +62,12 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel }: Se
         </TooltipContent>
       </Tooltip>
 
-      <div className="w-8 h-px bg-border mx-auto my-2" />
+      <div className={cn('h-px bg-border mx-auto my-1.5', dividerWidth)} />
 
       {/* Channels */}
-      <div className="flex-1 overflow-y-auto scrollbar-hidden space-y-2">
+      <div className={cn('flex-1 overflow-y-auto scrollbar-hidden', compact ? 'space-y-1' : 'space-y-2')}>
         {Object.entries(groupedChannels).map(([category, categoryChannels]) => (
-          <div key={category} className="space-y-1">
+          <div key={category} className={compact ? 'space-y-0.5' : 'space-y-1'}>
             {categoryChannels.map((channel) => {
               const isSelected = selectedChannel?.id === channel.id;
               
@@ -69,15 +81,16 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel }: Se
                       {/* Selection indicator */}
                       <div className={cn(
                         'absolute left-0 w-1 rounded-r-full bg-foreground transition-all',
-                        isSelected ? 'h-10' : 'h-0 group-hover:h-5'
+                        isSelected ? indicatorHeight : cn('h-0', indicatorHoverHeight)
                       )} />
                       
                       {/* Channel icon */}
                       <div className={cn(
-                        'w-12 h-12 rounded-full flex items-center justify-center text-lg transition-all',
+                        'rounded-full flex items-center justify-center transition-all',
+                        iconSize,
                         isSelected 
-                          ? 'bg-primary text-primary-foreground rounded-2xl' 
-                          : 'bg-muted text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground hover:rounded-2xl'
+                          ? 'bg-primary text-primary-foreground rounded-xl' 
+                          : 'bg-muted/50 text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground hover:rounded-xl'
                       )}>
                         {getChannelIcon(channel)}
                       </div>
