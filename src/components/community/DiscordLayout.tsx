@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCommunityPresence } from '@/hooks/useOnlinePresence';
 import { Loader2 } from 'lucide-react';
 import { ServerSidebar } from './ServerSidebar';
 import { ChatView } from './ChatView';
@@ -37,6 +38,7 @@ type ChannelState = Channel | null;
 
 export function DiscordLayout() {
   const { user } = useAuth();
+  const { onlineCount, onlineUsers } = useCommunityPresence();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<ChannelState>(null);
   const [loading, setLoading] = useState(true);
@@ -124,6 +126,8 @@ export function DiscordLayout() {
             isAdmin={isAdmin}
             onOpenThread={(message) => setThreadMessage(message)}
             onOpenSidebar={() => setSidebarOpen(true)}
+            onlineCount={onlineCount}
+            onlineUsers={onlineUsers}
           />
         )}
       </div>

@@ -57,14 +57,29 @@ interface Poll {
   } | null;
 }
 
+interface OnlineUser {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 interface ChatViewProps {
   channel: Channel;
   onOpenThread?: (message: Message) => void;
   isAdmin?: boolean;
   onOpenSidebar?: () => void;
+  onlineCount?: number;
+  onlineUsers?: OnlineUser[];
 }
 
-export function ChatView({ channel, onOpenThread, isAdmin = false, onOpenSidebar }: ChatViewProps) {
+export function ChatView({ 
+  channel, 
+  onOpenThread, 
+  isAdmin = false, 
+  onOpenSidebar,
+  onlineCount = 0,
+  onlineUsers = []
+}: ChatViewProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -350,6 +365,16 @@ export function ChatView({ channel, onOpenThread, isAdmin = false, onOpenSidebar
         <h2 className="font-semibold text-base">{channel.name}</h2>
         
         <div className="flex-1" />
+        
+        {/* Online indicator */}
+        {onlineCount > 0 && (
+          <div className="flex items-center gap-1.5 mr-2">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs text-muted-foreground">
+              {onlineCount} online
+            </span>
+          </div>
+        )}
         
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Users className="h-5 w-5 text-muted-foreground" />
