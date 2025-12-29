@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Pin } from 'lucide-react';
+import { Loader2, Pin, Menu, Hash, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MessageItem } from './MessageItem';
@@ -60,9 +61,10 @@ interface ChatViewProps {
   channel: Channel;
   onOpenThread?: (message: Message) => void;
   isAdmin?: boolean;
+  onOpenSidebar?: () => void;
 }
 
-export function ChatView({ channel, onOpenThread, isAdmin = false }: ChatViewProps) {
+export function ChatView({ channel, onOpenThread, isAdmin = false, onOpenSidebar }: ChatViewProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -332,9 +334,26 @@ export function ChatView({ channel, onOpenThread, isAdmin = false }: ChatViewPro
 
   return (
     <div className="flex flex-col h-full">
-      {/* Channel header */}
-      <div className="px-4 py-2 border-b border-border shrink-0">
-        <h2 className="font-semibold text-sm">{channel.name}</h2>
+      {/* Channel header - Discord style */}
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border shrink-0 bg-background">
+        {/* Mobile menu button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 md:hidden"
+          onClick={onOpenSidebar}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        
+        <Hash className="h-5 w-5 text-muted-foreground" />
+        <h2 className="font-semibold text-base">{channel.name}</h2>
+        
+        <div className="flex-1" />
+        
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Users className="h-5 w-5 text-muted-foreground" />
+        </Button>
       </div>
 
       {/* Pinned messages */}
