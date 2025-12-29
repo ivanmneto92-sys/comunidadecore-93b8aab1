@@ -8,7 +8,6 @@ import { ChannelListPanel } from './ChannelListPanel';
 import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
 
-
 interface Channel {
   id: string;
   name: string;
@@ -35,17 +34,19 @@ interface Message {
   } | null;
 }
 
-type ChannelState = Channel | null;
+type MobileView = 'channels' | 'chat';
 
 export function DiscordLayout() {
   const { user } = useAuth();
   const { onlineCount, onlineUsers } = useCommunityPresence();
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [selectedChannel, setSelectedChannel] = useState<ChannelState>(null);
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [threadMessage, setThreadMessage] = useState<Message | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Mobile navigation state
+  const [mobileView, setMobileView] = useState<MobileView>('channels');
 
   useEffect(() => {
     const initialize = async () => {
@@ -79,7 +80,7 @@ export function DiscordLayout() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -87,90 +88,63 @@ export function DiscordLayout() {
 
   if (channels.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
+      <div className="flex items-center justify-center h-full text-muted-foreground bg-background">
         Nenhum canal disponível
       </div>
     );
   }
 
+  const handleSelectChannel = (channel: Channel) => {
+    setSelectedChannel(channel);
+    setThreadMessage(null);
+    setMobileView('chat'); // Navigate to chat on mobile
+  };
+
+  const handleGoBack = () => {
+    setMobileView('channels');
+  };
+
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-background/80 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Mobile Drawer - Only Channel List */}
-      {sidebarOpen && (
-        <div className="fixed inset-y-0 left-0 z-50 w-[280px] bg-background shadow-xl md:hidden">
-          <ChannelListPanel
-            channels={channels}
-            selectedChannel={selectedChannel}
-            onSelectChannel={(channel) => {
-              setSelectedChannel(channel);
-              setSidebarOpen(false);
-              setThreadMessage(null);
-            }}
-            showCloseButton
-            onClose={() => setSidebarOpen(false)}
-          />
-        </div>
-      )}
-
-      {/* Desktop: Server Sidebar */}
-      <div className="hidden md:block w-[72px] shrink-0 h-full">
-        <ServerSidebar
-          channels={channels}
-          selectedChannel={selectedChannel}
-          onSelectChannel={(channel) => {
-            setSelectedChannel(channel);
-            setThreadMessage(null);
-          }}
-        />
-      </div>
-
-      {/* Desktop: Channel List Panel */}
-      <div className="hidden md:block w-[240px] shrink-0 h-full border-r border-border">
-        <ChannelListPanel
-          channels={channels}
-          selectedChannel={selectedChannel}
-          onSelectChannel={(channel) => {
-            setSelectedChannel(channel);
-            setThreadMessage(null);
-          }}
-        />
-      </div>
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {selectedChannel && (
-          <ChatView
-            channel={selectedChannel}
-            isAdmin={isAdmin}
-            onOpenThread={(message) => setThreadMessage(message)}
-            onOpenSidebar={() => setSidebarOpen(true)}
-            onlineCount={onlineCount}
-            onlineUsers={onlineUsers}
-          />
+    <div className="flex h-full w-full overflow-hidden bg-background">
+      {/* ===== MOBILE LAYOUT ===== */}
+      <div className="flex h-full w-full md:hidden">
+        {mobileView === 'channels' ? (
+          // Show ServerSidebar + ChannelList side by side
+          <div className="flex h-full w-full">
+            <div className="w-[72px] shrink-0 h-full">
+              <ServerSidebar
+                channels={channels}
+                selectedChannel={selectedChannel}
+                onSelectChannel={handleSelectChannel}
+              />
+            </div>
+            <div className="flex-1 h-full overflow-hidden">
+              <ChannelListPanel
+                channels={channels}
+                selectedChannel={selectedChannel}
+                onSelectChannel={handleSelectChannel}
+              />
+            </div>
+          </div>
+        ) : (
+          // Show ChatView full screen
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            {selectedChannel && (
+              <ChatView
+                channel={selectedChannel}
+                isAdmin={isAdmin}
+                onOpenThread={(message) => setThreadMessage(message)}
+                onGoBack={handleGoBack}
+                onlineCount={onlineCount}
+                onlineUsers={onlineUsers}
+              />
+            )}
+          </div>
         )}
       </div>
 
-      {/* Thread Panel - Desktop */}
-      {threadMessage && selectedChannel && (
-        <div className="hidden md:block w-80 border-l border-border shrink-0 h-full overflow-hidden">
-          <ThreadView
-            parentMessage={threadMessage}
-            channelId={selectedChannel.id}
-            onClose={() => setThreadMessage(null)}
-          />
-        </div>
-      )}
-
       {/* Mobile Thread Modal */}
-      {threadMessage && selectedChannel && (
+      {mobileView === 'chat' && threadMessage && selectedChannel && (
         <div className="fixed inset-0 z-50 md:hidden bg-background">
           <ThreadView
             parentMessage={threadMessage}
@@ -179,6 +153,57 @@ export function DiscordLayout() {
           />
         </div>
       )}
+
+      {/* ===== DESKTOP LAYOUT ===== */}
+      <div className="hidden md:flex h-full w-full">
+        {/* Server Sidebar */}
+        <div className="w-[72px] shrink-0 h-full">
+          <ServerSidebar
+            channels={channels}
+            selectedChannel={selectedChannel}
+            onSelectChannel={(channel) => {
+              setSelectedChannel(channel);
+              setThreadMessage(null);
+            }}
+          />
+        </div>
+
+        {/* Channel List Panel */}
+        <div className="w-[240px] shrink-0 h-full border-r border-border">
+          <ChannelListPanel
+            channels={channels}
+            selectedChannel={selectedChannel}
+            onSelectChannel={(channel) => {
+              setSelectedChannel(channel);
+              setThreadMessage(null);
+            }}
+          />
+        </div>
+
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {selectedChannel && (
+            <ChatView
+              channel={selectedChannel}
+              isAdmin={isAdmin}
+              onOpenThread={(message) => setThreadMessage(message)}
+              onlineCount={onlineCount}
+              onlineUsers={onlineUsers}
+            />
+          )}
+        </div>
+
+        {/* Thread Panel - Desktop */}
+        {threadMessage && selectedChannel && (
+          <div className="w-80 border-l border-border shrink-0 h-full overflow-hidden">
+            <ThreadView
+              parentMessage={threadMessage}
+              channelId={selectedChannel.id}
+              onClose={() => setThreadMessage(null)}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
