@@ -6,10 +6,12 @@ import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights'
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { useDailyStatus } from '@/hooks/useDailyStatus';
+import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const { dailyStatus, dailyResult, communityHighlights, isLoading } = useDailyStatus();
+  const { streakDays } = useStreak();
 
   const isRiskMode = dailyStatus?.status === 'danger';
 
@@ -29,8 +31,6 @@ export default function Dashboard() {
     losses: 0,
   };
 
-  // Mock streak days (could be fetched from backend later)
-  const streakDays = 5;
 
   return (
     <AppLayout>
