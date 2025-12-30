@@ -36,7 +36,9 @@ export default function Dashboard() {
     <AppLayout>
       <div className="px-4 py-6 space-y-5">
         {/* 1. Header Personalizado com Saudação e Streak */}
-        <PersonalizedHeader streakDays={streakDays} />
+        <div className="animate-fade-in" style={{ animationDelay: '0ms', animationFillMode: 'both' }}>
+          <PersonalizedHeader streakDays={streakDays} />
+        </div>
 
         {isLoading ? (
           <div className="space-y-4">
@@ -48,37 +50,47 @@ export default function Dashboard() {
         ) : (
           <>
             {/* 2. Status com Indicador Circular Animado */}
-            <AnimatedStatusCard
-              status={dailyStatus?.status || defaultStatus.status}
-              profileType={dailyStatus?.profileType || defaultStatus.profileType}
-              riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}
-              drawdownStatus={dailyStatus?.drawdownStatus || defaultStatus.drawdownStatus}
-            />
+            <div className="animate-fade-in" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>
+              <AnimatedStatusCard
+                status={dailyStatus?.status || defaultStatus.status}
+                profileType={dailyStatus?.profileType || defaultStatus.profileType}
+                riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}
+                drawdownStatus={dailyStatus?.drawdownStatus || defaultStatus.drawdownStatus}
+              />
+            </div>
 
             {/* 3. Resultado do Dia */}
-            <DayResultCard
-              pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
-              tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
-              wins={dailyResult?.wins ?? defaultResult.wins}
-              losses={dailyResult?.losses ?? defaultResult.losses}
-              isRiskMode={isRiskMode}
-            />
+            <div className="animate-fade-in" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
+              <DayResultCard
+                pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
+                tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
+                wins={dailyResult?.wins ?? defaultResult.wins}
+                losses={dailyResult?.losses ?? defaultResult.losses}
+                isRiskMode={isRiskMode}
+              />
+            </div>
 
             {/* 4. Insight do CORE - IA */}
-            <CoreInsightCard
-              insightText={dailyStatus?.insightText || defaultStatus.insightText}
-            />
+            <div className="animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
+              <CoreInsightCard
+                insightText={dailyStatus?.insightText || defaultStatus.insightText}
+              />
+            </div>
 
             {/* 5. Destaques da Comunidade */}
-            <CommunityHighlights highlights={communityHighlights} />
+            <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
+              <CommunityHighlights highlights={communityHighlights} />
+            </div>
 
             {/* 6. Acessos Rápidos Aprimorados */}
-            <EnhancedQuickActions />
+            <div className="animate-fade-in" style={{ animationDelay: '500ms', animationFillMode: 'both' }}>
+              <EnhancedQuickActions />
+            </div>
           </>
         )}
 
         {/* Compliance disclaimer */}
-        <p className="text-center text-xs text-muted-foreground pt-4 pb-2">
+        <p className="animate-fade-in text-center text-xs text-muted-foreground pt-4 pb-2" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
           Conteúdo educacional e informativo. Não é recomendação de investimento.
         </p>
       </div>
