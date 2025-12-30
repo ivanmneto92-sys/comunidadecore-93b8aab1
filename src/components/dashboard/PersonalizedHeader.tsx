@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { Flame } from 'lucide-react';
 import logoCore from '@/assets/logo-core.png';
 
@@ -15,6 +16,7 @@ function getGreeting(): string {
 
 export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   // Get display name from user metadata or email
   const displayName = user?.user_metadata?.display_name 
@@ -36,14 +38,15 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
         </div>
       </div>
 
-      {/* Right: Streak Badge */}
-      {streakDays > 0 && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-          <Flame className="w-4 h-4 text-primary animate-pulse" />
-          <span className="text-sm font-semibold text-primary">{streakDays}</span>
-          <span className="text-xs text-primary/70">dias</span>
-        </div>
-      )}
+      {/* Right: Streak Badge - Clickable */}
+      <button
+        onClick={() => navigate('/streaks')}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
+      >
+        <Flame className="w-4 h-4 text-primary animate-pulse" />
+        <span className="text-sm font-semibold text-primary">{streakDays}</span>
+        <span className="text-xs text-primary/70">dias</span>
+      </button>
     </div>
   );
 }
