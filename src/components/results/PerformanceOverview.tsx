@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
-import { TrendingUp, DollarSign, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { TrendingUp, DollarSign, ArrowUpRight, AlertTriangle, Calendar, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PerformanceOverviewProps {
   metrics: {
@@ -18,7 +19,7 @@ interface PerformanceOverviewProps {
 export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
   if (!metrics) {
     return (
-      <Card className="p-6">
+      <Card className="p-4">
         <p className="text-center text-muted-foreground text-sm">
           Métricas de performance não disponíveis.
         </p>
@@ -30,7 +31,8 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -40,87 +42,59 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
 
   const mainMetrics = [
     {
-      label: 'RETORNO (TOTAL)',
+      label: 'Retorno Total',
       value: formatPercent(metrics.totalReturn),
       icon: TrendingUp,
       isPositive: metrics.totalReturn >= 0,
-      isPercentage: true,
     },
     {
-      label: 'DEPÓSITOS (1M)',
+      label: 'Depósitos',
       value: formatCurrency(metrics.deposits1m),
       icon: DollarSign,
       isPositive: true,
-      isPercentage: false,
     },
     {
-      label: 'RETIRADAS (1M)',
+      label: 'Retiradas',
       value: formatCurrency(metrics.withdrawals1m),
       icon: ArrowUpRight,
       isPositive: true,
-      isPercentage: false,
     },
     {
-      label: 'REBAIXAMENTO',
+      label: 'Drawdown Máx.',
       value: `${metrics.maxDrawdown.toFixed(2)}%`,
       icon: AlertTriangle,
-      isPositive: false,
-      isPercentage: true,
       isDanger: true,
     },
   ];
 
-  const secondaryMetrics = [
-    {
-      label: 'LUCRO TOTAL',
-      value: formatCurrency(metrics.totalProfit),
-      isPositive: metrics.totalProfit >= 0,
-    },
-    {
-      label: 'TRIMESTRE',
-      value: formatPercent(metrics.quarterReturn),
-      isPositive: metrics.quarterReturn >= 0,
-    },
-    {
-      label: 'MÊS',
-      value: formatPercent(metrics.monthReturn),
-      isPositive: metrics.monthReturn >= 0,
-    },
-    {
-      label: 'SEMANA',
-      value: formatPercent(metrics.weekReturn),
-      isPositive: metrics.weekReturn >= 0,
-    },
-    {
-      label: 'DIA',
-      value: formatPercent(metrics.dayReturn),
-      isPositive: metrics.dayReturn >= 0,
-    },
+  const timeMetrics = [
+    { label: 'Trimestre', value: formatPercent(metrics.quarterReturn), isPositive: metrics.quarterReturn >= 0, icon: Calendar },
+    { label: 'Mês', value: formatPercent(metrics.monthReturn), isPositive: metrics.monthReturn >= 0, icon: Calendar },
+    { label: 'Semana', value: formatPercent(metrics.weekReturn), isPositive: metrics.weekReturn >= 0, icon: Clock },
+    { label: 'Dia', value: formatPercent(metrics.dayReturn), isPositive: metrics.dayReturn >= 0, icon: Clock },
   ];
 
   return (
     <div className="space-y-3">
-      {/* Main Metrics - 2x2 grid on mobile, 4 cols on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      {/* Main Metrics - 2x2 grid always */}
+      <div className="grid grid-cols-2 gap-2">
         {mainMetrics.map((metric) => (
-          <Card
-            key={metric.label}
-            className="p-3 flex flex-col gap-1"
-          >
-            <div className="flex items-center gap-1.5">
+          <Card key={metric.label} className="p-3">
+            <div className="flex items-center gap-2 mb-1">
               <metric.icon className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">
                 {metric.label}
               </span>
             </div>
             <span
-              className={`text-lg font-bold ${
+              className={cn(
+                'text-lg font-bold block',
                 metric.isDanger
                   ? 'text-destructive'
                   : metric.isPositive
                   ? 'text-emerald-500'
                   : 'text-destructive'
-              }`}
+              )}
             >
               {metric.value}
             </span>
@@ -128,26 +102,45 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
         ))}
       </div>
 
-      {/* Secondary Metrics - scrollable on mobile */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-5">
-        {secondaryMetrics.map((metric) => (
-          <Card
-            key={metric.label}
-            className="p-3 flex flex-col gap-0.5 min-w-[100px] lg:min-w-0 shrink-0"
-          >
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-              {metric.label}
-            </span>
+      {/* Time-based Metrics - 2x2 grid on mobile, 4 cols on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        {timeMetrics.map((metric) => (
+          <Card key={metric.label} className="p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <metric.icon className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                {metric.label}
+              </span>
+            </div>
             <span
-              className={`text-base font-semibold ${
+              className={cn(
+                'text-base font-semibold',
                 metric.isPositive ? 'text-emerald-500' : 'text-destructive'
-              }`}
+              )}
             >
               {metric.value}
             </span>
           </Card>
         ))}
       </div>
+
+      {/* Total Profit */}
+      <Card className="p-3 bg-primary/5 border-primary/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Lucro Total
+            </span>
+          </div>
+          <span className={cn(
+            'text-lg font-bold',
+            metrics.totalProfit >= 0 ? 'text-emerald-500' : 'text-destructive'
+          )}>
+            {formatCurrency(metrics.totalProfit)}
+          </span>
+        </div>
+      </Card>
     </div>
   );
 }

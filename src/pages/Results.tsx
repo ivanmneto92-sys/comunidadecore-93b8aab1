@@ -7,12 +7,11 @@ import { TodayResultCard } from '@/components/results/TodayResultCard';
 import { PerformanceOverview } from '@/components/results/PerformanceOverview';
 import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
 import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
-import { useAccountMetrics } from '@/hooks/useAccountMetrics';
+import { useAccountMetrics, FilterPeriod } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, BarChart3 } from 'lucide-react';
+import { Loader2, TrendingUp } from 'lucide-react';
 import { subDays, startOfYear, parseISO, isAfter } from 'date-fns';
-
-export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd';
+import { cn } from '@/lib/utils';
 
 interface DailyReport {
   id: string;
@@ -29,8 +28,10 @@ interface DailyReport {
 export default function Results() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const { metrics, monthlyReturns, growthData, loading: metricsLoading } = useAccountMetrics();
   const [filter, setFilter] = useState<FilterPeriod>('30d');
+  
+  // Pass filter to useAccountMetrics so all data respects the filter
+  const { metrics, monthlyReturns, growthData, loading: metricsLoading } = useAccountMetrics(filter);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -81,28 +82,6 @@ export default function Results() {
     });
   }, [reports, filter]);
 
-  const stats = useMemo(() => {
-    if (filteredReports.length === 0) {
-      return {
-        totalTrades: 0,
-        avgWinRate: 0,
-        totalPnl: 0,
-        maxDrawdown: 0,
-        winDays: 0,
-        lossDays: 0,
-      };
-    }
-
-    const totalTrades = filteredReports.reduce((sum, r) => sum + r.trades_count, 0);
-    const avgWinRate = filteredReports.reduce((sum, r) => sum + Number(r.win_rate), 0) / filteredReports.length;
-    const totalPnl = filteredReports.reduce((sum, r) => sum + Number(r.pnl_percent), 0);
-    const maxDrawdown = Math.max(...filteredReports.map((r) => Number(r.drawdown_percent)));
-    const winDays = filteredReports.filter((r) => Number(r.pnl_percent) > 0).length;
-    const lossDays = filteredReports.filter((r) => Number(r.pnl_percent) < 0).length;
-
-    return { totalTrades, avgWinRate, totalPnl, maxDrawdown, winDays, lossDays };
-  }, [filteredReports]);
-
   const todayResult = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const todayReport = reports.find((r) => r.date === today);
@@ -119,7 +98,6 @@ export default function Results() {
   }, [reports]);
 
   const chartData = useMemo(() => {
-    // Sort by date ascending for chart
     const sorted = [...filteredReports].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
@@ -148,58 +126,76 @@ export default function Results() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-4 overflow-x-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <BarChart3 className="h-6 w-6 text-primary-foreground" />
+        <div className={cn('flex items-center gap-3 animate-fade-in')}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/60 shadow-lg">
+            <TrendingUp className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-xl font-bold">Resultados</h1>
-            <p className="text-sm text-muted-foreground">Performance do Copy</p>
+            <p className="text-xs text-muted-foreground">Performance do Copy</p>
           </div>
         </div>
 
         {/* Filters */}
-        <ResultsFilter value={filter} onChange={setFilter} />
+        <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+          <ResultsFilter value={filter} onChange={setFilter} />
+        </div>
 
         {/* Today's Result */}
-        <TodayResultCard 
-          pnlPercent={todayResult.pnlPercent} 
-          tradesCount={todayResult.tradesCount} 
-          winRate={todayResult.winRate} 
-        />
+        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <TodayResultCard 
+            pnlPercent={todayResult.pnlPercent} 
+            tradesCount={todayResult.tradesCount} 
+            winRate={todayResult.winRate} 
+          />
+        </div>
 
         {/* Performance Overview */}
-        <PerformanceOverview metrics={metrics} />
+        <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <PerformanceOverview metrics={metrics} />
+        </div>
 
-        {/* Growth Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Growth Charts - Stack on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <AccountGrowthChart data={growthData} />
           <MonthlyReturnsChart data={monthlyReturns} />
         </div>
 
         {/* PnL Chart */}
-        {chartData.length > 0 && <ResultsChart data={chartData} />}
+        {chartData.length > 0 && (
+          <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+            <ResultsChart data={chartData} />
+          </div>
+        )}
 
         {/* Daily Results Feed */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Histórico Diário</h2>
+        <div className="space-y-2 animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Histórico Diário
+          </h2>
           {filteredReports.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhum resultado encontrado para este período.
+              Nenhum resultado para este período.
             </p>
           ) : (
             <div className="space-y-2">
-              {filteredReports.map((report) => (
-                <DailyResultItem key={report.id} report={report} />
+              {filteredReports.map((report, index) => (
+                <div 
+                  key={report.id} 
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${350 + index * 30}ms` }}
+                >
+                  <DailyResultItem report={report} />
+                </div>
               ))}
             </div>
           )}
         </div>
 
         {/* Compliance disclaimer */}
-        <p className="text-center text-xs text-muted-foreground pt-4">
+        <p className="text-center text-[10px] text-muted-foreground/60 pt-4 pb-2">
           Resultados passados não garantem resultados futuros.
         </p>
       </div>

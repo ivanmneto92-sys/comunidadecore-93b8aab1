@@ -1,6 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { FilterPeriod } from '@/pages/Results';
+import { FilterPeriod } from '@/hooks/useAccountMetrics';
 
 interface ResultsFilterProps {
   value: FilterPeriod;
@@ -8,28 +7,28 @@ interface ResultsFilterProps {
 }
 
 const filters: { value: FilterPeriod; label: string }[] = [
-  { value: '7d', label: '7D' },
-  { value: '30d', label: '30D' },
-  { value: '90d', label: '90D' },
-  { value: 'ytd', label: 'YTD' },
+  { value: '7d', label: '7 Dias' },
+  { value: '30d', label: '30 Dias' },
+  { value: '90d', label: '90 Dias' },
+  { value: 'ytd', label: 'Este Ano' },
 ];
 
 export function ResultsFilter({ value, onChange }: ResultsFilterProps) {
   return (
-    <div className="flex gap-2">
+    <div className="grid grid-cols-4 gap-1 p-1 bg-muted/50 rounded-lg">
       {filters.map((filter) => (
-        <Button
+        <button
           key={filter.value}
-          variant={value === filter.value ? 'default' : 'secondary'}
-          size="sm"
           onClick={() => onChange(filter.value)}
           className={cn(
-            'flex-1',
-            value === filter.value && 'ring-1 ring-primary/50'
+            'px-3 py-2 text-xs font-medium rounded-md transition-all duration-200',
+            value === filter.value
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
           )}
         >
           {filter.label}
-        </Button>
+        </button>
       ))}
     </div>
   );

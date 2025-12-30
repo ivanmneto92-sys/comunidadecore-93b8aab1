@@ -4,11 +4,9 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   Cell,
-  LabelList,
 } from 'recharts';
 
 interface MonthlyReturnsChartProps {
@@ -30,31 +28,33 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
     );
   }
 
-  const maxReturn = Math.max(...data.map((d) => d.returnPercent));
+  const maxReturn = Math.max(...data.map((d) => Math.abs(d.returnPercent)));
   const yAxisMax = Math.ceil(maxReturn / 5) * 5 + 5;
+  const hasNegative = data.some(d => d.returnPercent < 0);
+  const yAxisMin = hasNegative ? -yAxisMax : 0;
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 min-w-0">
       <h3 className="text-sm font-semibold mb-3">Retornos Mensais</h3>
-      <div className="h-[200px] w-full">
+      <div className="h-[180px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 20, right: 5, left: -20, bottom: 5 }}
+            margin={{ top: 10, right: 5, left: 0, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              domain={[0, yAxisMax]}
-              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              domain={[yAxisMin, yAxisMax]}
+              tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
               tickFormatter={(v) => `${v}%`}
               tickLine={false}
               axisLine={false}
+              width={35}
             />
             <Tooltip
               contentStyle={{
@@ -66,22 +66,13 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
               labelStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number) => [`${value.toFixed(2)}%`, 'Retorno']}
             />
-            <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]} maxBarSize={40}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.returnPercent >= 0 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'}
                 />
               ))}
-              <LabelList
-                dataKey="returnPercent"
-                position="top"
-                formatter={(value: number) => `${value.toFixed(1)}%`}
-                style={{
-                  fontSize: 9,
-                  fill: 'hsl(var(--muted-foreground))',
-                }}
-              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

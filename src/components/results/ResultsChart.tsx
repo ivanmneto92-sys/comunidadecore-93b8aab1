@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -50,7 +49,7 @@ export function ResultsChart({ data }: ResultsChartProps) {
       case 'daily':
         return 'hsl(var(--chart-2))';
       case 'drawdown':
-        return 'hsl(var(--status-danger))';
+        return 'hsl(var(--destructive))';
       default:
         return 'hsl(var(--chart-1))';
     }
@@ -72,17 +71,17 @@ export function ResultsChart({ data }: ResultsChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-xs text-muted-foreground mb-1">
+        <div className="bg-popover border border-border rounded-lg p-2 shadow-lg">
+          <p className="text-[10px] text-muted-foreground mb-0.5">
             {formatDate(label)}
           </p>
           <p className={cn(
             'text-sm font-semibold',
             chartType === 'drawdown' 
-              ? 'text-status-danger'
+              ? 'text-destructive'
               : payload[0].value >= 0 
-                ? 'text-status-success' 
-                : 'text-status-danger'
+                ? 'text-emerald-500' 
+                : 'text-destructive'
           )}>
             {chartType === 'drawdown' ? '-' : payload[0].value >= 0 ? '+' : ''}
             {payload[0].value.toFixed(2)}%
@@ -93,35 +92,47 @@ export function ResultsChart({ data }: ResultsChartProps) {
     return null;
   };
 
+  const chartTypes: { type: ChartType; label: string }[] = [
+    { type: 'cumulative', label: 'Acum.' },
+    { type: 'daily', label: 'Diário' },
+    { type: 'drawdown', label: 'DD' },
+  ];
+
+  // Show fewer labels on mobile
+  const tickInterval = data.length > 10 ? Math.ceil(data.length / 6) : 0;
+
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium">{getLabel()}</CardTitle>
-          <div className="flex gap-1">
-            {(['cumulative', 'daily', 'drawdown'] as ChartType[]).map((type) => (
-              <Button
+    <Card className="min-w-0">
+      <CardHeader className="pb-2 px-4 pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">{getLabel()}</h3>
+          <div className="flex gap-0.5 p-0.5 bg-muted/50 rounded-md">
+            {chartTypes.map(({ type, label }) => (
+              <button
                 key={type}
-                variant={chartType === type ? 'default' : 'ghost'}
-                size="sm"
-                className="h-7 px-2 text-xs"
                 onClick={() => setChartType(type)}
+                className={cn(
+                  'px-2 py-1 text-[10px] font-medium rounded transition-all',
+                  chartType === type
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
               >
-                {type === 'cumulative' ? 'Acum.' : type === 'daily' ? 'Diário' : 'DD'}
-              </Button>
+                {label}
+              </button>
             ))}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="h-48">
+      <CardContent className="pt-0 px-4 pb-4">
+        <div className="h-[180px] min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
             >
               <defs>
-                <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="resultColorGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={getColor()} stopOpacity={0.3} />
                   <stop offset="95%" stopColor={getColor()} stopOpacity={0} />
                 </linearGradient>
@@ -129,15 +140,17 @@ export function ResultsChart({ data }: ResultsChartProps) {
               <XAxis
                 dataKey="date"
                 tickFormatter={formatDate}
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                axisLine={{ stroke: 'hsl(var(--border))' }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
+                axisLine={false}
                 tickLine={false}
+                interval={tickInterval}
               />
               <YAxis
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 9 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(value) => `${value}%`}
+                width={35}
               />
               <Tooltip content={<CustomTooltip />} />
               {chartType !== 'drawdown' && (
@@ -148,7 +161,7 @@ export function ResultsChart({ data }: ResultsChartProps) {
                 dataKey={getDataKey()}
                 stroke={getColor()}
                 strokeWidth={2}
-                fill="url(#colorGradient)"
+                fill="url(#resultColorGradient)"
               />
             </AreaChart>
           </ResponsiveContainer>
