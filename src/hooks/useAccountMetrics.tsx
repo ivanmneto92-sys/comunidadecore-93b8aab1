@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { startOfYear, subDays } from 'date-fns';
+
+export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd';
 
 interface AccountMetrics {
   totalReturn: number;
@@ -24,7 +27,7 @@ interface AccountGrowthPoint {
   balance: number;
 }
 
-export function useAccountMetrics() {
+export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
   const [metrics, setMetrics] = useState<AccountMetrics | null>(null);
   const [monthlyReturns, setMonthlyReturns] = useState<MonthlyReturn[]>([]);
   const [growthData, setGrowthData] = useState<AccountGrowthPoint[]>([]);
@@ -33,6 +36,30 @@ export function useAccountMetrics() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      
+      // Calculate date range based on filter
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (filterPeriod) {
+        case '7d':
+          startDate = subDays(now, 7);
+          break;
+        case '30d':
+          startDate = subDays(now, 30);
+          break;
+        case '90d':
+          startDate = subDays(now, 90);
+          break;
+        case 'ytd':
+          startDate = startOfYear(now);
+          break;
+        default:
+          startDate = subDays(now, 30);
+      }
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      
       try {
         // Fetch latest account metrics
         const { data: metricsData } = await supabase
@@ -57,10 +84,11 @@ export function useAccountMetrics() {
           });
         }
 
-        // Fetch monthly returns for chart
+        // Fetch monthly returns for chart - filtered by period
         const { data: monthlyData } = await supabase
           .from('monthly_returns')
           .select('*')
+          .gte('month', startDateStr.substring(0, 7))
           .order('month', { ascending: true });
 
         if (monthlyData) {
@@ -72,32 +100,31 @@ export function useAccountMetrics() {
           );
         }
 
-        // Generate growth data from daily reports for chart
+        // Generate growth data from daily reports - filtered by period
         const { data: reportsData } = await supabase
           .from('reports_daily')
           .select('date, pnl_percent')
           .not('published_at', 'is', null)
+          .gte('date', startDateStr)
           .order('date', { ascending: true });
 
         if (reportsData && reportsData.length > 0) {
           let balance = 1000; // Starting balance
-          const growth: AccountGrowthPoint[] = [
-            { date: 'Início', balance: 1000 }
-          ];
+          const growth: AccountGrowthPoint[] = [];
           
-          reportsData.forEach((report, index) => {
+          reportsData.forEach((report) => {
             balance = balance * (1 + Number(report.pnl_percent) / 100);
-            const dateLabel = new Date(report.date).toLocaleDateString('pt-BR', { 
-              month: 'short', 
-              day: 'numeric' 
-            });
+            const date = new Date(report.date);
+            const dateLabel = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             growth.push({ 
               date: dateLabel, 
-              balance: Math.round(balance * 100) / 100 
+              balance: Math.round(balance) 
             });
           });
           
           setGrowthData(growth);
+        } else {
+          setGrowthData([]);
         }
       } catch (error) {
         console.error('Error fetching account metrics:', error);
@@ -107,7 +134,7 @@ export function useAccountMetrics() {
     };
 
     fetchData();
-  }, []);
+  }, [filterPeriod]);
 
   return { metrics, monthlyReturns, growthData, loading };
 }

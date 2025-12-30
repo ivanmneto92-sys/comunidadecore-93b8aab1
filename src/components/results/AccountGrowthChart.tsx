@@ -4,7 +4,6 @@ import {
   Area,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
@@ -38,16 +37,21 @@ export function AccountGrowthChart({ data }: AccountGrowthChartProps) {
   };
 
   const maxBalance = Math.max(...data.map((d) => d.balance));
-  const yAxisMax = Math.ceil(maxBalance / 500) * 500 + 500;
+  const minBalance = Math.min(...data.map((d) => d.balance));
+  const yAxisMax = Math.ceil(maxBalance / 100) * 100 + 100;
+  const yAxisMin = Math.floor(minBalance / 100) * 100 - 100;
+
+  // Show fewer labels on mobile
+  const tickInterval = data.length > 10 ? Math.ceil(data.length / 5) : 0;
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 min-w-0">
       <h3 className="text-sm font-semibold mb-3">Crescimento da Conta</h3>
-      <div className="h-[200px] w-full">
+      <div className="h-[180px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
+            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
           >
             <defs>
               <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
@@ -55,20 +59,20 @@ export function AccountGrowthChart({ data }: AccountGrowthChartProps) {
                 <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
               tickLine={false}
               axisLine={false}
-              interval="preserveStartEnd"
+              interval={tickInterval}
             />
             <YAxis
-              domain={[0, yAxisMax]}
-              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+              domain={[yAxisMin, yAxisMax]}
+              tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
               tickFormatter={(v) => `$${v}`}
               tickLine={false}
               axisLine={false}
+              width={45}
             />
             <Tooltip
               contentStyle={{
