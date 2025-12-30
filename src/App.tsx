@@ -14,6 +14,7 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Affiliates from "./pages/Affiliates";
+import StreakHistory from "./pages/StreakHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,11 @@ const App = () => (
             <Route path="/affiliates" element={
               <ProtectedRoute>
                 <Affiliates />
+              </ProtectedRoute>
+            } />
+            <Route path="/streaks" element={
+              <ProtectedRoute>
+                <StreakHistory />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
