@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, CheckCircle2, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -146,7 +147,9 @@ export function TutorialDetailModal({
               <div className="prose prose-invert prose-sm max-w-none">
                 <div
                   className="text-foreground"
-                  dangerouslySetInnerHTML={{ __html: tutorial.content.replace(/\n/g, '<br />') }}
+                  dangerouslySetInnerHTML={{ 
+                    __html: DOMPurify.sanitize(tutorial.content.replace(/\n/g, '<br />')) 
+                  }}
                 />
               </div>
             )}
