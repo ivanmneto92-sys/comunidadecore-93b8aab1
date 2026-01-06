@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { User, LogOut, Loader2, Save, Crown, Shield, Calendar, Users, ChevronRight, Wallet } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { AvatarUpload } from '@/components/profile/AvatarUpload';
 
 const tierConfig = {
   free: { label: 'Free', color: 'bg-muted text-muted-foreground', icon: User },
@@ -28,10 +29,20 @@ export default function Profile() {
   const { affiliate } = useAffiliate();
   const { toast } = useToast();
   
-  const [displayName, setDisplayName] = useState(profile?.display_name || '');
-  const [username, setUsername] = useState(profile?.username || '');
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  // Update local state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name || '');
+      setUsername(profile.username || '');
+      setAvatarUrl(profile.avatar_url || null);
+    }
+  }, [profile]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -183,7 +194,19 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="text-sm font-medium">Editar Perfil</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            {/* Avatar Upload */}
+            <div className="flex flex-col items-center gap-3">
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                displayName={displayName}
+                onUploadComplete={(url) => setAvatarUrl(url)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Clique para alterar sua foto
+              </p>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="displayName">Nome de exibição</Label>
               <Input

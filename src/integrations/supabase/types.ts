@@ -349,7 +349,9 @@ export type Database = {
           channel_id: string
           content: string
           created_at: string
+          edited_at: string | null
           id: string
+          image_url: string | null
           is_bot_message: boolean
           is_highlight: boolean | null
           is_pinned: boolean
@@ -361,7 +363,9 @@ export type Database = {
           channel_id: string
           content: string
           created_at?: string
+          edited_at?: string | null
           id?: string
+          image_url?: string | null
           is_bot_message?: boolean
           is_highlight?: boolean | null
           is_pinned?: boolean
@@ -373,7 +377,9 @@ export type Database = {
           channel_id?: string
           content?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
+          image_url?: string | null
           is_bot_message?: boolean
           is_highlight?: boolean | null
           is_pinned?: boolean
@@ -936,6 +942,38 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: []
+      }
+      user_channel_read_status: {
+        Row: {
+          channel_id: string
+          created_at: string
+          id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          id?: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_channel_read_status_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

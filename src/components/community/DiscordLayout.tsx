@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommunityPresence } from '@/hooks/useOnlinePresence';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Loader2 } from 'lucide-react';
 import { ServerSidebar } from './ServerSidebar';
 import { ChannelListPanel } from './ChannelListPanel';
@@ -39,6 +40,7 @@ type MobileView = 'channels' | 'chat';
 export function DiscordLayout() {
   const { user } = useAuth();
   const { onlineCount, onlineUsers } = useCommunityPresence();
+  const { unreadCounts, totalUnread } = useUnreadMessages();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,6 +127,7 @@ export function DiscordLayout() {
               channels={channels}
               selectedChannel={selectedChannel}
               onSelectChannel={handleSelectChannel}
+              unreadCounts={unreadCounts}
             />
           ) : (
             selectedChannel && (
@@ -175,6 +178,7 @@ export function DiscordLayout() {
               setSelectedChannel(channel);
               setThreadMessage(null);
             }}
+            unreadCounts={unreadCounts}
           />
         </div>
 
