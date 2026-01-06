@@ -475,6 +475,7 @@ export function ChatView({
           channelId={channel.id}
           channelName={channel.name}
           onOpenPollModal={() => setShowPollModal(true)}
+          onlineUserIds={onlineUsers.map(u => u.user_id)}
         />
       ) : (
         <div className="p-3 border-t border-border text-center text-xs text-muted-foreground shrink-0">

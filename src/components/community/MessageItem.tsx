@@ -131,6 +131,44 @@ export function MessageItem({
 
   const isOwnMessage = user?.id === message.user_id;
 
+  // Render content with highlighted mentions
+  const renderContentWithMentions = (content: string) => {
+    // Match @[Display Name](user_id) format
+    const mentionRegex = /@\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionRegex.exec(content)) !== null) {
+      // Add text before mention
+      if (match.index > lastIndex) {
+        parts.push(content.slice(lastIndex, match.index));
+      }
+      
+      // Add highlighted mention
+      const displayName = match[1];
+      const userId = match[2];
+      parts.push(
+        <span
+          key={`${userId}-${match.index}`}
+          className="bg-primary/20 text-primary px-1 rounded font-medium cursor-pointer hover:bg-primary/30 transition-colors"
+          title={displayName}
+        >
+          @{displayName}
+        </span>
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : content;
+  };
+
   return (
     <div 
       className={cn(
@@ -178,7 +216,7 @@ export function MessageItem({
         </div>
         
         <p className="text-sm text-foreground/90 break-words mt-0.5 whitespace-pre-wrap">
-          {message.content.replace(/!\[image\]\([^)]+\)/g, '')}
+          {renderContentWithMentions(message.content.replace(/!\[image\]\([^)]+\)/g, ''))}
         </p>
 
         {/* Image display */}
