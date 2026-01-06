@@ -245,6 +245,17 @@ export default function Auth() {
           </CardContent>
         </Card>
 
+        {/* Legal links */}
+        <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+          <a href="/termos" className="hover:text-primary hover:underline">
+            Termos de Uso
+          </a>
+          <span>•</span>
+          <a href="/privacidade" className="hover:text-primary hover:underline">
+            Política de Privacidade
+          </a>
+        </div>
+
         {/* Compliance disclaimer */}
         <p className="text-center text-xs text-muted-foreground">
           Conteúdo educacional e informativo. Não é recomendação de investimento. 

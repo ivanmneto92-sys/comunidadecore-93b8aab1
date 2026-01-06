@@ -15,6 +15,8 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Affiliates from "./pages/Affiliates";
 import StreakHistory from "./pages/StreakHistory";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,9 +28,11 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
+        <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/termos" element={<Terms />} />
+            <Route path="/privacidade" element={<Privacy />} />
             <Route path="/" element={
               <ProtectedRoute>
                 <Dashboard />
