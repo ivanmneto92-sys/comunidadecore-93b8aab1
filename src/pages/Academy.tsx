@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { GraduationCap, Lock, CheckCircle2, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useTutorialProgress } from '@/hooks/useTutorialProgress';
+import { GraduationCap, Loader2 } from 'lucide-react';
+import { AcademyProgressCard } from '@/components/academy/AcademyProgressCard';
+import { ContinueLearningCard } from '@/components/academy/ContinueLearningCard';
+import { CategoryTabs } from '@/components/academy/CategoryTabs';
+import { TutorialCard } from '@/components/academy/TutorialCard';
+import { TutorialDetailModal } from '@/components/academy/TutorialDetailModal';
 
 interface Tutorial {
   id: string;
@@ -14,13 +19,9 @@ interface Tutorial {
   description: string | null;
   category: string;
   tier_required: 'free' | 'plus' | 'elite';
+  content: string | null;
+  video_url: string | null;
 }
-
-const categoryLabels: Record<string, { label: string; icon: string }> = {
-  beginner: { label: 'Iniciante', icon: '🌱' },
-  intermediate: { label: 'Intermediário', icon: '📈' },
-  advanced: { label: 'Avançado', icon: '🎯' },
-};
 
 const tierLabels: Record<string, { label: string; color: string }> = {
   free: { label: 'Grátis', color: 'bg-muted text-muted-foreground' },
@@ -31,14 +32,19 @@ const tierLabels: Record<string, { label: string; color: string }> = {
 export default function Academy() {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
   const { membership } = useUserProfile();
+
+  const tutorialIds = useMemo(() => tutorials.map((t) => t.id), [tutorials]);
+  const { isCompleted, markAsCompleted, getStats, loading: progressLoading } = useTutorialProgress(tutorialIds);
 
   useEffect(() => {
     const fetchTutorials = async () => {
       try {
         const { data, error } = await supabase
           .from('tutorials')
-          .select('id, title, slug, description, category, tier_required')
+          .select('id, title, slug, description, category, tier_required, content, video_url')
           .eq('is_published', true)
           .order('sort_order', { ascending: true });
 
@@ -61,22 +67,53 @@ export default function Academy() {
     return false;
   };
 
-  // Group tutorials by category
-  const groupedTutorials = tutorials.reduce((acc, tutorial) => {
-    const category = tutorial.category;
-    if (!acc[category]) {
-      acc[category] = [];
+  // Get unique categories
+  const categories = useMemo(() => {
+    const cats = [...new Set(tutorials.map((t) => t.category))];
+    const order = ['beginner', 'intermediate', 'advanced'];
+    return cats.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  }, [tutorials]);
+
+  // Count tutorials per category
+  const tutorialCounts = useMemo(() => {
+    return tutorials.reduce((acc, t) => {
+      acc[t.category] = (acc[t.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [tutorials]);
+
+  // Filter tutorials by category
+  const filteredTutorials = useMemo(() => {
+    if (!activeCategory) return tutorials;
+    return tutorials.filter((t) => t.category === activeCategory);
+  }, [tutorials, activeCategory]);
+
+  // Get stats
+  const stats = getStats();
+
+  // Find next tutorial to continue
+  const nextTutorial = useMemo(() => {
+    return tutorials.find((t) => !isCompleted(t.id) && canAccess(t.tier_required));
+  }, [tutorials, isCompleted]);
+
+  // Navigation for modal
+  const currentIndex = selectedTutorial
+    ? filteredTutorials.findIndex((t) => t.id === selectedTutorial.id)
+    : -1;
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setSelectedTutorial(filteredTutorials[currentIndex - 1]);
     }
-    acc[category].push(tutorial);
-    return acc;
-  }, {} as Record<string, Tutorial[]>);
+  };
 
-  const categoryOrder = ['beginner', 'intermediate', 'advanced'];
-  const sortedCategories = Object.keys(groupedTutorials).sort(
-    (a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
-  );
+  const handleNext = () => {
+    if (currentIndex < filteredTutorials.length - 1) {
+      setSelectedTutorial(filteredTutorials[currentIndex + 1]);
+    }
+  };
 
-  if (loading) {
+  if (loading || progressLoading) {
     return (
       <AppLayout>
         <div className="flex min-h-screen items-center justify-center">
@@ -90,81 +127,79 @@ export default function Academy() {
     <AppLayout>
       <div className="px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <GraduationCap className="h-6 w-6 text-primary-foreground" />
+        <div
+          className="flex items-center gap-3 animate-fade-in"
+          style={{ animationDelay: '0ms' }}
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/20">
+            <GraduationCap className="h-7 w-7 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl font-bold">Academia CORE</h1>
             <p className="text-sm text-muted-foreground">Aprenda sobre copy trading</p>
           </div>
-        </div>
-
-        {/* Membership badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Seu plano:</span>
           <Badge className={tierLabels[membership]?.color}>
             {tierLabels[membership]?.label}
           </Badge>
         </div>
 
-        {/* Tutorials by category */}
-        {sortedCategories.map((category) => (
-          <div key={category} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{categoryLabels[category]?.icon}</span>
-              <h2 className="text-lg font-semibold">
-                {categoryLabels[category]?.label || category}
-              </h2>
-            </div>
-
-            <div className="grid gap-3">
-              {groupedTutorials[category].map((tutorial) => {
-                const hasAccess = canAccess(tutorial.tier_required);
-                
-                return (
-                  <Card 
-                    key={tutorial.id}
-                    className={cn(
-                      'transition-colors',
-                      hasAccess 
-                        ? 'cursor-pointer hover:bg-card/80' 
-                        : 'opacity-60'
-                    )}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium truncate">{tutorial.title}</h3>
-                            {tutorial.tier_required !== 'free' && (
-                              <Badge 
-                                variant="secondary" 
-                                className={cn('text-xs', tierLabels[tutorial.tier_required]?.color)}
-                              >
-                                {tierLabels[tutorial.tier_required]?.label}
-                              </Badge>
-                            )}
-                          </div>
-                          {tutorial.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {tutorial.description}
-                            </p>
-                          )}
-                        </div>
-                        {hasAccess ? (
-                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                        ) : (
-                          <Lock className="h-5 w-5 text-muted-foreground shrink-0" />
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+        {/* Progress bar */}
+        <div
+          className="space-y-2 animate-fade-in"
+          style={{ animationDelay: '50ms' }}
+        >
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Progresso geral</span>
+            <span className="font-medium text-primary">{stats.percentage}%</span>
           </div>
-        ))}
+          <Progress value={stats.percentage} className="h-2" />
+        </div>
+
+        {/* Progress Card */}
+        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <AcademyProgressCard
+            percentage={stats.percentage}
+            completed={stats.completed}
+            total={stats.total}
+            nextTutorialTitle={nextTutorial?.title}
+          />
+        </div>
+
+        {/* Continue Learning */}
+        {nextTutorial && (
+          <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+            <ContinueLearningCard
+              tutorial={nextTutorial}
+              hasAccess={canAccess(nextTutorial.tier_required)}
+              onSelect={() => setSelectedTutorial(nextTutorial)}
+            />
+          </div>
+        )}
+
+        {/* Category Tabs */}
+        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <CategoryTabs
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            tutorialCounts={tutorialCounts}
+          />
+        </div>
+
+        {/* Tutorial Cards */}
+        <div className="grid gap-3">
+          {filteredTutorials.map((tutorial, index) => (
+            <TutorialCard
+              key={tutorial.id}
+              tutorial={tutorial}
+              hasAccess={canAccess(tutorial.tier_required)}
+              isCompleted={isCompleted(tutorial.id)}
+              onSelect={() => canAccess(tutorial.tier_required) && setSelectedTutorial(tutorial)}
+              className="animate-fade-in"
+              style={{ animationDelay: `${250 + index * 50}ms` }}
+            />
+          ))}
+        </div>
 
         {tutorials.length === 0 && (
           <p className="text-center text-sm text-muted-foreground py-8">
@@ -172,6 +207,23 @@ export default function Academy() {
           </p>
         )}
       </div>
+
+      {/* Tutorial Detail Modal */}
+      <TutorialDetailModal
+        tutorial={selectedTutorial}
+        isOpen={!!selectedTutorial}
+        onClose={() => setSelectedTutorial(null)}
+        isCompleted={selectedTutorial ? isCompleted(selectedTutorial.id) : false}
+        onMarkComplete={async () => {
+          if (selectedTutorial) {
+            await markAsCompleted(selectedTutorial.id);
+          }
+        }}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        hasPrevious={currentIndex > 0}
+        hasNext={currentIndex < filteredTutorials.length - 1}
+      />
     </AppLayout>
   );
 }
