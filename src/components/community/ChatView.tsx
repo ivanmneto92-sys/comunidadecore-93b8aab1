@@ -42,6 +42,7 @@ interface Message {
     avatar_url: string | null;
   } | null;
   reactions?: Reaction[];
+  author_role?: 'admin' | 'moderator' | null;
 }
 
 interface Poll {
@@ -91,7 +92,10 @@ export function ChatView({
   const [showPollModal, setShowPollModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const canSendMessages = !channel.is_admin_only && !channel.is_bot_only;
+  // Admins podem postar em canais admin-only, mas não em bot-only
+  const canSendMessages = isAdmin 
+    ? !channel.is_bot_only 
+    : (!channel.is_admin_only && !channel.is_bot_only);
 
   // Marcar canal como lido ao abrir
   useEffect(() => {
@@ -130,6 +134,25 @@ export function ChatView({
             acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url };
             return acc;
           }, {} as Record<string, { display_name: string | null; avatar_url: string | null }>);
+        }
+      }
+
+      // Fetch user roles (admin/moderator)
+      let rolesMap: Record<string, 'admin' | 'moderator'> = {};
+      if (userIds.length > 0) {
+        const { data: rolesData } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds)
+          .in('role', ['admin', 'moderator']);
+
+        if (rolesData) {
+          rolesData.forEach(r => {
+            // Priorizar admin sobre moderator
+            if (!rolesMap[r.user_id] || r.role === 'admin') {
+              rolesMap[r.user_id] = r.role as 'admin' | 'moderator';
+            }
+          });
         }
       }
 
@@ -185,6 +208,7 @@ export function ChatView({
         profiles: msg.user_id ? profilesMap[msg.user_id] || null : null,
         reply_count: replyCounts[msg.id] || 0,
         reactions: reactionsMap[msg.id] || [],
+        author_role: msg.user_id ? rolesMap[msg.user_id] || null : null,
       }));
 
       setMessages(messagesWithData as Message[]);
@@ -455,6 +479,7 @@ export function ChatView({
                   <MessageItem
                     message={message}
                     isAdmin={isAdmin}
+                    authorRole={message.author_role}
                     onReply={() => onOpenThread?.(message)}
                     onOpenThread={() => onOpenThread?.(message)}
                   />
