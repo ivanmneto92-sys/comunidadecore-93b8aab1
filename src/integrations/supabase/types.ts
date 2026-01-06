@@ -65,6 +65,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_activity_logs: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_resource_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_resource_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_resource_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       affiliates: {
         Row: {
           affiliate_code: string
@@ -111,6 +141,54 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcasts: {
+        Row: {
+          channel_id: string | null
+          content: string
+          id: string
+          is_pinned: boolean | null
+          message_id: string | null
+          sent_at: string
+          sent_by: string
+          title: string
+        }
+        Insert: {
+          channel_id?: string | null
+          content: string
+          id?: string
+          is_pinned?: boolean | null
+          message_id?: string | null
+          sent_at?: string
+          sent_by: string
+          title: string
+        }
+        Update: {
+          channel_id?: string | null
+          content?: string
+          id?: string
+          is_pinned?: boolean | null
+          message_id?: string | null
+          sent_at?: string
+          sent_by?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcasts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broadcasts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
@@ -406,29 +484,38 @@ export type Database = {
       }
       moderation_reports: {
         Row: {
+          action_note: string | null
+          action_taken: string | null
           created_at: string
           id: string
           message_id: string
           reason: string
           reporter_id: string
+          reviewed_at: string | null
           reviewed_by: string | null
           status: string
         }
         Insert: {
+          action_note?: string | null
+          action_taken?: string | null
           created_at?: string
           id?: string
           message_id: string
           reason: string
           reporter_id: string
+          reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
         }
         Update: {
+          action_note?: string | null
+          action_taken?: string | null
           created_at?: string
           id?: string
           message_id?: string
           reason?: string
           reporter_id?: string
+          reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
         }
