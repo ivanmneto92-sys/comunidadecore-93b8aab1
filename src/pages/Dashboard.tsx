@@ -5,6 +5,7 @@ import { CoreInsightCard } from '@/components/dashboard/CoreInsightCard';
 import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights';
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
+import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
 import { useDailyStatus } from '@/hooks/useDailyStatus';
 import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,6 +39,11 @@ export default function Dashboard() {
         {/* 1. Header Personalizado com Saudação e Streak */}
         <div className="animate-fade-in" style={{ animationDelay: '0ms', animationFillMode: 'both' }}>
           <PersonalizedHeader streakDays={streakDays} />
+        </div>
+
+        {/* 2. Check-in Diário */}
+        <div className="animate-fade-in" style={{ animationDelay: '50ms', animationFillMode: 'both' }}>
+          <DailyCheckinCard />
         </div>
 
         {isLoading ? (
