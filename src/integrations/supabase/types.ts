@@ -324,6 +324,33 @@ export type Database = {
           },
         ]
       }
+      daily_checkins: {
+        Row: {
+          checkin_date: string
+          created_at: string
+          id: string
+          streak_count: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          checkin_date?: string
+          created_at?: string
+          id?: string
+          streak_count?: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          checkin_date?: string
+          created_at?: string
+          id?: string
+          streak_count?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
       health_scores: {
         Row: {
           created_at: string
@@ -1079,6 +1106,33 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_xp: {
+        Row: {
+          created_at: string
+          current_level: number
+          id: string
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
