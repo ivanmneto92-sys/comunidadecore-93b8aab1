@@ -14,9 +14,10 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Send, Trash2, TrendingUp, TrendingDown, Zap, Target, AlertTriangle } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, Plus, Send, Trash2, TrendingUp, TrendingDown, Zap, Target, Pencil, X } from 'lucide-react';
+import { format, subMonths, addMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { DailyReportPreview } from './DailyReportPreview';
+import { ReportsCalendar } from './ReportsCalendar';
 
 const reportSchema = z.object({
   date: z.string().min(1, 'Data é obrigatória'),
@@ -49,6 +50,14 @@ export function DailyReportForm() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  
+  // Calendar state
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  // Edit mode state
+  const [editingReport, setEditingReport] = useState<DailyReport | null>(null);
+  const isEditMode = editingReport !== null;
 
   const form = useForm<ReportFormData>({
     resolver: zodResolver(reportSchema),
@@ -86,11 +95,16 @@ export function DailyReportForm() {
   }, [watchedValues.pnl_percent, winRate]);
 
   const fetchReports = async () => {
+    // Fetch reports for 3 months range (for calendar navigation)
+    const startDate = format(startOfMonth(subMonths(calendarMonth, 1)), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(addMonths(calendarMonth, 1)), 'yyyy-MM-dd');
+    
     const { data, error } = await supabase
       .from('reports_daily')
       .select('*')
-      .order('date', { ascending: false })
-      .limit(10);
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: false });
 
     if (error) {
       console.error('Error fetching reports:', error);
@@ -102,7 +116,58 @@ export function DailyReportForm() {
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [calendarMonth]);
+
+  // Handle calendar date selection
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    
+    if (!date) {
+      cancelEdit();
+      return;
+    }
+    
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const existingReport = reports.find(r => r.date === dateStr);
+    
+    if (existingReport) {
+      // Enter edit mode with existing report
+      setEditingReport(existingReport);
+      
+      // Calculate wins/losses from trades_count and win_rate
+      const wins = Math.round(existingReport.trades_count * (existingReport.win_rate / 100));
+      const losses = existingReport.trades_count - wins;
+      
+      form.reset({
+        date: existingReport.date,
+        hasOperations: existingReport.trades_count > 0,
+        wins,
+        losses,
+        pnl_percent: Number(existingReport.pnl_percent),
+        drawdown_percent: Number(existingReport.drawdown_percent),
+        status: existingReport.status,
+        ai_comment: existingReport.ai_comment || '',
+      });
+    } else {
+      // New report mode
+      cancelEdit();
+      form.setValue('date', dateStr);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingReport(null);
+    form.reset({
+      date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+      hasOperations: true,
+      wins: 0,
+      losses: 0,
+      pnl_percent: 0,
+      drawdown_percent: 0,
+      status: 'success',
+      ai_comment: '',
+    });
+  };
 
   const applyTemplate = (template: 'green' | 'neutral' | 'red') => {
     switch (template) {
@@ -133,13 +198,13 @@ export function DailyReportForm() {
     }
   };
 
-  const onSubmit = async (data: ReportFormData) => {
+  const onSubmit = async (data: ReportFormData, shouldPublish = false) => {
     setSubmitting(true);
     try {
       const tradesTotal = data.hasOperations ? data.wins + data.losses : 0;
       const calculatedWinRate = tradesTotal > 0 ? (data.wins / tradesTotal) * 100 : 0;
 
-      const { error } = await supabase.from('reports_daily').insert({
+      const reportData = {
         date: data.date,
         trades_count: tradesTotal,
         win_rate: calculatedWinRate,
@@ -148,16 +213,30 @@ export function DailyReportForm() {
         status: data.status,
         ai_comment: data.ai_comment || null,
         created_by: user?.id,
-      });
+        ...(shouldPublish && { published_at: new Date().toISOString() }),
+      };
 
-      if (error) throw error;
+      if (isEditMode && editingReport) {
+        // Update existing report
+        const { error } = await supabase
+          .from('reports_daily')
+          .update(reportData)
+          .eq('id', editingReport.id);
 
-      toast({ title: 'Relatório criado com sucesso!' });
-      form.reset();
+        if (error) throw error;
+        toast({ title: shouldPublish ? 'Relatório atualizado e publicado!' : 'Relatório atualizado!' });
+      } else {
+        // Create new report
+        const { error } = await supabase.from('reports_daily').insert(reportData);
+        if (error) throw error;
+        toast({ title: shouldPublish ? 'Relatório publicado com sucesso!' : 'Relatório criado com sucesso!' });
+      }
+
+      cancelEdit();
       fetchReports();
     } catch (error) {
-      console.error('Error creating report:', error);
-      toast({ title: 'Erro ao criar relatório', variant: 'destructive' });
+      console.error('Error saving report:', error);
+      toast({ title: 'Erro ao salvar relatório', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -187,6 +266,12 @@ export function DailyReportForm() {
       if (error) throw error;
 
       toast({ title: 'Relatório excluído!' });
+      
+      // If we were editing this report, cancel edit mode
+      if (editingReport?.id === id) {
+        cancelEdit();
+      }
+      
       fetchReports();
     } catch (error) {
       console.error('Error deleting report:', error);
@@ -198,55 +283,99 @@ export function DailyReportForm() {
 
   return (
     <div className="space-y-6">
+      {/* Calendar */}
+      <ReportsCalendar
+        reports={reports}
+        selectedDate={selectedDate}
+        onSelectDate={handleDateSelect}
+        month={calendarMonth}
+        onMonthChange={setCalendarMonth}
+      />
+
       {/* Form */}
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Novo Resultado Diário
+            {isEditMode ? (
+              <>
+                <Pencil className="h-5 w-5" />
+                Editar Resultado
+              </>
+            ) : (
+              <>
+                <Plus className="h-5 w-5" />
+                Novo Resultado Diário
+              </>
+            )}
           </CardTitle>
-          <CardDescription>Adicione os resultados do dia de forma simples</CardDescription>
+          <CardDescription>
+            {isEditMode 
+              ? `Editando resultado de ${format(parseISO(editingReport.date), 'dd/MM/yyyy')}`
+              : 'Adicione os resultados do dia de forma simples'
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Quick Templates */}
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground mb-2">Templates rápidos:</p>
-            <div className="flex gap-2 flex-wrap">
+          {/* Edit Mode Banner */}
+          {isEditMode && (
+            <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
+              <span className="text-sm text-primary">
+                Modo de edição ativo
+              </span>
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                onClick={() => applyTemplate('green')}
-                className="border-status-success/50 text-status-success hover:bg-status-success/10"
+                onClick={cancelEdit}
+                className="h-8"
               >
-                <TrendingUp className="h-4 w-4 mr-1" />
-                Dia Verde
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => applyTemplate('neutral')}
-                className="border-muted-foreground/50"
-              >
-                <Target className="h-4 w-4 mr-1" />
-                Sem Operações
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => applyTemplate('red')}
-                className="border-status-danger/50 text-status-danger hover:bg-status-danger/10"
-              >
-                <TrendingDown className="h-4 w-4 mr-1" />
-                Dia Vermelho
+                <X className="h-4 w-4 mr-1" />
+                Cancelar
               </Button>
             </div>
-          </div>
+          )}
+
+          {/* Quick Templates - Hide in edit mode */}
+          {!isEditMode && (
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground mb-2">Templates rápidos:</p>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyTemplate('green')}
+                  className="border-status-success/50 text-status-success hover:bg-status-success/10"
+                >
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Dia Verde
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyTemplate('neutral')}
+                  className="border-muted-foreground/50"
+                >
+                  <Target className="h-4 w-4 mr-1" />
+                  Sem Operações
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyTemplate('red')}
+                  className="border-status-danger/50 text-status-danger hover:bg-status-danger/10"
+                >
+                  <TrendingDown className="h-4 w-4 mr-1" />
+                  Dia Vermelho
+                </Button>
+              </div>
+            </div>
+          )}
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="space-y-6">
               {/* Date and Operation Toggle */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -256,7 +385,7 @@ export function DailyReportForm() {
                     <FormItem>
                       <FormLabel>📅 Data</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input type="date" {...field} disabled={isEditMode} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -468,10 +597,12 @@ export function DailyReportForm() {
                 >
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : isEditMode ? (
+                    <Pencil className="h-4 w-4 mr-2" />
                   ) : (
                     <Plus className="h-4 w-4 mr-2" />
                   )}
-                  Criar Rascunho
+                  {isEditMode ? 'Atualizar Rascunho' : 'Criar Rascunho'}
                 </Button>
                 <Button 
                   type="button" 
@@ -481,39 +612,12 @@ export function DailyReportForm() {
                     const isValid = await form.trigger();
                     if (isValid) {
                       const data = form.getValues();
-                      setSubmitting(true);
-                      try {
-                        const tradesTotal = data.hasOperations ? data.wins + data.losses : 0;
-                        const calculatedWinRate = tradesTotal > 0 ? (data.wins / tradesTotal) * 100 : 0;
-
-                        const { error } = await supabase.from('reports_daily').insert({
-                          date: data.date,
-                          trades_count: tradesTotal,
-                          win_rate: calculatedWinRate,
-                          pnl_percent: data.hasOperations ? data.pnl_percent : 0,
-                          drawdown_percent: data.hasOperations ? data.drawdown_percent : 0,
-                          status: data.status,
-                          ai_comment: data.ai_comment || null,
-                          created_by: user?.id,
-                          published_at: new Date().toISOString(),
-                        });
-
-                        if (error) throw error;
-
-                        toast({ title: 'Relatório publicado com sucesso!' });
-                        form.reset();
-                        fetchReports();
-                      } catch (error) {
-                        console.error('Error creating report:', error);
-                        toast({ title: 'Erro ao publicar relatório', variant: 'destructive' });
-                      } finally {
-                        setSubmitting(false);
-                      }
+                      onSubmit(data, true);
                     }
                   }}
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  Publicar Agora
+                  {isEditMode ? 'Atualizar e Publicar' : 'Publicar Agora'}
                 </Button>
               </div>
             </form>
@@ -546,7 +650,10 @@ export function DailyReportForm() {
               </TableHeader>
               <TableBody>
                 {reports.map((report) => (
-                  <TableRow key={report.id}>
+                  <TableRow 
+                    key={report.id}
+                    className={editingReport?.id === report.id ? 'bg-primary/10' : ''}
+                  >
                     <TableCell>{format(new Date(report.date), 'dd/MM')}</TableCell>
                     <TableCell className={Number(report.pnl_percent) >= 0 ? 'text-status-success' : 'text-status-danger'}>
                       {Number(report.pnl_percent) >= 0 ? '+' : ''}{Number(report.pnl_percent).toFixed(2)}%
@@ -561,11 +668,20 @@ export function DailyReportForm() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleDateSelect(parseISO(report.date))}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         {!report.published_at && (
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => publishReport(report.id)}
+                            title="Publicar"
                           >
                             <Send className="h-4 w-4" />
                           </Button>
@@ -574,6 +690,7 @@ export function DailyReportForm() {
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteReport(report.id)}
+                          title="Excluir"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
