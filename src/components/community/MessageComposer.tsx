@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Send, BarChart3, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,19 +8,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { ImageUpload } from './ImageUpload';
+import { MentionPopover } from './MentionPopover';
+import { MentionUser } from '@/hooks/useMentions';
 
 interface MessageComposerProps {
   channelId: string;
   channelName: string;
   onOpenPollModal: () => void;
   disabled?: boolean;
+  onlineUserIds?: string[];
 }
 
 export function MessageComposer({ 
   channelId, 
   channelName, 
   onOpenPollModal,
-  disabled = false 
+  disabled = false,
+  onlineUserIds = []
 }: MessageComposerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -28,13 +32,66 @@ export function MessageComposer({
   const [message, setMessage] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  
+  // Mention state
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(e.target.value);
-    if (e.target.value.length > 0) {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart || 0;
+    setMessage(value);
+    
+    if (value.length > 0) {
       startTyping();
     }
+
+    // Check for @ trigger
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const atMatch = textBeforeCursor.match(/@(\w*)$/);
+    
+    if (atMatch) {
+      setShowMentions(true);
+      setMentionQuery(atMatch[1]);
+      setMentionStartIndex(cursorPos - atMatch[0].length);
+    } else {
+      setShowMentions(false);
+      setMentionQuery('');
+      setMentionStartIndex(-1);
+    }
   }, [startTyping]);
+
+  const handleMentionSelect = useCallback((selectedUser: MentionUser) => {
+    if (mentionStartIndex === -1) return;
+    
+    const beforeMention = message.slice(0, mentionStartIndex);
+    const afterMention = message.slice(mentionStartIndex + mentionQuery.length + 1);
+    const mentionText = `@[${selectedUser.display_name}](${selectedUser.id}) `;
+    
+    const newMessage = beforeMention + mentionText + afterMention;
+    setMessage(newMessage);
+    setShowMentions(false);
+    setMentionQuery('');
+    setMentionStartIndex(-1);
+    
+    // Focus input and set cursor after mention
+    setTimeout(() => {
+      if (inputRef.current) {
+        const newCursorPos = beforeMention.length + mentionText.length;
+        inputRef.current.focus();
+        inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  }, [message, mentionQuery, mentionStartIndex]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showMentions && e.key === 'Escape') {
+      e.preventDefault();
+      setShowMentions(false);
+    }
+  }, [showMentions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +131,16 @@ export function MessageComposer({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-3 border-t border-border shrink-0 bg-background">
+    <form onSubmit={handleSubmit} className="p-3 border-t border-border shrink-0 bg-background relative">
+      {/* Mention popover */}
+      <MentionPopover
+        open={showMentions}
+        query={mentionQuery}
+        onlineUserIds={onlineUserIds}
+        onSelect={handleMentionSelect}
+        onClose={() => setShowMentions(false)}
+      />
+
       {/* Preview da imagem */}
       {imageUrl && (
         <div className="mb-2 flex items-center gap-2">
@@ -115,9 +181,11 @@ export function MessageComposer({
 
         {/* Input */}
         <Input
+          ref={inputRef}
           value={message}
           onChange={handleInputChange}
           onBlur={stopTyping}
+          onKeyDown={handleKeyDown}
           placeholder={`Mensagem em #${channelName.toLowerCase()}`}
           className="flex-1 h-9 text-sm"
           disabled={sending}
