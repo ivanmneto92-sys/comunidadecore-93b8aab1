@@ -3,6 +3,7 @@ import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, ChevronRight } f
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { UnreadBadge } from './UnreadBadge';
 
 interface Channel {
   id: string;
@@ -20,6 +21,7 @@ interface ChannelListPanelProps {
   channels: Channel[];
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
+  unreadCounts?: Record<string, number>;
 }
 
 const getChannelIcon = (channel: Channel) => {
@@ -50,7 +52,8 @@ const getChannelIcon = (channel: Channel) => {
 export function ChannelListPanel({ 
   channels, 
   selectedChannel, 
-  onSelectChannel
+  onSelectChannel,
+  unreadCounts = {}
 }: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -105,30 +108,49 @@ export function ChannelListPanel({
                 {categoryLabels[category] || category}
               </h3>
               <div className="space-y-0.5">
-                {categoryChannels.map((channel) => (
-                  <button
-                    key={channel.id}
-                    onClick={() => onSelectChannel(channel)}
-                    className={cn(
-                      "w-full flex items-start gap-3 p-2 rounded-md text-left transition-colors",
-                      selectedChannel?.id === channel.id
-                        ? "bg-primary/20 text-foreground"
-                        : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                    )}
-                  >
-                    {getChannelIcon(channel)}
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="font-medium text-sm truncate">
-                        {channel.name}
-                      </div>
-                      {channel.description && (
-                        <div className="text-xs text-muted-foreground truncate">
-                          {channel.description}
-                        </div>
+                {categoryChannels.map((channel) => {
+                  const unreadCount = unreadCounts[channel.id] || 0;
+                  
+                  return (
+                    <button
+                      key={channel.id}
+                      onClick={() => onSelectChannel(channel)}
+                      className={cn(
+                        "w-full flex items-start gap-3 p-2 rounded-md text-left transition-colors",
+                        selectedChannel?.id === channel.id
+                          ? "bg-primary/20 text-foreground"
+                          : unreadCount > 0
+                          ? "text-foreground hover:bg-secondary/60 font-medium"
+                          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                       )}
-                    </div>
-                  </button>
-                ))}
+                    >
+                      <div className="relative">
+                        {getChannelIcon(channel)}
+                        {unreadCount > 0 && selectedChannel?.id !== channel.id && (
+                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "text-sm truncate",
+                            unreadCount > 0 && selectedChannel?.id !== channel.id && "font-semibold"
+                          )}>
+                            {channel.name}
+                          </span>
+                          {unreadCount > 0 && selectedChannel?.id !== channel.id && (
+                            <UnreadBadge count={unreadCount} />
+                          )}
+                        </div>
+                        {channel.description && (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {channel.description}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}

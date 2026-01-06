@@ -11,6 +11,8 @@ import { MessageComposer } from './MessageComposer';
 import { PollCard } from './PollCard';
 import { CreatePollModal } from './CreatePollModal';
 import { ThreadView } from './ThreadView';
+import { TypingIndicator } from './TypingIndicator';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 interface Channel {
   id: string;
@@ -34,6 +36,7 @@ interface Message {
   is_bot_message: boolean;
   is_pinned: boolean;
   reply_count?: number;
+  image_url?: string | null;
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -81,6 +84,7 @@ export function ChatView({
   onlineUsers = []
 }: ChatViewProps) {
   const { user } = useAuth();
+  const { markAsRead } = useUnreadMessages();
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,12 +93,19 @@ export function ChatView({
 
   const canSendMessages = !channel.is_admin_only && !channel.is_bot_only;
 
+  // Marcar canal como lido ao abrir
+  useEffect(() => {
+    if (channel.id && user) {
+      markAsRead(channel.id);
+    }
+  }, [channel.id, user, markAsRead]);
+
   const fetchMessages = useCallback(async () => {
     try {
       // Fetch messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .order('created_at', { ascending: true })
@@ -454,6 +465,9 @@ export function ChatView({
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
+
+      {/* Typing indicator */}
+      {canSendMessages && <TypingIndicator channelId={channel.id} />}
 
       {/* Composer */}
       {canSendMessages ? (

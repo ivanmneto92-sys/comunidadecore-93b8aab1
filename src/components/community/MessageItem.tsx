@@ -35,6 +35,7 @@ interface Message {
   is_bot_message: boolean;
   is_pinned: boolean;
   reply_count?: number;
+  image_url?: string | null;
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -177,8 +178,20 @@ export function MessageItem({
         </div>
         
         <p className="text-sm text-foreground/90 break-words mt-0.5 whitespace-pre-wrap">
-          {message.content}
+          {message.content.replace(/!\[image\]\([^)]+\)/g, '')}
         </p>
+
+        {/* Image display */}
+        {message.image_url && (
+          <div className="mt-2">
+            <img 
+              src={message.image_url} 
+              alt="Imagem anexada" 
+              className="max-w-xs max-h-64 rounded-lg border border-border object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(message.image_url!, '_blank')}
+            />
+          </div>
+        )}
 
         {/* Reactions & Reply count */}
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
