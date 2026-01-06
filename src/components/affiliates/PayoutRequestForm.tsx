@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Wallet, CreditCard, Loader2, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Wallet, Loader2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { Affiliate } from '@/hooks/useAffiliate';
 
 interface PayoutRequestFormProps {
@@ -12,99 +12,149 @@ interface PayoutRequestFormProps {
   onRequest: (amount: number, method: string, details: Record<string, unknown>) => Promise<boolean>;
 }
 
+const MIN_PAYOUT = 50;
+
 export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormProps) {
   const [amount, setAmount] = useState('');
-  const [method, setMethod] = useState(affiliate.payment_method || 'pix');
+  const [method, setMethod] = useState<'pix' | 'paypal'>('pix');
   const [pixKey, setPixKey] = useState(affiliate.pix_key || '');
   const [paypalEmail, setPaypalEmail] = useState(affiliate.payment_email || '');
   const [loading, setLoading] = useState(false);
 
-  const availableBalance = Number(affiliate.available_balance);
-  const minPayout = 50;
-  const canRequest = availableBalance >= minPayout;
+  const canPayout = affiliate.available_balance >= MIN_PAYOUT;
+  const progressPercent = Math.min((affiliate.available_balance / MIN_PAYOUT) * 100, 100);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount < minPayout) return;
+    if (!canPayout) return;
 
     setLoading(true);
-    const details: Record<string, unknown> = method === 'pix' 
-      ? { pix_key: pixKey }
-      : { email: paypalEmail };
-
-    const success = await onRequest(numAmount, method, details);
-    if (success) {
-      setAmount('');
+    try {
+      const details = method === 'pix' ? { pix_key: pixKey } : { email: paypalEmail };
+      const success = await onRequest(parseFloat(amount) || affiliate.available_balance, method, details);
+      if (success) {
+        setAmount('');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Wallet className="h-5 w-5" />
-          Solicitar Saque
-        </CardTitle>
-        <CardDescription>
-          Saldo disponível: <span className="text-primary font-bold">R$ {availableBalance.toFixed(2)}</span>
-        </CardDescription>
+    <Card className="overflow-hidden border-border/50">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            canPayout ? 'bg-primary/10' : 'bg-muted'
+          }`}>
+            <Wallet className={`w-5 h-5 ${canPayout ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
+          <div>
+            <h3 className="font-semibold">Solicitar Saque</h3>
+            <p className="text-sm text-muted-foreground">
+              Saldo disponível: <span className={canPayout ? 'text-primary font-medium' : ''}>
+                R$ {affiliate.available_balance.toFixed(2)}
+              </span>
+            </p>
+          </div>
+        </div>
       </CardHeader>
+
       <CardContent>
-        {!canRequest ? (
-          <div className="text-center py-4 text-muted-foreground">
-            <p>Saldo mínimo para saque: <strong>R$ {minPayout.toFixed(2)}</strong></p>
-            <p className="text-sm mt-2">Continue indicando para atingir o valor mínimo!</p>
+        {!canPayout ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50">
+              <AlertCircle className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <p className="text-sm">
+                  Você precisa de no mínimo <strong>R$ {MIN_PAYOUT}</strong> para solicitar um saque.
+                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Progresso</span>
+                    <span>R$ {affiliate.available_balance.toFixed(2)} / R$ {MIN_PAYOUT}</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary/50 to-primary rounded-full transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Amount */}
             <div className="space-y-2">
               <Label htmlFor="amount">Valor do saque</Label>
               <Input
                 id="amount"
                 type="number"
-                placeholder="0.00"
+                placeholder={`Máximo: R$ ${affiliate.available_balance.toFixed(2)}`}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                min={minPayout}
-                max={availableBalance}
+                max={affiliate.available_balance}
                 step="0.01"
               />
               <p className="text-xs text-muted-foreground">
-                Mínimo: R$ {minPayout.toFixed(2)} | Máximo: R$ {availableBalance.toFixed(2)}
+                Deixe em branco para sacar o valor total disponível.
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="method">Método de pagamento</Label>
-              <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger id="method">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pix">Pix</SelectItem>
-                  <SelectItem value="paypal">PayPal</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Payment Method */}
+            <div className="space-y-3">
+              <Label>Método de pagamento</Label>
+              <RadioGroup
+                value={method}
+                onValueChange={(value) => setMethod(value as 'pix' | 'paypal')}
+                className="grid grid-cols-2 gap-3"
+              >
+                <div>
+                  <RadioGroupItem
+                    value="pix"
+                    id="pix"
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor="pix"
+                    className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  >
+                    <CreditCard className="mb-2 h-5 w-5" />
+                    <span className="text-sm font-medium">Pix</span>
+                  </Label>
+                </div>
+                <div>
+                  <RadioGroupItem
+                    value="paypal"
+                    id="paypal"
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor="paypal"
+                    className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                  >
+                    <Wallet className="mb-2 h-5 w-5" />
+                    <span className="text-sm font-medium">PayPal</span>
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
 
-            {method === 'pix' && (
+            {/* Payment Details */}
+            {method === 'pix' ? (
               <div className="space-y-2">
                 <Label htmlFor="pixKey">Chave Pix</Label>
                 <Input
                   id="pixKey"
-                  type="text"
                   placeholder="CPF, e-mail, telefone ou chave aleatória"
                   value={pixKey}
                   onChange={(e) => setPixKey(e.target.value)}
                   required
                 />
               </div>
-            )}
-
-            {method === 'paypal' && (
+            ) : (
               <div className="space-y-2">
                 <Label htmlFor="paypalEmail">E-mail do PayPal</Label>
                 <Input
@@ -118,9 +168,16 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
               </div>
             )}
 
+            {/* Submit */}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Solicitar Saque
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                'Solicitar Saque'
+              )}
             </Button>
           </form>
         )}

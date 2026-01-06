@@ -1,74 +1,71 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { User, LogOut, Loader2, Save, Crown, Shield, Calendar, Users, ChevronRight, Wallet } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { AvatarUpload } from '@/components/profile/AvatarUpload';
-
-const tierConfig = {
-  free: { label: 'Free', color: 'bg-muted text-muted-foreground', icon: User },
-  plus: { label: 'Plus', color: 'bg-status-warning/20 text-status-warning', icon: Crown },
-  elite: { label: 'Elite', color: 'bg-primary/20 text-primary', icon: Crown },
-};
+import { ProfileStatusCard } from '@/components/profile/ProfileStatusCard';
+import { AffiliateQuickCard } from '@/components/profile/AffiliateQuickCard';
+import { User, LogOut, Loader2, Save, Edit3 } from 'lucide-react';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { profile, membership, isAdmin, isModerator, loading: profileLoading } = useUserProfile();
-  const { affiliate } = useAffiliate();
+  const { affiliate, referrals, commissions } = useAffiliate();
   const { toast } = useToast();
-  
+
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
 
-  // Update local state when profile loads
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || '');
       setUsername(profile.username || '');
-      setAvatarUrl(profile.avatar_url || null);
+      setAvatarUrl(profile.avatar_url);
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
   const handleSave = async () => {
     if (!user) return;
-    
+
     setSaving(true);
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          display_name: displayName.trim() || null,
-          username: username.trim() || null,
+          display_name: displayName,
+          username: username,
         })
         .eq('id', user.id);
 
       if (error) throw error;
-      
+
       toast({
         title: 'Perfil atualizado',
-        description: 'Suas informações foram salvas.',
+        description: 'Suas alterações foram salvas com sucesso.',
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast({
-        variant: 'destructive',
         title: 'Erro ao salvar',
-        description: 'Tente novamente.',
+        description: 'Não foi possível atualizar seu perfil.',
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
@@ -76,182 +73,166 @@ export default function Profile() {
   };
 
   const handleSignOut = async () => {
-    setSigningOut(true);
-    try {
-      await signOut();
-    } finally {
-      setSigningOut(false);
-    }
+    await signOut();
+    navigate('/auth');
   };
 
-  const memberSince = profile?.created_at 
-    ? format(parseISO(profile.created_at), "MMMM 'de' yyyy", { locale: ptBR })
-    : '';
+  const handleAvatarChange = (url: string | null) => {
+    setAvatarUrl(url);
+  };
 
-  if (profileLoading) {
+  if (authLoading || profileLoading) {
     return (
       <AppLayout>
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="container mx-auto px-4 py-6 space-y-6">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-64 w-full" />
         </div>
       </AppLayout>
     );
   }
 
-  const TierIcon = tierConfig[membership]?.icon || User;
+  const tier = membership || 'free';
+  const pendingCommissions = commissions.filter((c) => c.status === 'pending').length;
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
+      <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <User className="h-6 w-6 text-primary-foreground" />
+        <div
+          className="flex items-center gap-4 animate-fade-in"
+          style={{ animationDelay: '0ms' }}
+        >
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">
+            <User className="w-6 h-6 text-background" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Perfil</h1>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <h1 className="text-2xl font-bold">Meu Perfil</h1>
+            <p className="text-sm text-muted-foreground">
+              Gerencie suas informações pessoais
+            </p>
           </div>
         </div>
 
-        {/* Membership & Badges */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        {/* Status Card */}
+        <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
+          <ProfileStatusCard
+            tier={tier}
+            isAdmin={isAdmin}
+            isModerator={isModerator}
+            memberSince={profile?.created_at || new Date().toISOString()}
+            displayName={displayName}
+          />
+        </div>
+
+        {/* Affiliate Quick Card */}
+        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <AffiliateQuickCard
+            hasAffiliate={!!affiliate}
+            availableBalance={affiliate?.available_balance}
+            totalReferrals={referrals.length}
+            pendingCommissions={pendingCommissions}
+          />
+        </div>
+
+        {/* Edit Profile Card */}
+        <Card
+          className="overflow-hidden border-border/50 animate-fade-in"
+          style={{ animationDelay: '150ms' }}
+        >
+          <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${tierConfig[membership]?.color}`}>
-                <TierIcon className="h-6 w-6" />
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Edit3 className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
-                <Badge className={tierConfig[membership]?.color}>
-                  {tierConfig[membership]?.label}
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">Seu plano atual</p>
+                <h3 className="font-semibold">Editar Perfil</h3>
+                <p className="text-sm text-muted-foreground">
+                  Atualize suas informações
+                </p>
               </div>
             </div>
-
-            {(isAdmin || isModerator) && (
-              <div className="flex gap-2">
-                {isAdmin && (
-                  <Badge variant="outline" className="gap-1">
-                    <Shield className="h-3 w-3" />
-                    Admin
-                  </Badge>
-                )}
-                {isModerator && (
-                  <Badge variant="outline" className="gap-1">
-                    <Shield className="h-3 w-3" />
-                    Moderador
-                  </Badge>
-                )}
-              </div>
-            )}
-
-            {memberSince && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Membro desde {memberSince}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Affiliate Program Card */}
-        <Card className="border-primary/20 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate('/affiliates')}>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Programa de Afiliados
-              </CardTitle>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <CardDescription>Indique amigos e ganhe comissões</CardDescription>
           </CardHeader>
-          <CardContent>
-            {affiliate ? (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-primary" />
-                  <span className="text-sm">Saldo disponível:</span>
-                </div>
-                <span className="text-lg font-bold text-primary">
-                  R$ {Number(affiliate.available_balance).toFixed(2)}
-                </span>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Torne-se um afiliado e comece a ganhar hoje!
-              </p>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Edit Profile */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Editar Perfil</CardTitle>
-          </CardHeader>
           <CardContent className="space-y-6">
-            {/* Avatar Upload */}
-            <div className="flex flex-col items-center gap-3">
+            {/* Avatar */}
+            <div className="flex flex-col items-center gap-2">
               <AvatarUpload
                 currentAvatarUrl={avatarUrl}
                 displayName={displayName}
-                onUploadComplete={(url) => setAvatarUrl(url)}
+                onUploadComplete={handleAvatarChange}
               />
               <p className="text-xs text-muted-foreground">
                 Clique para alterar sua foto
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="displayName">Nome de exibição</Label>
-              <Input
-                id="displayName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Seu nome"
-              />
+            {/* Form Fields */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Nome de exibição</Label>
+                <Input
+                  id="displayName"
+                  placeholder="Como você quer ser chamado"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Nome de usuário</Label>
+                <Input
+                  id="username"
+                  placeholder="@seuusuario"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
             </div>
 
+            {/* Email (read-only) */}
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="@username"
+                id="email"
+                value={user?.email || ''}
+                disabled
+                className="bg-muted/50"
               />
+              <p className="text-xs text-muted-foreground">
+                O e-mail não pode ser alterado.
+              </p>
             </div>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full">
+            {/* Save Button */}
+            <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
               {saving ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Salvando...
+                </>
               ) : (
-                <Save className="h-4 w-4 mr-2" />
+                <>
+                  <Save className="w-4 h-4" />
+                  Salvar Alterações
+                </>
               )}
-              Salvar
             </Button>
           </CardContent>
         </Card>
 
-        {/* Sign Out */}
-        <Button 
-          variant="destructive" 
-          onClick={handleSignOut} 
-          disabled={signingOut}
-          className="w-full"
-        >
-          {signingOut ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <LogOut className="h-4 w-4 mr-2" />
-          )}
-          Sair
-        </Button>
+        {/* Sign Out Button */}
+        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <Button
+            variant="outline"
+            onClick={handleSignOut}
+            className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-4 h-4" />
+            Sair da Conta
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );
