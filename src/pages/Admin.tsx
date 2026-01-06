@@ -8,7 +8,12 @@ import { HealthScoreForm } from '@/components/admin/HealthScoreForm';
 import { TutorialManager } from '@/components/admin/TutorialManager';
 import { ChannelManager } from '@/components/admin/ChannelManager';
 import { AffiliateManager } from '@/components/admin/AffiliateManager';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users } from 'lucide-react';
+import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { UserManager } from '@/components/admin/UserManager';
+import { ModerationPanel } from '@/components/admin/ModerationPanel';
+import { BroadcastManager } from '@/components/admin/BroadcastManager';
+import { ActivityLogs } from '@/components/admin/ActivityLogs';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -49,8 +54,20 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="results" className="w-full">
+        <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className="flex w-full overflow-x-auto scrollbar-hidden bg-card gap-1 p-1">
+            <TabsTrigger value="dashboard" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <Users className="h-4 w-4" />
+              <span>Usuários</span>
+            </TabsTrigger>
+            <TabsTrigger value="moderation" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <AlertTriangle className="h-4 w-4" />
+              <span>Moderação</span>
+            </TabsTrigger>
             <TabsTrigger value="results" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <BarChart3 className="h-4 w-4" />
               <span>Resultados</span>
@@ -67,11 +84,31 @@ export default function Admin() {
               <MessageSquare className="h-4 w-4" />
               <span>Canais</span>
             </TabsTrigger>
+            <TabsTrigger value="broadcast" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <Megaphone className="h-4 w-4" />
+              <span>Broadcast</span>
+            </TabsTrigger>
             <TabsTrigger value="affiliates" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <Users className="h-4 w-4" />
               <span>Afiliados</span>
             </TabsTrigger>
+            <TabsTrigger value="logs" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <History className="h-4 w-4" />
+              <span>Logs</span>
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard" className="mt-4">
+            <AdminDashboard />
+          </TabsContent>
+
+          <TabsContent value="users" className="mt-4">
+            <UserManager />
+          </TabsContent>
+
+          <TabsContent value="moderation" className="mt-4">
+            <ModerationPanel />
+          </TabsContent>
 
           <TabsContent value="results" className="mt-4">
             <DailyReportForm />
@@ -89,8 +126,16 @@ export default function Admin() {
             <ChannelManager />
           </TabsContent>
 
+          <TabsContent value="broadcast" className="mt-4">
+            <BroadcastManager />
+          </TabsContent>
+
           <TabsContent value="affiliates" className="mt-4">
             <AffiliateManager />
+          </TabsContent>
+
+          <TabsContent value="logs" className="mt-4">
+            <ActivityLogs />
           </TabsContent>
         </Tabs>
       </div>
