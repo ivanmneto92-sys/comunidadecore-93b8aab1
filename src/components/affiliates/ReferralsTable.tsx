@@ -1,73 +1,106 @@
+import { Users, UserCheck, UserX, Clock, Calendar, Share2 } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users } from 'lucide-react';
 import type { Referral } from '@/hooks/useAffiliate';
 
 interface ReferralsTableProps {
   referrals: Referral[];
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending: { label: 'Pendente', variant: 'secondary' },
-  active: { label: 'Ativo', variant: 'outline' },
-  converted: { label: 'Convertido', variant: 'default' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' },
+const statusConfig: Record<string, { label: string; icon: typeof UserCheck; variant: 'default' | 'secondary' | 'outline'; color: string }> = {
+  converted: { label: 'Convertido', icon: UserCheck, variant: 'default', color: 'text-primary' },
+  pending: { label: 'Pendente', icon: Clock, variant: 'secondary', color: 'text-muted-foreground' },
+  active: { label: 'Ativo', icon: UserCheck, variant: 'outline', color: 'text-primary' },
+  expired: { label: 'Expirado', icon: UserX, variant: 'outline', color: 'text-destructive' },
+  cancelled: { label: 'Cancelado', icon: UserX, variant: 'outline', color: 'text-destructive' },
 };
 
 function maskEmail(email: string | null): string {
-  if (!email) return '***';
-  const [name, domain] = email.split('@');
+  if (!email) return 'Usuário';
+  const [user, domain] = email.split('@');
   if (!domain) return email.slice(0, 3) + '***';
-  return name.slice(0, 2) + '***@' + domain;
+  return user.slice(0, 3) + '***@' + domain;
 }
 
 export function ReferralsTable({ referrals }: ReferralsTableProps) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Users className="h-4 w-4" />
-          Suas Indicações
-        </CardTitle>
-        <CardDescription className="text-xs">
-          Pessoas que usaram seu link
-        </CardDescription>
+    <Card className="overflow-hidden border-border/50">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Users className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold">Suas Indicações</h3>
+            <p className="text-sm text-muted-foreground">
+              {referrals.length} {referrals.length === 1 ? 'pessoa indicada' : 'pessoas indicadas'}
+            </p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="pt-0">
+
+      <CardContent className="space-y-3">
         {referrals.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Users className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">Você ainda não tem indicações</p>
-            <p className="text-xs">Compartilhe seu link para começar!</p>
+          <div className="text-center py-8 space-y-3">
+            <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+              <Share2 className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="font-medium">Nenhuma indicação ainda</p>
+              <p className="text-sm text-muted-foreground">
+                Compartilhe seu link e comece a ganhar comissões!
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {referrals.map((referral) => {
-              const status = statusConfig[referral.status] || statusConfig.pending;
-              return (
-                <div key={referral.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
-                      {referral.profile?.display_name || maskEmail(referral.referred_user_id)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(referral.referred_at), 'dd MMM yyyy', { locale: ptBR })}
-                    </p>
+          referrals.map((referral, index) => {
+            const config = statusConfig[referral.status] || statusConfig.pending;
+            const StatusIcon = config.icon;
+
+            return (
+              <div
+                key={referral.id}
+                className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Avatar Placeholder */}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    referral.status === 'converted' ? 'bg-primary/10' : 'bg-muted'
+                  }`}>
+                    <StatusIcon className={`w-5 h-5 ${config.color}`} />
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge variant={status.variant} className="text-[10px]">{status.label}</Badge>
-                    {referral.converted_at && (
-                      <span className="text-[10px] text-muted-foreground">
-                        Conv. {format(new Date(referral.converted_at), 'dd/MM', { locale: ptBR })}
+
+                  {/* Info */}
+                  <div>
+                    <p className="font-medium text-sm">
+                      {maskEmail(referral.referred_user_id)}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3 h-3" />
+                      <span>
+                        {format(new Date(referral.referred_at), "dd MMM yyyy", { locale: ptBR })}
                       </span>
-                    )}
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Status & Conversion */}
+                <div className="text-right space-y-1">
+                  <Badge variant={config.variant} className="text-xs">
+                    {config.label}
+                  </Badge>
+                  {referral.converted_at && (
+                    <p className="text-xs text-muted-foreground">
+                      Convertido em {format(new Date(referral.converted_at), "dd/MM", { locale: ptBR })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })
         )}
       </CardContent>
     </Card>
