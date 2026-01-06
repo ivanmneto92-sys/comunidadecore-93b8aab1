@@ -6,7 +6,9 @@ import {
   MoreHorizontal, 
   Pin, 
   Trash2,
-  Reply
+  Reply,
+  Shield,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +51,7 @@ interface MessageItemProps {
   onOpenThread?: () => void;
   isAdmin?: boolean;
   showActions?: boolean;
+  authorRole?: 'admin' | 'moderator' | null;
 }
 
 export function MessageItem({ 
@@ -56,7 +59,8 @@ export function MessageItem({
   onReply, 
   onOpenThread,
   isAdmin = false,
-  showActions = true 
+  showActions = true,
+  authorRole
 }: MessageItemProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -205,6 +209,18 @@ export function MessageItem({
           {message.is_bot_message && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-medium">
               BOT
+            </span>
+          )}
+          {!message.is_bot_message && authorRole === 'admin' && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-500 font-medium flex items-center gap-0.5">
+              <Shield className="h-2.5 w-2.5" />
+              ADMIN
+            </span>
+          )}
+          {!message.is_bot_message && authorRole === 'moderator' && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-500 font-medium flex items-center gap-0.5">
+              <ShieldCheck className="h-2.5 w-2.5" />
+              MOD
             </span>
           )}
           {message.is_pinned && (
