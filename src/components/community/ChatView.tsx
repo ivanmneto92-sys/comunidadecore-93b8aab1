@@ -40,6 +40,7 @@ interface Message {
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
+    avatar_id: string | null;
   } | null;
   reactions?: Reaction[];
   author_role?: 'admin' | 'moderator' | null;
@@ -122,18 +123,18 @@ export function ChatView({
       const messageIds = (messagesData || []).map(m => m.id);
 
       // Fetch profiles
-      let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+      let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, display_name, avatar_url')
+          .select('id, display_name, avatar_url, avatar_id')
           .in('id', userIds);
 
         if (profilesData) {
           profilesMap = profilesData.reduce((acc, profile) => {
-            acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url };
+            acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url, avatar_id: profile.avatar_id };
             return acc;
-          }, {} as Record<string, { display_name: string | null; avatar_url: string | null }>);
+          }, {} as Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }>);
         }
       }
 

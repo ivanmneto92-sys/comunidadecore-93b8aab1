@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
 
 interface Reaction {
   emoji: string;
@@ -41,6 +42,7 @@ interface Message {
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
+    avatar_id: string | null;
   } | null;
   reactions?: Reaction[];
 }
@@ -65,6 +67,12 @@ export function MessageItem({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Avatar hook para renderizar SVG
+  const { svg: avatarSvg } = useAvatar(
+    message.profiles?.avatar_id, 
+    message.profiles?.display_name || undefined
+  );
 
   const formatTime = (dateStr: string) => {
     try {
@@ -185,16 +193,10 @@ export function MessageItem({
     >
       {/* Avatar */}
       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium shrink-0 overflow-hidden">
-        {message.profiles?.avatar_url ? (
-          <img 
-            src={message.profiles.avatar_url} 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-        ) : message.is_bot_message ? (
+        {message.is_bot_message ? (
           '🤖'
         ) : (
-          (message.profiles?.display_name?.[0] || '?').toUpperCase()
+          renderAvatarSvg(avatarSvg, 'w-full h-full')
         )}
       </div>
 
