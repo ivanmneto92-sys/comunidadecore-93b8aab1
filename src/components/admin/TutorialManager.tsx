@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff, Pencil, X, Video, VideoOff } from 'lucide-react';
 
 const tutorialSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório').max(100),
@@ -34,6 +34,8 @@ interface Tutorial {
   title: string;
   slug: string;
   description: string | null;
+  content: string | null;
+  video_url: string | null;
   category: string;
   tier_required: 'free' | 'plus' | 'elite';
   is_published: boolean;
@@ -45,6 +47,7 @@ export function TutorialManager() {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const form = useForm<TutorialFormData>({
     resolver: zodResolver(tutorialSchema),
@@ -82,29 +85,84 @@ export function TutorialManager() {
   const onSubmit = async (data: TutorialFormData) => {
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('tutorials').insert({
-        title: data.title,
-        slug: data.slug,
-        description: data.description || null,
-        content: data.content || null,
-        video_url: data.video_url || null,
-        category: data.category,
-        tier_required: data.tier_required,
-        is_published: data.is_published,
-        sort_order: data.sort_order,
-      });
+      if (editingId) {
+        // Update existing tutorial
+        const { error } = await supabase
+          .from('tutorials')
+          .update({
+            title: data.title,
+            slug: data.slug,
+            description: data.description || null,
+            content: data.content || null,
+            video_url: data.video_url || null,
+            category: data.category,
+            tier_required: data.tier_required,
+            is_published: data.is_published,
+            sort_order: data.sort_order,
+          })
+          .eq('id', editingId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({ title: 'Tutorial criado!' });
+        toast({ title: 'Tutorial atualizado!' });
+        setEditingId(null);
+      } else {
+        // Create new tutorial
+        const { error } = await supabase.from('tutorials').insert({
+          title: data.title,
+          slug: data.slug,
+          description: data.description || null,
+          content: data.content || null,
+          video_url: data.video_url || null,
+          category: data.category,
+          tier_required: data.tier_required,
+          is_published: data.is_published,
+          sort_order: data.sort_order,
+        });
+
+        if (error) throw error;
+
+        toast({ title: 'Tutorial criado!' });
+      }
+
       form.reset();
       fetchTutorials();
     } catch (error) {
-      console.error('Error creating tutorial:', error);
-      toast({ title: 'Erro ao criar tutorial', variant: 'destructive' });
+      console.error('Error saving tutorial:', error);
+      toast({ title: 'Erro ao salvar tutorial', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const startEditing = (tutorial: Tutorial) => {
+    setEditingId(tutorial.id);
+    form.reset({
+      title: tutorial.title,
+      slug: tutorial.slug,
+      description: tutorial.description || '',
+      content: tutorial.content || '',
+      video_url: tutorial.video_url || '',
+      category: tutorial.category,
+      tier_required: tutorial.tier_required,
+      is_published: tutorial.is_published,
+      sort_order: tutorial.sort_order,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    form.reset({
+      title: '',
+      slug: '',
+      description: '',
+      content: '',
+      video_url: '',
+      category: 'beginner',
+      tier_required: 'free',
+      is_published: false,
+      sort_order: 0,
+    });
   };
 
   const togglePublish = async (id: string, currentStatus: boolean) => {
@@ -131,6 +189,9 @@ export function TutorialManager() {
       if (error) throw error;
 
       toast({ title: 'Tutorial excluído!' });
+      if (editingId === id) {
+        cancelEditing();
+      }
       fetchTutorials();
     } catch (error) {
       console.error('Error deleting tutorial:', error);
@@ -149,16 +210,34 @@ export function TutorialManager() {
     }
   };
 
+  const getYouTubeId = (url: string | null) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
+    return match ? match[1] : null;
+  };
+
   return (
     <div className="space-y-6">
       {/* Form */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5" />
-            Novo Tutorial
-          </CardTitle>
-          <CardDescription>Adicione conteúdo educacional</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                {editingId ? 'Editar Tutorial' : 'Novo Tutorial'}
+              </CardTitle>
+              <CardDescription>
+                {editingId ? 'Atualize o conteúdo do tutorial' : 'Adicione conteúdo educacional'}
+              </CardDescription>
+            </div>
+            {editingId && (
+              <Button variant="ghost" size="sm" onClick={cancelEditing}>
+                <X className="h-4 w-4 mr-1" />
+                Cancelar
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -211,9 +290,42 @@ export function TutorialManager() {
                 name="video_url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL do Vídeo (opcional)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Video className="h-4 w-4" />
+                      URL do Vídeo (YouTube)
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="https://youtube.com/..." {...field} />
+                      <Input 
+                        placeholder="https://youtube.com/watch?v=... ou https://youtu.be/..." 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {field.value && getYouTubeId(field.value) && (
+                      <div className="mt-2 rounded-lg overflow-hidden border border-border">
+                        <img 
+                          src={`https://img.youtube.com/vi/${getYouTubeId(field.value)}/mqdefault.jpg`}
+                          alt="Thumbnail do vídeo"
+                          className="w-full max-w-xs"
+                        />
+                      </div>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Conteúdo (suporta quebras de linha)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Conteúdo do tutorial..."
+                        className="min-h-[150px]"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,7 +339,7 @@ export function TutorialManager() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -249,7 +361,7 @@ export function TutorialManager() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tier</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -298,10 +410,12 @@ export function TutorialManager() {
               <Button type="submit" disabled={submitting} className="w-full">
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : editingId ? (
+                  <Pencil className="h-4 w-4 mr-2" />
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />
                 )}
-                Criar Tutorial
+                {editingId ? 'Salvar Alterações' : 'Criar Tutorial'}
               </Button>
             </form>
           </Form>
@@ -311,7 +425,7 @@ export function TutorialManager() {
       {/* Tutorials List */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Tutoriais</CardTitle>
+          <CardTitle>Tutoriais ({tutorials.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -325,6 +439,7 @@ export function TutorialManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Título</TableHead>
+                  <TableHead>Vídeo</TableHead>
                   <TableHead>Tier</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -332,8 +447,29 @@ export function TutorialManager() {
               </TableHeader>
               <TableBody>
                 {tutorials.map((tutorial) => (
-                  <TableRow key={tutorial.id}>
-                    <TableCell className="font-medium">{tutorial.title}</TableCell>
+                  <TableRow key={tutorial.id} className={editingId === tutorial.id ? 'bg-muted/50' : ''}>
+                    <TableCell className="font-medium">
+                      <div>
+                        {tutorial.title}
+                        <p className="text-xs text-muted-foreground">{tutorial.category}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {tutorial.video_url ? (
+                        <div className="flex items-center gap-2">
+                          <Video className="h-4 w-4 text-status-positive" />
+                          {getYouTubeId(tutorial.video_url) && (
+                            <img 
+                              src={`https://img.youtube.com/vi/${getYouTubeId(tutorial.video_url)}/default.jpg`}
+                              alt=""
+                              className="h-8 w-14 object-cover rounded"
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <VideoOff className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </TableCell>
                     <TableCell>{getTierBadge(tutorial.tier_required)}</TableCell>
                     <TableCell>
                       {tutorial.is_published ? (
@@ -347,7 +483,16 @@ export function TutorialManager() {
                         <Button
                           size="icon"
                           variant="ghost"
+                          onClick={() => startEditing(tutorial)}
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           onClick={() => togglePublish(tutorial.id, tutorial.is_published)}
+                          title={tutorial.is_published ? 'Despublicar' : 'Publicar'}
                         >
                           {tutorial.is_published ? (
                             <EyeOff className="h-4 w-4" />
@@ -359,6 +504,7 @@ export function TutorialManager() {
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteTutorial(tutorial.id)}
+                          title="Excluir"
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
