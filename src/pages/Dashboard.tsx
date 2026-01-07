@@ -1,7 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AnimatedStatusCard } from '@/components/dashboard/AnimatedStatusCard';
-import { DayResultCard } from '@/components/dashboard/DayResultCard';
-import { CoreInsightCard } from '@/components/dashboard/CoreInsightCard';
+import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
 import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights';
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
@@ -22,7 +21,7 @@ export default function Dashboard() {
     profileType: 'normal' as const,
     riskLevel: 'baixo' as const,
     drawdownStatus: 'controlado' as const,
-    insightText: 'O comportamento atual segue o padrão saudável do sistema. Dias como este priorizam consistência, não agressividade.',
+    insightText: 'O comportamento atual segue o padrão saudável do sistema.',
   };
 
   const defaultResult = {
@@ -32,71 +31,55 @@ export default function Dashboard() {
     losses: 0,
   };
 
-
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-5">
-        {/* 1. Header Personalizado com Saudação e Streak */}
-        <div className="animate-fade-in" style={{ animationDelay: '0ms', animationFillMode: 'both' }}>
-          <PersonalizedHeader streakDays={streakDays} />
-        </div>
+      <div className="px-4 py-6 space-y-6">
+        {/* 1. Header Premium */}
+        <PersonalizedHeader streakDays={streakDays} />
 
         {/* 2. Check-in Diário */}
-        <div className="animate-fade-in" style={{ animationDelay: '50ms', animationFillMode: 'both' }}>
-          <DailyCheckinCard />
-        </div>
+        <DailyCheckinCard />
 
         {isLoading ? (
           <div className="space-y-4">
-            <Skeleton className="h-36 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-52 w-full rounded-2xl" />
+            <div className="grid grid-cols-2 gap-3">
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+            </div>
           </div>
         ) : (
           <>
-            {/* 2. Status com Indicador Circular Animado */}
-            <div className="animate-fade-in" style={{ animationDelay: '100ms', animationFillMode: 'both' }}>
-              <AnimatedStatusCard
-                status={dailyStatus?.status || defaultStatus.status}
-                profileType={dailyStatus?.profileType || defaultStatus.profileType}
-                riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}
-                drawdownStatus={dailyStatus?.drawdownStatus || defaultStatus.drawdownStatus}
-              />
-            </div>
+            {/* 3. Hero Status Card */}
+            <AnimatedStatusCard
+              status={dailyStatus?.status || defaultStatus.status}
+              profileType={dailyStatus?.profileType || defaultStatus.profileType}
+              riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}
+              drawdownStatus={dailyStatus?.drawdownStatus || defaultStatus.drawdownStatus}
+              insightText={dailyStatus?.insightText || defaultStatus.insightText}
+            />
 
-            {/* 3. Resultado do Dia */}
-            <div className="animate-fade-in" style={{ animationDelay: '200ms', animationFillMode: 'both' }}>
-              <DayResultCard
-                pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
-                tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
-                wins={dailyResult?.wins ?? defaultResult.wins}
-                losses={dailyResult?.losses ?? defaultResult.losses}
-                isRiskMode={isRiskMode}
-              />
-            </div>
+            {/* 4. Metrics Grid 2x2 */}
+            <MetricsGrid
+              pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
+              tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
+              wins={dailyResult?.wins ?? defaultResult.wins}
+              losses={dailyResult?.losses ?? defaultResult.losses}
+              isRiskMode={isRiskMode}
+            />
 
-            {/* 4. Insight do CORE - IA */}
-            <div className="animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
-              <CoreInsightCard
-                insightText={dailyStatus?.insightText || defaultStatus.insightText}
-              />
-            </div>
+            {/* 5. Quick Actions Grid */}
+            <EnhancedQuickActions />
 
-            {/* 5. Destaques da Comunidade */}
-            <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
-              <CommunityHighlights highlights={communityHighlights} />
-            </div>
-
-            {/* 6. Acessos Rápidos Aprimorados */}
-            <div className="animate-fade-in" style={{ animationDelay: '500ms', animationFillMode: 'both' }}>
-              <EnhancedQuickActions />
-            </div>
+            {/* 6. Community Highlights Carousel */}
+            <CommunityHighlights highlights={communityHighlights} />
           </>
         )}
 
         {/* Compliance disclaimer */}
-        <p className="animate-fade-in text-center text-xs text-muted-foreground pt-4 pb-2" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
+        <p className="text-center text-xs text-muted-foreground pt-2 pb-2">
           Conteúdo educacional e informativo. Não é recomendação de investimento.
         </p>
       </div>
