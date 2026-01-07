@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { compressImage, formatFileSize } from '@/lib/imageCompression';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -45,20 +46,31 @@ export function AvatarUpload({ currentAvatarUrl, displayName, onUploadComplete }
       return;
     }
 
-    // Mostrar preview
-    const reader = new FileReader();
-    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
-    reader.readAsDataURL(file);
-
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      // Comprimir imagem automaticamente
+      const originalSize = file.size;
+      const compressedBlob = await compressImage(file, 800, 800, 0.85);
+      const compressedSize = compressedBlob.size;
+      
+      // Log da compressão para debug
+      console.log(`Imagem comprimida: ${formatFileSize(originalSize)} → ${formatFileSize(compressedSize)}`);
+
+      // Mostrar preview do arquivo comprimido
+      const previewReader = new FileReader();
+      previewReader.onload = (e) => setPreviewUrl(e.target?.result as string);
+      previewReader.readAsDataURL(compressedBlob);
+
+      // Usar sempre .jpg já que comprimimos para JPEG
+      const fileName = `${user.id}/avatar.jpg`;
 
       // Upload para o storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, compressedBlob, { 
+          upsert: true,
+          contentType: 'image/jpeg'
+        });
 
       if (uploadError) throw uploadError;
 
@@ -78,7 +90,17 @@ export function AvatarUpload({ currentAvatarUrl, displayName, onUploadComplete }
 
       if (updateError) throw updateError;
 
-      toast({ title: 'Foto atualizada com sucesso!' });
+      // Mostrar economia de tamanho se houve compressão significativa
+      const savedPercent = Math.round((1 - compressedSize / originalSize) * 100);
+      if (savedPercent > 10) {
+        toast({ 
+          title: 'Foto atualizada!',
+          description: `Imagem otimizada em ${savedPercent}%`
+        });
+      } else {
+        toast({ title: 'Foto atualizada com sucesso!' });
+      }
+      
       onUploadComplete?.(urlWithTimestamp);
     } catch (error) {
       console.error('Error uploading avatar:', error);
