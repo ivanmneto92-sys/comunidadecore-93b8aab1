@@ -33,14 +33,14 @@ interface UserProfileData {
   loading: boolean;
 }
 
-export function useUserProfile(): UserProfileData {
+export function useUserProfile(): UserProfileData & { refetch?: () => void } {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [membership, setMembership] = useState<MembershipTier>('free');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchUserData = async () => {
     if (!user) {
       setProfile(null);
       setRoles([]);
@@ -49,43 +49,43 @@ export function useUserProfile(): UserProfileData {
       return;
     }
 
-    const fetchUserData = async () => {
-      setLoading(true);
-      try {
-        // Fetch profile
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        
-        setProfile(profileData);
+    setLoading(true);
+    try {
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      setProfile(profileData);
 
-        // Fetch roles
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
-        
-        setRoles((rolesData as UserRole[] || []).map(r => r.role));
+      // Fetch roles
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      
+      setRoles((rolesData as UserRole[] || []).map(r => r.role));
 
-        // Fetch membership
-        const { data: membershipData } = await supabase
-          .from('memberships')
-          .select('tier, expires_at')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (membershipData) {
-          setMembership((membershipData as Membership).tier);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
+      // Fetch membership
+      const { data: membershipData } = await supabase
+        .from('memberships')
+        .select('tier, expires_at')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (membershipData) {
+        setMembership((membershipData as Membership).tier);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchUserData();
   }, [user]);
 
@@ -95,6 +95,7 @@ export function useUserProfile(): UserProfileData {
     membership,
     isAdmin: roles.includes('admin'),
     isModerator: roles.includes('moderator'),
-    loading
+    loading,
+    refetch: fetchUserData
   };
 }
