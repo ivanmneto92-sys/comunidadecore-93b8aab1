@@ -39,9 +39,9 @@ export function AvatarUpload({ currentAvatarUrl, displayName, onUploadComplete }
       return;
     }
 
-    // Validar tamanho (máximo 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ variant: 'destructive', title: 'A imagem deve ter no máximo 2MB' });
+    // Validar tamanho (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ variant: 'destructive', title: 'A imagem deve ter no máximo 5MB' });
       return;
     }
 
