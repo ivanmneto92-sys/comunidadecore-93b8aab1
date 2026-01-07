@@ -6,7 +6,6 @@ import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights'
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
-import { MiniResultsCalendar } from '@/components/dashboard/MiniResultsCalendar';
 import { useDailyStatus } from '@/hooks/useDailyStatus';
 import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -84,25 +83,20 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* 5. Mini Calendário de Resultados */}
+            {/* 5. Destaques da Comunidade */}
             <div className="animate-fade-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
-              <MiniResultsCalendar />
-            </div>
-
-            {/* 6. Destaques da Comunidade */}
-            <div className="animate-fade-in" style={{ animationDelay: '500ms', animationFillMode: 'both' }}>
               <CommunityHighlights highlights={communityHighlights} />
             </div>
 
-            {/* 7. Acessos Rápidos Aprimorados */}
-            <div className="animate-fade-in" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
+            {/* 6. Acessos Rápidos Aprimorados */}
+            <div className="animate-fade-in" style={{ animationDelay: '500ms', animationFillMode: 'both' }}>
               <EnhancedQuickActions />
             </div>
           </>
         )}
 
         {/* Compliance disclaimer */}
-        <p className="animate-fade-in text-center text-xs text-muted-foreground pt-4 pb-2" style={{ animationDelay: '700ms', animationFillMode: 'both' }}>
+        <p className="animate-fade-in text-center text-xs text-muted-foreground pt-4 pb-2" style={{ animationDelay: '600ms', animationFillMode: 'both' }}>
           Conteúdo educacional e informativo. Não é recomendação de investimento.
         </p>
       </div>
