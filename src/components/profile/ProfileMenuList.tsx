@@ -29,7 +29,7 @@ export function ProfileMenuList({
   const navigate = useNavigate();
 
   return (
-    <div className="px-4 space-y-4 pb-8">
+    <div className="px-4 space-y-3 pb-6">
       {/* Conta */}
       <Card className="overflow-hidden divide-y divide-border/50 animate-fade-in" style={{ animationDelay: '100ms' }}>
         <ProfileMenuItem
@@ -96,7 +96,7 @@ export function ProfileMenuList({
       </Card>
 
       {/* Footer */}
-      <p className="text-center text-xs text-muted-foreground pt-4 animate-fade-in" style={{ animationDelay: '500ms' }}>
+      <p className="text-center text-xs text-muted-foreground pt-2 animate-fade-in" style={{ animationDelay: '500ms' }}>
         CORE HUB • v1.0.0
       </p>
     </div>
