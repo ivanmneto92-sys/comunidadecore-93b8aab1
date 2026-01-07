@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface CategoryTabsProps {
   categories: string[];
@@ -8,10 +7,10 @@ interface CategoryTabsProps {
   tutorialCounts: Record<string, number>;
 }
 
-const categoryConfig: Record<string, { label: string; icon: string }> = {
-  beginner: { label: 'Iniciante', icon: '🌱' },
-  intermediate: { label: 'Intermediário', icon: '📈' },
-  advanced: { label: 'Avançado', icon: '🎯' },
+const categoryConfig: Record<string, { label: string }> = {
+  beginner: { label: 'Iniciante' },
+  intermediate: { label: 'Intermed.' },
+  advanced: { label: 'Avançado' },
 };
 
 export function CategoryTabs({
@@ -20,64 +19,57 @@ export function CategoryTabs({
   onCategoryChange,
   tutorialCounts,
 }: CategoryTabsProps) {
-  const allCount = Object.values(tutorialCounts).reduce((a, b) => a + b, 0);
+  const totalCount = Object.values(tutorialCounts).reduce((a, b) => a + b, 0);
+
+  // Build tabs: All + existing categories in order
+  const orderedCategories = ['beginner', 'intermediate', 'advanced'].filter(
+    (cat) => categories.includes(cat)
+  );
+
+  const tabs = [
+    { key: null, label: 'Todos', count: totalCount },
+    ...orderedCategories.map((key) => ({
+      key,
+      label: categoryConfig[key]?.label || key,
+      count: tutorialCounts[key] || 0,
+    })),
+  ];
+
+  const gridCols = Math.min(tabs.length, 4);
 
   return (
-    <ScrollArea className="w-full">
-      <div className="flex gap-2 pb-2">
-        {/* All tab */}
-        <button
-          onClick={() => onCategoryChange(null)}
-          className={cn(
-            'flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all',
-            activeCategory === null
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-          )}
-        >
-          <span>📚</span>
-          <span>Todos</span>
-          <span className={cn(
-            'rounded-full px-2 py-0.5 text-xs',
-            activeCategory === null
-              ? 'bg-primary-foreground/20 text-primary-foreground'
-              : 'bg-background text-muted-foreground'
-          )}>
-            {allCount}
-          </span>
-        </button>
-
-        {/* Category tabs */}
-        {categories.map((category) => {
-          const config = categoryConfig[category] || { label: category, icon: '📖' };
-          const count = tutorialCounts[category] || 0;
+    <div className="bg-muted/30 p-1 rounded-lg">
+      <div
+        className="grid gap-1"
+        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+      >
+        {tabs.slice(0, 4).map((tab) => {
+          const isActive = activeCategory === tab.key;
 
           return (
             <button
-              key={category}
-              onClick={() => onCategoryChange(category)}
+              key={tab.key ?? 'all'}
+              onClick={() => onCategoryChange(tab.key)}
               className={cn(
-                'flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all',
-                activeCategory === category
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                'flex flex-col items-center justify-center py-2 px-1 rounded-md text-xs font-medium transition-colors',
+                isActive
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              <span>{config.icon}</span>
-              <span>{config.label}</span>
-              <span className={cn(
-                'rounded-full px-2 py-0.5 text-xs',
-                activeCategory === category
-                  ? 'bg-primary-foreground/20 text-primary-foreground'
-                  : 'bg-background text-muted-foreground'
-              )}>
-                {count}
+              <span className="truncate">{tab.label}</span>
+              <span
+                className={cn(
+                  'text-[10px] mt-0.5',
+                  isActive ? 'text-primary' : 'text-muted-foreground/70'
+                )}
+              >
+                {tab.count}
               </span>
             </button>
           );
         })}
       </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    </div>
   );
 }

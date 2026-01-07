@@ -1,16 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { useState, useMemo } from 'react';
+import { GraduationCap, Lock, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useTutorialProgress } from '@/hooks/useTutorialProgress';
-import { GraduationCap, Loader2 } from 'lucide-react';
-import { AcademyProgressCard } from '@/components/academy/AcademyProgressCard';
 import { ContinueLearningCard } from '@/components/academy/ContinueLearningCard';
 import { CategoryTabs } from '@/components/academy/CategoryTabs';
 import { TutorialCard } from '@/components/academy/TutorialCard';
 import { TutorialDetailModal } from '@/components/academy/TutorialDetailModal';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Tutorial {
   id: string;
@@ -23,42 +21,27 @@ interface Tutorial {
   video_url: string | null;
 }
 
-const tierLabels: Record<string, { label: string; color: string }> = {
-  free: { label: 'Grátis', color: 'bg-muted text-muted-foreground' },
-  plus: { label: 'Plus', color: 'bg-status-warning/20 text-status-warning' },
-  elite: { label: 'Elite', color: 'bg-primary/20 text-primary' },
-};
-
 export default function Academy() {
-  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
-  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
   const { membership } = useUserProfile();
 
+  const { data: tutorials = [], isLoading } = useQuery({
+    queryKey: ['tutorials'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tutorials')
+        .select('id, title, slug, description, category, tier_required, content, video_url')
+        .eq('is_published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as Tutorial[];
+    },
+  });
+
   const tutorialIds = useMemo(() => tutorials.map((t) => t.id), [tutorials]);
   const { isCompleted, markAsCompleted, getStats, loading: progressLoading } = useTutorialProgress(tutorialIds);
-
-  useEffect(() => {
-    const fetchTutorials = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('tutorials')
-          .select('id, title, slug, description, category, tier_required, content, video_url')
-          .eq('is_published', true)
-          .order('sort_order', { ascending: true });
-
-        if (error) throw error;
-        setTutorials((data || []) as Tutorial[]);
-      } catch (error) {
-        console.error('Error fetching tutorials:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTutorials();
-  }, []);
 
   const canAccess = (tierRequired: string) => {
     if (tierRequired === 'free') return true;
@@ -66,13 +49,6 @@ export default function Academy() {
     if (membership === 'plus' && (tierRequired === 'free' || tierRequired === 'plus')) return true;
     return false;
   };
-
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = [...new Set(tutorials.map((t) => t.category))];
-    const order = ['beginner', 'intermediate', 'advanced'];
-    return cats.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-  }, [tutorials]);
 
   // Count tutorials per category
   const tutorialCounts = useMemo(() => {
@@ -94,7 +70,7 @@ export default function Academy() {
   // Find next tutorial to continue
   const nextTutorial = useMemo(() => {
     return tutorials.find((t) => !isCompleted(t.id) && canAccess(t.tier_required));
-  }, [tutorials, isCompleted]);
+  }, [tutorials, isCompleted, membership]);
 
   // Navigation for modal
   const currentIndex = selectedTutorial
@@ -113,99 +89,74 @@ export default function Academy() {
     }
   };
 
-  if (loading || progressLoading) {
+  if (isLoading || progressLoading) {
     return (
-      <AppLayout>
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background p-4 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full rounded-lg" />
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-lg" />
+          ))}
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
   return (
-    <AppLayout>
-      <div className="px-4 py-6 space-y-6">
-        {/* Header */}
-        <div
-          className="flex items-center gap-3 animate-fade-in"
-          style={{ animationDelay: '0ms' }}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/60 shadow-lg shadow-primary/20">
-            <GraduationCap className="h-7 w-7 text-primary-foreground" />
+    <div className="min-h-screen bg-background pb-24">
+      {/* Compact Header */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-primary" />
+            <h1 className="text-lg font-semibold">Academia</h1>
           </div>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">Academia CORE</h1>
-            <p className="text-sm text-muted-foreground">Aprenda sobre copy trading</p>
-          </div>
-          <Badge className={tierLabels[membership]?.color}>
-            {tierLabels[membership]?.label}
-          </Badge>
+          <span className="text-sm text-muted-foreground">
+            {stats.completed}/{stats.total} concluídas
+          </span>
         </div>
+      </div>
 
-        {/* Progress bar */}
-        <div
-          className="space-y-2 animate-fade-in"
-          style={{ animationDelay: '50ms' }}
-        >
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progresso geral</span>
-            <span className="font-medium text-primary">{stats.percentage}%</span>
-          </div>
-          <Progress value={stats.percentage} className="h-2" />
-        </div>
-
-        {/* Progress Card */}
-        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <AcademyProgressCard
-            percentage={stats.percentage}
-            completed={stats.completed}
-            total={stats.total}
-            nextTutorialTitle={nextTutorial?.title}
-          />
-        </div>
-
-        {/* Continue Learning */}
+      <div className="p-4 space-y-5">
+        {/* Hero Card - Continue Learning */}
         {nextTutorial && (
-          <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-            <ContinueLearningCard
-              tutorial={nextTutorial}
-              hasAccess={canAccess(nextTutorial.tier_required)}
-              onSelect={() => setSelectedTutorial(nextTutorial)}
-            />
-          </div>
-        )}
-
-        {/* Category Tabs */}
-        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <CategoryTabs
-            categories={categories}
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-            tutorialCounts={tutorialCounts}
+          <ContinueLearningCard
+            tutorial={nextTutorial}
+            hasAccess={canAccess(nextTutorial.tier_required)}
+            onSelect={() => setSelectedTutorial(nextTutorial)}
+            progress={{ completed: stats.completed, total: stats.total }}
           />
-        </div>
-
-        {/* Tutorial Cards */}
-        <div className="grid gap-3">
-          {filteredTutorials.map((tutorial, index) => (
-            <TutorialCard
-              key={tutorial.id}
-              tutorial={tutorial}
-              hasAccess={canAccess(tutorial.tier_required)}
-              isCompleted={isCompleted(tutorial.id)}
-              onSelect={() => canAccess(tutorial.tier_required) && setSelectedTutorial(tutorial)}
-              className="animate-fade-in"
-              style={{ animationDelay: `${250 + index * 50}ms` }}
-            />
-          ))}
-        </div>
-
-        {tutorials.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            Nenhum tutorial disponível ainda.
-          </p>
         )}
+
+        {/* Category Tabs - Static Segmented */}
+        <CategoryTabs
+          categories={Object.keys(tutorialCounts)}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          tutorialCounts={tutorialCounts}
+        />
+
+        {/* Tutorial List - Compact Format */}
+        <div className="space-y-2">
+          {filteredTutorials.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Lock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhum tutorial disponível</p>
+            </div>
+          ) : (
+            filteredTutorials.map((tutorial) => (
+              <TutorialCard
+                key={tutorial.id}
+                tutorial={tutorial}
+                hasAccess={canAccess(tutorial.tier_required)}
+                isCompleted={isCompleted(tutorial.id)}
+                onSelect={() => canAccess(tutorial.tier_required) && setSelectedTutorial(tutorial)}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       {/* Tutorial Detail Modal */}
@@ -224,6 +175,6 @@ export default function Academy() {
         hasPrevious={currentIndex > 0}
         hasNext={currentIndex < filteredTutorials.length - 1}
       />
-    </AppLayout>
+    </div>
   );
 }
