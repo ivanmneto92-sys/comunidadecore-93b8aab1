@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Affiliates from "./pages/Affiliates";
 import StreakHistory from "./pages/StreakHistory";
+import Achievements from "./pages/Achievements";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
@@ -71,6 +72,11 @@ const App = () => (
             <Route path="/streaks" element={
               <ProtectedRoute>
                 <StreakHistory />
+              </ProtectedRoute>
+            } />
+            <Route path="/achievements" element={
+              <ProtectedRoute>
+                <Achievements />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

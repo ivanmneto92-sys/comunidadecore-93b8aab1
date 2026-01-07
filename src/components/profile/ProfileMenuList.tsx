@@ -7,7 +7,8 @@ import {
   Shield, 
   HelpCircle, 
   LogOut,
-  DollarSign
+  DollarSign,
+  Trophy
 } from 'lucide-react';
 import { ProfileMenuItem } from './ProfileMenuItem';
 import { Badge } from '@/components/ui/badge';
@@ -43,6 +44,13 @@ export function ProfileMenuList({
           label="Trocar Avatar"
           subtitle="Escolha um novo avatar"
           onClick={onChangeAvatar}
+        />
+        <ProfileMenuItem
+          icon={Trophy}
+          iconColor="text-amber-500"
+          label="Conquistas"
+          subtitle="Badges e recompensas"
+          onClick={() => navigate('/achievements')}
         />
         <ProfileMenuItem
           icon={Users}

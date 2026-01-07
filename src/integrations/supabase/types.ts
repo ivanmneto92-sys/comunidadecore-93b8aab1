@@ -65,6 +65,48 @@ export type Database = {
         }
         Relationships: []
       }
+      achievements: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          rarity: string | null
+          requirement_value: number | null
+          sort_order: number | null
+          xp_reward: number | null
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string
+          description: string
+          icon: string
+          id?: string
+          name: string
+          rarity?: string | null
+          requirement_value?: number | null
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          rarity?: string | null
+          requirement_value?: number | null
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
       admin_activity_logs: {
         Row: {
           action_type: string
@@ -1059,6 +1101,35 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_channel_read_status: {
         Row: {
