@@ -11,10 +11,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAffiliate } from '@/hooks/useAffiliate';
 import { supabase } from '@/integrations/supabase/client';
-import { AvatarUpload } from '@/components/profile/AvatarUpload';
+import { AvatarSelector } from '@/components/profile/AvatarSelector';
 import { ProfileStatusCard } from '@/components/profile/ProfileStatusCard';
 import { AffiliateQuickCard } from '@/components/profile/AffiliateQuickCard';
-import { User, LogOut, Loader2, Save, Edit3 } from 'lucide-react';
+import { User, LogOut, Loader2, Save, Edit3, Palette } from 'lucide-react';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -25,14 +25,14 @@ export default function Profile() {
 
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarId, setAvatarId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.display_name || '');
       setUsername(profile.username || '');
-      setAvatarUrl(profile.avatar_url);
+      setAvatarId(profile.avatar_id);
     }
   }, [profile]);
 
@@ -77,8 +77,8 @@ export default function Profile() {
     navigate('/auth');
   };
 
-  const handleAvatarChange = (url: string | null) => {
-    setAvatarUrl(url);
+  const handleAvatarChange = (newAvatarId: string) => {
+    setAvatarId(newAvatarId);
   };
 
   if (authLoading || profileLoading) {
@@ -137,10 +137,38 @@ export default function Profile() {
           />
         </div>
 
-        {/* Edit Profile Card */}
+        {/* Avatar Selection Card */}
         <Card
           className="overflow-hidden border-border/50 animate-fade-in"
           style={{ animationDelay: '150ms' }}
+        >
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                <Palette className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Escolher Avatar</h3>
+                <p className="text-sm text-muted-foreground">
+                  Selecione seu avatar preferido
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <AvatarSelector
+              currentAvatarId={avatarId}
+              displayName={displayName}
+              onAvatarChange={handleAvatarChange}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Edit Profile Card */}
+        <Card
+          className="overflow-hidden border-border/50 animate-fade-in"
+          style={{ animationDelay: '200ms' }}
         >
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
@@ -157,17 +185,6 @@ export default function Profile() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Avatar */}
-            <div className="flex flex-col items-center gap-2">
-              <AvatarUpload
-                currentAvatarUrl={avatarUrl}
-                displayName={displayName}
-                onUploadComplete={handleAvatarChange}
-              />
-              <p className="text-xs text-muted-foreground">
-                Clique para alterar sua foto
-              </p>
-            </div>
 
             {/* Form Fields */}
             <div className="grid gap-4 sm:grid-cols-2">
@@ -223,7 +240,7 @@ export default function Profile() {
         </Card>
 
         {/* Sign Out Button */}
-        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
           <Button
             variant="outline"
             onClick={handleSignOut}

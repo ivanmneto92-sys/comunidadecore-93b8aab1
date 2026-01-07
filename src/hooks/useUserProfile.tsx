@@ -10,6 +10,7 @@ interface Profile {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  avatar_id: string | null;
   bio: string | null;
   created_at: string;
 }

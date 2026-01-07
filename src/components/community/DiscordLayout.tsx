@@ -32,6 +32,7 @@ interface Message {
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
+    avatar_id: string | null;
   } | null;
 }
 

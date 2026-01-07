@@ -18,6 +18,7 @@ interface Message {
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
+    avatar_id: string | null;
   } | null;
 }
 
@@ -50,19 +51,19 @@ export function ThreadView({ parentMessage, channelId, onClose }: ThreadViewProp
 
         // Fetch profiles
         const userIds = [...new Set((repliesData || []).map(m => m.user_id).filter(Boolean))] as string[];
-        let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
+        let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }> = {};
 
         if (userIds.length > 0) {
           const { data: profilesData } = await supabase
             .from('profiles')
-            .select('id, display_name, avatar_url')
+            .select('id, display_name, avatar_url, avatar_id')
             .in('id', userIds);
 
           if (profilesData) {
             profilesMap = profilesData.reduce((acc, profile) => {
-              acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url };
+              acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url, avatar_id: profile.avatar_id };
               return acc;
-            }, {} as Record<string, { display_name: string | null; avatar_url: string | null }>);
+            }, {} as Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }>);
           }
         }
 
@@ -99,7 +100,7 @@ export function ThreadView({ parentMessage, channelId, onClose }: ThreadViewProp
           if (newMsg.user_id) {
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('display_name, avatar_url')
+              .select('display_name, avatar_url, avatar_id')
               .eq('id', newMsg.user_id)
               .maybeSingle();
             profile = profileData;
