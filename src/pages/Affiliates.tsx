@@ -8,11 +8,13 @@ import { useAffiliate } from '@/hooks/useAffiliate';
 import { useAuth } from '@/hooks/useAuth';
 import { AffiliateLinkCard } from '@/components/affiliates/AffiliateLinkCard';
 import { AffiliateHeroStats } from '@/components/affiliates/AffiliateHeroStats';
+import { AffiliateLevelCard } from '@/components/affiliates/AffiliateLevelCard';
+import { AffiliateLeaderboard } from '@/components/affiliates/AffiliateLeaderboard';
 import { ReferralsTable } from '@/components/affiliates/ReferralsTable';
 import { CommissionsTable } from '@/components/affiliates/CommissionsTable';
 import { PayoutRequestForm } from '@/components/affiliates/PayoutRequestForm';
 import { PayoutHistory } from '@/components/affiliates/PayoutHistory';
-import { Users, ArrowLeft, Gift, Star, Crown, Sparkles } from 'lucide-react';
+import { Users, ArrowLeft, Gift, Star, Crown, Sparkles, Trophy } from 'lucide-react';
 
 const statusBadges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   active: { label: 'Ativo', variant: 'default' },
@@ -53,6 +55,7 @@ export default function Affiliates() {
     { icon: Star, title: 'R$ 20 por Plus', description: 'Para cada indicado que assinar o plano Plus' },
     { icon: Crown, title: 'R$ 50 por Elite', description: 'Para cada indicado que assinar o plano Elite' },
     { icon: Gift, title: 'Saques Rápidos', description: 'Receba via Pix ou PayPal a partir de R$ 50' },
+    { icon: Trophy, title: 'Sistema de Níveis', description: 'Suba de nível e ganhe bônus em comissões' },
   ];
 
   return (
@@ -140,8 +143,13 @@ export default function Affiliates() {
               <AffiliateLinkCard affiliateCode={affiliate.affiliate_code} />
             </div>
 
-            {/* Hero Stats */}
+            {/* Level Card - Gamification */}
             <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <AffiliateLevelCard referrals={referrals} />
+            </div>
+
+            {/* Hero Stats */}
+            <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
               <AffiliateHeroStats
                 affiliate={affiliate}
                 referrals={referrals}
@@ -149,22 +157,27 @@ export default function Affiliates() {
               />
             </div>
 
+            {/* Leaderboard */}
+            <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <AffiliateLeaderboard />
+            </div>
+
             {/* Referrals & Commissions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+              <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
                 <ReferralsTable referrals={referrals} />
               </div>
-              <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
                 <CommissionsTable commissions={commissions} />
               </div>
             </div>
 
             {/* Payout Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+              <div className="animate-fade-in" style={{ animationDelay: '350ms' }}>
                 <PayoutRequestForm affiliate={affiliate} onRequest={requestPayout} />
               </div>
-              <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+              <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <PayoutHistory payouts={payouts} />
               </div>
             </div>
