@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { Shield, Activity, AlertTriangle, LucideIcon } from 'lucide-react';
 
 interface AnimatedStatusCardProps {
   status: 'success' | 'warning' | 'danger';
@@ -11,30 +12,33 @@ interface AnimatedStatusCardProps {
 const statusConfig = {
   success: {
     label: 'Estável',
-    emoji: '🟢',
+    Icon: Shield,
     contextPhrase: 'Sistema operando dentro do padrão',
-    ringColor: 'stroke-status-success',
-    textColor: 'text-status-success',
-    bgGradient: 'from-status-success/20 via-status-success/5 to-transparent',
     percentage: 85,
+    barGradient: 'from-status-success via-status-success/80 to-status-success/60',
+    glowColor: 'bg-status-success/30',
+    textColor: 'text-status-success',
+    iconBg: 'bg-status-success/10',
   },
   warning: {
     label: 'Atenção',
-    emoji: '🟡',
+    Icon: Activity,
     contextPhrase: 'Mercado exige cautela adicional',
-    ringColor: 'stroke-status-warning',
-    textColor: 'text-status-warning',
-    bgGradient: 'from-status-warning/20 via-status-warning/5 to-transparent',
     percentage: 55,
+    barGradient: 'from-status-warning via-status-warning/80 to-status-warning/60',
+    glowColor: 'bg-status-warning/30',
+    textColor: 'text-status-warning',
+    iconBg: 'bg-status-warning/10',
   },
   danger: {
     label: 'Risco Elevado',
-    emoji: '🔴',
+    Icon: AlertTriangle,
     contextPhrase: 'Momento de preservação de capital',
-    ringColor: 'stroke-status-danger',
-    textColor: 'text-status-danger',
-    bgGradient: 'from-status-danger/20 via-status-danger/5 to-transparent',
     percentage: 25,
+    barGradient: 'from-status-danger via-status-danger/80 to-status-danger/60',
+    glowColor: 'bg-status-danger/30',
+    textColor: 'text-status-danger',
+    iconBg: 'bg-status-danger/10',
   },
 };
 
@@ -56,51 +60,29 @@ const drawdownLabels = {
   fora_do_padrao: 'Crítico',
 };
 
-function CircularProgress({ percentage, status }: { percentage: number; status: 'success' | 'warning' | 'danger' }) {
+function HorizontalStatusBar({ percentage, status }: { percentage: number; status: 'success' | 'warning' | 'danger' }) {
   const config = statusConfig[status];
-  const circumference = 2 * Math.PI * 42;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="relative w-32 h-32">
-      {/* Glow effect */}
-      <div className={cn(
-        'absolute inset-0 rounded-full blur-xl opacity-50',
-        status === 'success' && 'bg-status-success/30',
-        status === 'warning' && 'bg-status-warning/30',
-        status === 'danger' && 'bg-status-danger/30'
-      )} />
-      
-      <svg className="w-full h-full -rotate-90 relative" viewBox="0 0 100 100">
-        {/* Background circle */}
-        <circle
-          cx="50"
-          cy="50"
-          r="42"
-          fill="none"
-          strokeWidth="8"
-          className="stroke-secondary/50"
+    <div className="w-full space-y-2">
+      <div className="relative h-3 w-full rounded-full bg-secondary/50 overflow-hidden">
+        {/* Glow effect */}
+        <div 
+          className={cn('absolute inset-0 blur-md opacity-50', config.glowColor)}
+          style={{ width: `${percentage}%` }}
         />
-        {/* Progress circle */}
-        <circle
-          cx="50"
-          cy="50"
-          r="42"
-          fill="none"
-          strokeWidth="8"
-          strokeLinecap="round"
-          className={cn(config.ringColor, 'transition-all duration-1000 ease-out')}
-          style={{
-            strokeDasharray: circumference,
-            strokeDashoffset: strokeDashoffset,
-          }}
+        {/* Progress bar */}
+        <div
+          className={cn(
+            'h-full rounded-full bg-gradient-to-r transition-all duration-1000 ease-out',
+            config.barGradient
+          )}
+          style={{ width: `${percentage}%` }}
         />
-      </svg>
-      
-      {/* Center content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl">{config.emoji}</span>
-        <span className={cn('text-sm font-bold mt-1', config.textColor)}>{config.label}</span>
+      </div>
+      <div className="flex justify-between items-center text-xs">
+        <span className="text-muted-foreground">Saúde do Sistema</span>
+        <span className={cn('font-semibold', config.textColor)}>{percentage}%</span>
       </div>
     </div>
   );
@@ -108,6 +90,7 @@ function CircularProgress({ percentage, status }: { percentage: number; status: 
 
 export function AnimatedStatusCard({ status, profileType, riskLevel, drawdownStatus, insightText }: AnimatedStatusCardProps) {
   const config = statusConfig[status];
+  const Icon = config.Icon;
 
   const pills = [
     { label: 'Perfil', value: profileLabels[profileType] },
@@ -116,40 +99,41 @@ export function AnimatedStatusCard({ status, profileType, riskLevel, drawdownSta
   ];
 
   return (
-    <div className={cn(
-      'relative overflow-hidden rounded-2xl p-6',
-      'bg-gradient-to-br', config.bgGradient,
-      'border border-border/50'
-    )}>
-      {/* Content */}
-      <div className="flex flex-col items-center text-center gap-4">
-        {/* Circular Indicator */}
-        <CircularProgress percentage={config.percentage} status={status} />
-        
-        {/* Context Phrase */}
-        <p className="text-sm text-muted-foreground max-w-xs">
-          {config.contextPhrase}
-        </p>
-
-        {/* Pills */}
-        <div className="flex items-center gap-2 flex-wrap justify-center">
-          {pills.map((pill) => (
-            <span
-              key={pill.label}
-              className="px-3 py-1 rounded-full bg-secondary/60 text-xs font-medium text-foreground"
-            >
-              {pill.label}: {pill.value}
-            </span>
-          ))}
+    <div className="relative overflow-hidden rounded-2xl p-6 bg-card border border-border/50">
+      {/* Header with Icon and Status */}
+      <div className="flex items-start gap-4 mb-6">
+        <div className={cn('p-3 rounded-xl', config.iconBg)}>
+          <Icon className={cn('w-7 h-7', config.textColor)} />
         </div>
-
-        {/* Insight Text - Optional */}
-        {insightText && (
-          <p className="text-xs text-muted-foreground/80 italic max-w-xs pt-2 border-t border-border/30">
-            💡 {insightText}
-          </p>
-        )}
+        <div className="flex-1">
+          <h3 className={cn('text-xl font-bold', config.textColor)}>{config.label}</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">{config.contextPhrase}</p>
+        </div>
       </div>
+
+      {/* Horizontal Status Bar */}
+      <div className="mb-6">
+        <HorizontalStatusBar percentage={config.percentage} status={status} />
+      </div>
+
+      {/* Pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {pills.map((pill) => (
+          <span
+            key={pill.label}
+            className="px-3 py-1.5 rounded-full bg-secondary/60 text-xs font-medium text-foreground"
+          >
+            {pill.label}: {pill.value}
+          </span>
+        ))}
+      </div>
+
+      {/* Insight Text - Optional */}
+      {insightText && (
+        <p className="text-xs text-muted-foreground/80 italic max-w-xs pt-4 mt-4 border-t border-border/30">
+          💡 {insightText}
+        </p>
+      )}
     </div>
   );
 }
