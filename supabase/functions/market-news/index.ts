@@ -84,19 +84,26 @@ serve(async (req) => {
       throw new Error('FINNHUB_API_KEY not configured');
     }
 
-    // Fetch forex news
-    const response = await fetch(
-      `https://finnhub.io/api/v1/news?category=forex&token=${apiKey}`
+    // Fetch news from multiple categories in parallel
+    const categories = ['forex', 'crypto', 'general'];
+    const newsPromises = categories.map(category =>
+      fetch(`https://finnhub.io/api/v1/news?category=${category}&token=${apiKey}`)
+        .then(res => res.ok ? res.json() : [])
+        .catch(() => [])
     );
 
-    if (!response.ok) {
-      throw new Error(`Finnhub API error: ${response.status}`);
-    }
+    const [forexNews, cryptoNews, generalNews] = await Promise.all(newsPromises);
 
-    const news = await response.json();
-    
-    // Get the 10 most recent news items
-    const recentNews = news.slice(0, 10);
+    // Tag each news item with its category and combine
+    const taggedNews = [
+      ...forexNews.slice(0, 5).map((item: Record<string, unknown>) => ({ ...item, marketCategory: 'FOREX' })),
+      ...cryptoNews.slice(0, 3).map((item: Record<string, unknown>) => ({ ...item, marketCategory: 'CRYPTO' })),
+      ...generalNews.slice(0, 4).map((item: Record<string, unknown>) => ({ ...item, marketCategory: 'ÍNDICES' })),
+    ];
+
+    // Sort by datetime (most recent first) and take top 10
+    const sortedNews = taggedNews.sort((a, b) => (b.datetime as number) - (a.datetime as number));
+    const recentNews = sortedNews.slice(0, 10);
     
     // Extract headlines for translation
     const headlines = recentNews.map((item: { headline: string }) => item.headline);
@@ -114,6 +121,7 @@ serve(async (req) => {
       image: string;
       datetime: number;
       category: string;
+      marketCategory: string;
     }, index: number) => ({
       id: item.id,
       headline: translatedHeadlines[index] || item.headline,
@@ -123,7 +131,7 @@ serve(async (req) => {
       url: item.url,
       image: item.image,
       datetime: item.datetime,
-      category: item.category,
+      category: item.marketCategory || 'FOREX',
     }));
 
     // Cache the result

@@ -130,7 +130,17 @@ export function NewsChannelView({ channel, onGoBack, onlineCount }: NewsChannelV
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-sm text-foreground">{item.source}</span>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">FOREX</Badge>
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "text-[10px] px-1.5 py-0",
+                            item.category === 'CRYPTO' && "border-orange-500/50 text-orange-400",
+                            item.category === 'ÍNDICES' && "border-blue-500/50 text-blue-400",
+                            item.category === 'FOREX' && "border-emerald-500/50 text-emerald-400"
+                          )}
+                        >
+                          {item.category}
+                        </Badge>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(item.datetime * 1000), {
                             addSuffix: true,
