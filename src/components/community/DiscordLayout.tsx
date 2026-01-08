@@ -8,6 +8,8 @@ import { ServerSidebar } from './ServerSidebar';
 import { ChannelListPanel } from './ChannelListPanel';
 import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
+import { CommunityNewsPanel } from './CommunityNewsPanel';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface Channel {
   id: string;
@@ -47,6 +49,7 @@ export function DiscordLayout() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [threadMessage, setThreadMessage] = useState<Message | null>(null);
+  const [showNews, setShowNews] = useState(false);
   
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<MobileView>('channels');
@@ -118,6 +121,7 @@ export function DiscordLayout() {
             selectedChannel={selectedChannel}
             onSelectChannel={handleSelectChannel}
             compact={true}
+            onOpenNews={() => setShowNews(true)}
           />
         </div>
         
@@ -155,6 +159,13 @@ export function DiscordLayout() {
           />
         </div>
       )}
+
+      {/* Mobile News Sheet */}
+      <Sheet open={showNews} onOpenChange={setShowNews}>
+        <SheetContent side="right" className="p-0 w-[85vw] max-w-sm md:hidden">
+          <CommunityNewsPanel onClose={() => setShowNews(false)} showCloseButton />
+        </SheetContent>
+      </Sheet>
 
       {/* ===== DESKTOP LAYOUT ===== */}
       <div className="hidden md:flex h-full w-full">
@@ -206,6 +217,11 @@ export function DiscordLayout() {
             />
           </div>
         )}
+
+        {/* News Panel - Desktop */}
+        <div className="w-[280px] shrink-0 h-full border-l border-border">
+          <CommunityNewsPanel />
+        </div>
       </div>
     </div>
   );
