@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { useMarketNews, NewsItem } from "@/hooks/useMarketNews";
-import { Newspaper, ExternalLink, AlertCircle } from "lucide-react";
+import { Newspaper, ExternalLink, AlertCircle, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -16,29 +17,45 @@ function NewsItemCard({ news }: { news: NewsItem }) {
       href={news.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
+      className="group block p-4 rounded-xl bg-gradient-to-r from-card to-card/80 border border-border/30 hover:border-primary/40 hover:from-primary/5 hover:to-card/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
     >
-      {news.image && (
-        <img
-          src={news.image}
-          alt=""
-          className="w-16 h-16 rounded-md object-cover flex-shrink-0"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-        />
-      )}
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
-          {news.headline}
-        </h4>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-muted-foreground">{news.source}</span>
-          <span className="text-xs text-muted-foreground">•</span>
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
+      <div className="flex gap-4">
+        {news.image && (
+          <div className="relative flex-shrink-0">
+            <img
+              src={news.image}
+              alt=""
+              className="w-20 h-20 rounded-lg object-cover ring-1 ring-border/20 group-hover:ring-primary/30 transition-all duration-300"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-background/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant="outline" 
+              className="bg-primary/10 text-primary border-primary/20 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5"
+            >
+              <TrendingUp className="w-3 h-3 mr-1" />
+              Forex
+            </Badge>
+          </div>
+          <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
+            {news.headline}
+          </h4>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-medium">{news.source}</span>
+              <span className="text-border">•</span>
+              <span>{timeAgo}</span>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+          </div>
         </div>
       </div>
-      <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
     </a>
   );
 }
@@ -47,9 +64,10 @@ function NewsSkeletons() {
   return (
     <div className="space-y-3">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="flex gap-3 p-3">
-          <Skeleton className="w-16 h-16 rounded-md" />
-          <div className="flex-1 space-y-2">
+        <div key={i} className="flex gap-4 p-4 rounded-xl bg-card/50 border border-border/20">
+          <Skeleton className="w-20 h-20 rounded-lg flex-shrink-0" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-4 w-16 rounded-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />
@@ -64,25 +82,34 @@ export function MarketNewsCard() {
   const { data: news, isLoading, error } = useMarketNews();
 
   return (
-    <Card className="bg-card/80 backdrop-blur-sm border-border/50">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Newspaper className="w-5 h-5 text-primary" />
-          Notícias de Forex
+    <Card className="bg-gradient-to-br from-card via-card to-card/95 backdrop-blur-sm border-border/50 overflow-hidden">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 ring-1 ring-primary/20">
+            <Newspaper className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+              Notícias de Forex
+            </span>
+            <span className="text-xs text-muted-foreground font-normal">
+              Atualizações em tempo real
+            </span>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-3">
         {isLoading && <NewsSkeletons />}
         
         {error && (
-          <div className="flex items-center gap-2 text-muted-foreground p-4">
-            <AlertCircle className="w-5 h-5" />
+          <div className="flex items-center gap-3 text-muted-foreground p-4 rounded-xl bg-destructive/5 border border-destructive/10">
+            <AlertCircle className="w-5 h-5 text-destructive/70" />
             <span className="text-sm">Não foi possível carregar as notícias</span>
           </div>
         )}
         
         {news && news.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {news.map((item) => (
               <NewsItemCard key={item.id} news={item} />
             ))}
@@ -90,12 +117,15 @@ export function MarketNewsCard() {
         )}
         
         {news && news.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Nenhuma notícia disponível no momento
-          </p>
+          <div className="text-center py-8">
+            <Newspaper className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">
+              Nenhuma notícia disponível no momento
+            </p>
+          </div>
         )}
         
-        <p className="text-[10px] text-muted-foreground mt-4 text-center">
+        <p className="text-[10px] text-muted-foreground/60 mt-4 text-center pt-3 border-t border-border/30">
           Conteúdo apenas para fins educacionais. Não constitui aconselhamento de investimento.
         </p>
       </CardContent>
