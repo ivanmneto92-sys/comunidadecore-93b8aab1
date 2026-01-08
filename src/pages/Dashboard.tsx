@@ -75,7 +75,6 @@ export default function Dashboard() {
 
             {/* 6. Market News Feed */}
             <MarketNewsCard />
-            <MarketNewsCard />
           </>
         )}
 
