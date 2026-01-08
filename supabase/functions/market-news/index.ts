@@ -9,6 +9,60 @@ const corsHeaders = {
 let cachedNews: { data: unknown; timestamp: number } | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+async function translateHeadlines(headlines: string[]): Promise<string[]> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  if (!LOVABLE_API_KEY) {
+    console.log('LOVABLE_API_KEY not configured, skipping translation');
+    return headlines;
+  }
+
+  try {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-lite',
+        messages: [{
+          role: 'user',
+          content: `Traduza estes títulos de notícias financeiras para português brasileiro de forma natural e jornalística. Retorne APENAS um JSON array com os títulos traduzidos na mesma ordem, sem explicações adicionais.
+
+Títulos:
+${JSON.stringify(headlines)}`
+        }],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Translation API error:', response.status);
+      return headlines;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      return headlines;
+    }
+
+    // Extract JSON array from response
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const translated = JSON.parse(jsonMatch[0]);
+      if (Array.isArray(translated) && translated.length === headlines.length) {
+        return translated;
+      }
+    }
+    
+    return headlines;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return headlines;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -41,8 +95,17 @@ serve(async (req) => {
 
     const news = await response.json();
     
-    // Transform and limit to 5 most recent news
-    const formattedNews = news.slice(0, 5).map((item: {
+    // Get the 5 most recent news items
+    const recentNews = news.slice(0, 5);
+    
+    // Extract headlines for translation
+    const headlines = recentNews.map((item: { headline: string }) => item.headline);
+    
+    // Translate headlines to Portuguese
+    const translatedHeadlines = await translateHeadlines(headlines);
+    
+    // Transform and combine with translated headlines
+    const formattedNews = recentNews.map((item: {
       id: number;
       headline: string;
       summary: string;
@@ -51,9 +114,10 @@ serve(async (req) => {
       image: string;
       datetime: number;
       category: string;
-    }) => ({
+    }, index: number) => ({
       id: item.id,
-      headline: item.headline,
+      headline: translatedHeadlines[index] || item.headline,
+      originalHeadline: item.headline,
       summary: item.summary,
       source: item.source,
       url: item.url,
