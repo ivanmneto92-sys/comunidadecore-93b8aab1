@@ -12,6 +12,7 @@ import Academy from "./pages/Academy";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import Affiliates from "./pages/Affiliates";
 import StreakHistory from "./pages/StreakHistory";
@@ -31,6 +32,7 @@ const App = () => (
         <BrowserRouter>
         <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/termos" element={<Terms />} />
             <Route path="/privacidade" element={<Privacy />} />
