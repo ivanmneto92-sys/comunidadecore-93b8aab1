@@ -1,7 +1,6 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AnimatedStatusCard } from '@/components/dashboard/AnimatedStatusCard';
 import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
-import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights';
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
@@ -11,7 +10,7 @@ import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
-  const { dailyStatus, dailyResult, communityHighlights, isLoading } = useDailyStatus();
+  const { dailyStatus, dailyResult, isLoading } = useDailyStatus();
   const { streakDays } = useStreak();
 
   const isRiskMode = dailyStatus?.status === 'danger';
@@ -74,10 +73,8 @@ export default function Dashboard() {
             {/* 5. Quick Actions Grid */}
             <EnhancedQuickActions />
 
-            {/* 6. Community Highlights Carousel */}
-            <CommunityHighlights highlights={communityHighlights} />
-
-            {/* 7. Market News Feed */}
+            {/* 6. Market News Feed */}
+            <MarketNewsCard />
             <MarketNewsCard />
           </>
         )}
