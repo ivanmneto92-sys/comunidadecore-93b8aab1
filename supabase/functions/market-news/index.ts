@@ -30,9 +30,9 @@ serve(async (req) => {
       throw new Error('FINNHUB_API_KEY not configured');
     }
 
-    // Fetch general market news
+    // Fetch forex news
     const response = await fetch(
-      `https://finnhub.io/api/v1/news?category=general&token=${apiKey}`
+      `https://finnhub.io/api/v1/news?category=forex&token=${apiKey}`
     );
 
     if (!response.ok) {
