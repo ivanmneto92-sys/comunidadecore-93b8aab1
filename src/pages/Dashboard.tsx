@@ -27,8 +27,8 @@ export default function Dashboard() {
   const defaultResult = {
     pnlPercent: 0,
     tradesCount: 0,
-    wins: 0,
-    losses: 0,
+    winRate: 0,
+    positiveDays: 0,
   };
 
   return (
@@ -65,8 +65,8 @@ export default function Dashboard() {
             <MetricsGrid
               pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
               tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
-              wins={dailyResult?.wins ?? defaultResult.wins}
-              losses={dailyResult?.losses ?? defaultResult.losses}
+              winRate={dailyResult?.winRate ?? defaultResult.winRate}
+              positiveDays={dailyResult?.positiveDays ?? defaultResult.positiveDays}
               isRiskMode={isRiskMode}
             />
 

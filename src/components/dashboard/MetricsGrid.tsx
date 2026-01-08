@@ -1,17 +1,16 @@
-import { TrendingUp, TrendingDown, Activity, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, BarChart3, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MetricsGridProps {
   pnlPercent: number;
   tradesCount: number;
-  wins: number;
-  losses: number;
+  winRate: number;
+  positiveDays: number;
   isRiskMode: boolean;
 }
 
-export function MetricsGrid({ pnlPercent, tradesCount, wins, losses, isRiskMode }: MetricsGridProps) {
+export function MetricsGrid({ pnlPercent, tradesCount, winRate, positiveDays, isRiskMode }: MetricsGridProps) {
   const isPositive = pnlPercent >= 0;
-  const winRate = tradesCount > 0 ? Math.round((wins / tradesCount) * 100) : 0;
 
   const metrics = [
     {
@@ -30,17 +29,17 @@ export function MetricsGrid({ pnlPercent, tradesCount, wins, losses, isRiskMode 
     },
     {
       label: 'Win Rate',
-      value: tradesCount > 0 ? `${winRate}%` : '—',
+      value: tradesCount > 0 ? `${Math.round(winRate)}%` : '—',
       icon: BarChart3,
       color: winRate >= 50 ? 'text-status-success' : 'text-status-warning',
       bgColor: winRate >= 50 ? 'bg-status-success/10' : 'bg-status-warning/10',
     },
     {
-      label: 'W/L',
-      value: `${wins}/${losses}`,
-      icon: Activity,
-      color: 'text-muted-foreground',
-      bgColor: 'bg-muted/30',
+      label: 'Dias Positivos',
+      value: positiveDays.toString(),
+      icon: Flame,
+      color: positiveDays > 0 ? 'text-status-success' : 'text-muted-foreground',
+      bgColor: positiveDays > 0 ? 'bg-status-success/10' : 'bg-muted/30',
     },
   ];
 
