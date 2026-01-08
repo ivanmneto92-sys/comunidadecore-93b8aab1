@@ -17,8 +17,10 @@ export function DailyReportPreview({
   losses,
   hasOperations 
 }: DailyReportPreviewProps) {
-  const isPositive = pnlPercent >= 0;
-  const isNeutral = pnlPercent === 0;
+  // Ensure pnlPercent is a number
+  const pnlValue = typeof pnlPercent === 'number' ? pnlPercent : parseFloat(String(pnlPercent)) || 0;
+  const isPositive = pnlValue >= 0;
+  const isNeutral = pnlValue === 0;
 
   if (!hasOperations) {
     return (
@@ -62,7 +64,7 @@ export function DailyReportPreview({
               isPositive ? 'text-status-success' : 'text-status-danger'
             )}
           >
-            {isPositive ? '+' : ''}{pnlPercent.toFixed(2)}%
+            {isPositive ? '+' : ''}{pnlValue.toFixed(2)}%
           </span>
           <span className="text-sm text-muted-foreground">•</span>
           <span className="text-sm text-muted-foreground">{tradesCount} trades</span>
