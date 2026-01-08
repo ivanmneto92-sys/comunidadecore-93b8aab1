@@ -14,8 +14,8 @@ interface DailyStatus {
 interface DailyResult {
   pnlPercent: number;
   tradesCount: number;
-  wins: number;
-  losses: number;
+  winRate: number;
+  positiveDays: number;
 }
 
 interface CommunityHighlight {
@@ -61,6 +61,32 @@ export function useDailyStatus() {
     refetchOnMount: true,
   });
 
+  // Query to calculate consecutive positive days
+  const { data: positiveDaysCount } = useQuery({
+    queryKey: ['positive-days-count'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reports_daily')
+        .select('pnl_percent, date')
+        .not('published_at', 'is', null)
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      if (!data || data.length === 0) return 0;
+
+      let count = 0;
+      for (const report of data) {
+        if (Number(report.pnl_percent) > 0) {
+          count++;
+        } else {
+          break;
+        }
+      }
+      return count;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: highlights, isLoading: isLoadingHighlights } = useQuery({
     queryKey: ['community-highlights'],
     queryFn: async () => {
@@ -94,8 +120,8 @@ export function useDailyStatus() {
   const dailyResult: DailyResult | null = dailyReport ? {
     pnlPercent: Number(dailyReport.pnl_percent),
     tradesCount: dailyReport.trades_count,
-    wins: Math.round(dailyReport.trades_count * (Number(dailyReport.win_rate) / 100)),
-    losses: dailyReport.trades_count - Math.round(dailyReport.trades_count * (Number(dailyReport.win_rate) / 100)),
+    winRate: Number(dailyReport.win_rate),
+    positiveDays: positiveDaysCount ?? 0,
   } : null;
 
   const communityHighlights: CommunityHighlight[] = (highlights || []).map((msg: any) => {
