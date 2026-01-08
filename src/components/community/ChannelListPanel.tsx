@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, ChevronRight } from 'lucide-react';
+import { Search, Hash, Megaphone, BarChart3, Brain, HelpCircle, ChevronRight, Newspaper } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,6 +35,8 @@ const getChannelIcon = (channel: Channel) => {
     case 'announcements':
     case 'anuncios':
       return <Megaphone className={cn(iconClass, "text-primary")} />;
+    case 'noticias-mercado':
+      return <Newspaper className={cn(iconClass, "text-blue-400")} />;
     case 'daily-results':
     case 'resultados':
       return <BarChart3 className={cn(iconClass, "text-status-success")} />;

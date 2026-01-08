@@ -8,6 +8,7 @@ import { ServerSidebar } from './ServerSidebar';
 import { ChannelListPanel } from './ChannelListPanel';
 import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
+import { NewsChannelView } from './NewsChannelView';
 import { CommunityNewsPanel } from './CommunityNewsPanel';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
@@ -134,6 +135,12 @@ export function DiscordLayout() {
               onSelectChannel={handleSelectChannel}
               unreadCounts={unreadCounts}
             />
+          ) : selectedChannel?.slug === 'noticias-mercado' ? (
+            <NewsChannelView
+              channel={selectedChannel}
+              onGoBack={handleGoBack}
+              onlineCount={onlineCount}
+            />
           ) : (
             selectedChannel && (
               <ChatView
@@ -196,7 +203,12 @@ export function DiscordLayout() {
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {selectedChannel && (
+          {selectedChannel?.slug === 'noticias-mercado' ? (
+            <NewsChannelView
+              channel={selectedChannel}
+              onlineCount={onlineCount}
+            />
+          ) : selectedChannel && (
             <ChatView
               channel={selectedChannel}
               isAdmin={isAdmin}

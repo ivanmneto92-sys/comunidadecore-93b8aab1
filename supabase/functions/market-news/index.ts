@@ -95,8 +95,8 @@ serve(async (req) => {
 
     const news = await response.json();
     
-    // Get the 5 most recent news items
-    const recentNews = news.slice(0, 5);
+    // Get the 10 most recent news items
+    const recentNews = news.slice(0, 10);
     
     // Extract headlines for translation
     const headlines = recentNews.map((item: { headline: string }) => item.headline);
