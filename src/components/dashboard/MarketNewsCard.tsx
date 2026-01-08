@@ -68,7 +68,7 @@ export function MarketNewsCard() {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Newspaper className="w-5 h-5 text-primary" />
-          Notícias do Mercado
+          Notícias de Forex
         </CardTitle>
       </CardHeader>
       <CardContent>
