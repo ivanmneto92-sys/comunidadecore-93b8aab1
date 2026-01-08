@@ -1,3 +1,4 @@
+import { Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -18,9 +19,10 @@ interface ServerSidebarProps {
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
   compact?: boolean;
+  onOpenNews?: () => void;
 }
 
-export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false }: ServerSidebarProps) {
+export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false, onOpenNews }: ServerSidebarProps) {
   // Group channels by category
   const groupedChannels = channels.reduce((acc, channel) => {
     if (!acc[channel.category]) {
@@ -108,6 +110,32 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
           </div>
         ))}
       </div>
+
+      {/* News button - Mobile only */}
+      {onOpenNews && (
+        <>
+          <div className={cn('h-px bg-border mx-auto my-1.5', dividerWidth)} />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={onOpenNews}
+                className="relative w-full flex items-center justify-center group"
+              >
+                <div className={cn(
+                  'rounded-full flex items-center justify-center transition-all',
+                  iconSize,
+                  'bg-muted/50 text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground hover:rounded-xl'
+                )}>
+                  <Newspaper className={compact ? 'h-4 w-4' : 'h-5 w-5'} />
+                </div>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <span className="font-semibold">Notícias Forex</span>
+            </TooltipContent>
+          </Tooltip>
+        </>
+      )}
     </div>
   );
 }
