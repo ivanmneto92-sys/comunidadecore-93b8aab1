@@ -44,47 +44,43 @@ export function useDailyStatus() {
     gcTime: 30 * 60 * 1000,
   });
 
-  const { data: dailyReport, isLoading: isLoadingReport } = useQuery({
-    queryKey: ['daily-report', today],
+  const { data: dailyReportData, isLoading: isLoadingReport } = useQuery({
+    queryKey: ['daily-report-with-streak', today],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch today's report
+      const { data: todayReport, error: todayError } = await supabase
         .from('reports_daily')
         .select('pnl_percent, trades_count, win_rate')
         .eq('date', today)
         .not('published_at', 'is', null)
         .maybeSingle();
 
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 0,
-    refetchOnMount: true,
-  });
+      if (todayError) throw todayError;
 
-  // Query to calculate consecutive positive days
-  const { data: positiveDaysCount } = useQuery({
-    queryKey: ['positive-days-count'],
-    queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch all reports to calculate positive days streak
+      const { data: allReports, error: allError } = await supabase
         .from('reports_daily')
         .select('pnl_percent, date')
         .not('published_at', 'is', null)
         .order('date', { ascending: false });
 
-      if (error) throw error;
-      if (!data || data.length === 0) return 0;
+      if (allError) throw allError;
 
-      let count = 0;
-      for (const report of data) {
-        if (Number(report.pnl_percent) > 0) {
-          count++;
-        } else {
-          break;
+      let positiveDays = 0;
+      if (allReports && allReports.length > 0) {
+        for (const report of allReports) {
+          if (Number(report.pnl_percent) > 0) {
+            positiveDays++;
+          } else {
+            break;
+          }
         }
       }
-      return count;
+
+      return { todayReport, positiveDays };
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   const { data: highlights, isLoading: isLoadingHighlights } = useQuery({
@@ -117,11 +113,11 @@ export function useDailyStatus() {
     insightText: (healthScore as any).insight_text || 'Mantenha o foco na gestão de risco e siga o plano operacional.',
   } : null;
 
-  const dailyResult: DailyResult | null = dailyReport ? {
-    pnlPercent: Number(dailyReport.pnl_percent),
-    tradesCount: dailyReport.trades_count,
-    winRate: Number(dailyReport.win_rate),
-    positiveDays: positiveDaysCount ?? 0,
+  const dailyResult: DailyResult | null = dailyReportData?.todayReport ? {
+    pnlPercent: Number(dailyReportData.todayReport.pnl_percent),
+    tradesCount: dailyReportData.todayReport.trades_count,
+    winRate: Number(dailyReportData.todayReport.win_rate),
+    positiveDays: dailyReportData.positiveDays ?? 0,
   } : null;
 
   const communityHighlights: CommunityHighlight[] = (highlights || []).map((msg: any) => {
