@@ -1,6 +1,7 @@
-import { Newspaper } from 'lucide-react';
+import { Newspaper, Megaphone, BarChart3, Brain, HelpCircle, Hash, MessageCircle, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import logoCoreImage from '@/assets/logo-core.png';
 
 interface Channel {
   id: string;
@@ -22,6 +23,37 @@ interface ServerSidebarProps {
   onOpenNews?: () => void;
 }
 
+const getChannelIconComponent = (channel: Channel, className: string) => {
+  // First check by icon property
+  if (channel.icon === 'newspaper') return <Newspaper className={className} />;
+  if (channel.icon === 'megaphone') return <Megaphone className={className} />;
+  if (channel.icon === 'chart') return <BarChart3 className={className} />;
+  if (channel.icon === 'brain') return <Brain className={className} />;
+  if (channel.icon === 'help') return <HelpCircle className={className} />;
+  if (channel.icon === 'wrench') return <Wrench className={className} />;
+  if (channel.icon === 'chat') return <MessageCircle className={className} />;
+  
+  // Fallback to slug-based icons
+  switch (channel.slug) {
+    case 'anuncios':
+    case 'announcements':
+      return <Megaphone className={className} />;
+    case 'noticias-mercado':
+      return <Newspaper className={className} />;
+    case 'resultados':
+    case 'daily-results':
+      return <BarChart3 className={className} />;
+    case 'leitura-risco':
+    case 'risk-reading':
+      return <Brain className={className} />;
+    case 'duvidas':
+    case 'beginner-questions':
+      return <HelpCircle className={className} />;
+    default:
+      return <Hash className={className} />;
+  }
+};
+
 export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false, onOpenNews }: ServerSidebarProps) {
   // Group channels by category
   const groupedChannels = channels.reduce((acc, channel) => {
@@ -32,16 +64,10 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
     return acc;
   }, {} as Record<string, Channel[]>);
 
-  const getChannelIcon = (channel: Channel) => {
-    if (channel.icon) return channel.icon;
-    if (channel.is_bot_only) return '🤖';
-    if (channel.is_admin_only) return '🔒';
-    return '#';
-  };
-
   // Dynamic sizes based on compact mode
-  const iconSize = compact ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-lg';
-  const logoSize = compact ? 'w-8 h-8 text-sm' : 'w-12 h-12 text-xl';
+  const iconSize = compact ? 'w-8 h-8' : 'w-12 h-12';
+  const iconClassSize = compact ? 'h-4 w-4' : 'h-5 w-5';
+  const logoSize = compact ? 'w-8 h-8' : 'w-12 h-12';
   const indicatorHeight = compact ? 'h-6' : 'h-10';
   const indicatorHoverHeight = compact ? 'group-hover:h-4' : 'group-hover:h-5';
   const containerPadding = compact ? 'py-2 px-1' : 'py-3 px-2';
@@ -53,10 +79,14 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
       <Tooltip>
         <TooltipTrigger asChild>
           <button className={cn(
-            'mx-auto mb-1.5 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-bold hover:rounded-xl transition-all',
+            'mx-auto mb-1.5 rounded-2xl bg-card border border-border flex items-center justify-center overflow-hidden hover:rounded-xl transition-all',
             logoSize
           )}>
-            C
+            <img 
+              src={logoCoreImage} 
+              alt="CORE" 
+              className="w-full h-full object-cover"
+            />
           </button>
         </TooltipTrigger>
         <TooltipContent side="right">
@@ -94,7 +124,7 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
                           ? 'bg-primary text-primary-foreground rounded-xl' 
                           : 'bg-muted/50 text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground hover:rounded-xl'
                       )}>
-                        {getChannelIcon(channel)}
+                        {getChannelIconComponent(channel, iconClassSize)}
                       </div>
                     </button>
                   </TooltipTrigger>
