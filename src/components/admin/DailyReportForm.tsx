@@ -216,18 +216,34 @@ export function DailyReportForm() {
         ...(shouldPublish && { published_at: new Date().toISOString() }),
       };
 
+      console.log('[DailyReportForm] Submitting:', { 
+        isEditMode, 
+        editingReportId: editingReport?.id, 
+        formData: data,
+        reportData 
+      });
+
       if (isEditMode && editingReport) {
         // Update existing report
-        const { error } = await supabase
+        const { data: updateResult, error } = await supabase
           .from('reports_daily')
           .update(reportData)
-          .eq('id', editingReport.id);
+          .eq('id', editingReport.id)
+          .select();
+
+        console.log('[DailyReportForm] Update result:', { updateResult, error });
 
         if (error) throw error;
         toast({ title: shouldPublish ? 'Relatório atualizado e publicado!' : 'Relatório atualizado!' });
       } else {
         // Create new report
-        const { error } = await supabase.from('reports_daily').insert(reportData);
+        const { data: insertResult, error } = await supabase
+          .from('reports_daily')
+          .insert(reportData)
+          .select();
+
+        console.log('[DailyReportForm] Insert result:', { insertResult, error });
+
         if (error) throw error;
         toast({ title: shouldPublish ? 'Relatório publicado com sucesso!' : 'Relatório criado com sucesso!' });
       }
@@ -235,7 +251,7 @@ export function DailyReportForm() {
       cancelEdit();
       fetchReports();
     } catch (error) {
-      console.error('Error saving report:', error);
+      console.error('[DailyReportForm] Error saving report:', error);
       toast({ title: 'Erro ao salvar relatório', variant: 'destructive' });
     } finally {
       setSubmitting(false);
