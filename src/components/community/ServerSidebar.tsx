@@ -84,13 +84,13 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
       <Tooltip>
         <TooltipTrigger asChild>
           <button className={cn(
-            'mx-auto mb-1.5 rounded-2xl bg-card border border-border flex items-center justify-center overflow-hidden hover:rounded-xl transition-all',
+            'mx-auto mb-1.5 rounded-2xl bg-secondary flex items-center justify-center overflow-hidden hover:rounded-xl transition-all p-1.5',
             logoSize
           )}>
             <img 
               src={logoCoreImage} 
               alt="CORE" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </button>
         </TooltipTrigger>
