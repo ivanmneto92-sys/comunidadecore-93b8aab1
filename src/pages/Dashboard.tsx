@@ -5,6 +5,7 @@ import { CommunityHighlights } from '@/components/dashboard/CommunityHighlights'
 import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
+import { MarketNewsCard } from '@/components/dashboard/MarketNewsCard';
 import { useDailyStatus } from '@/hooks/useDailyStatus';
 import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -75,6 +76,9 @@ export default function Dashboard() {
 
             {/* 6. Community Highlights Carousel */}
             <CommunityHighlights highlights={communityHighlights} />
+
+            {/* 7. Market News Feed */}
+            <MarketNewsCard />
           </>
         )}
 
