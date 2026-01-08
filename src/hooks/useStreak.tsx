@@ -5,10 +5,11 @@ export function useStreak() {
   const { data: streakDays = 0, isLoading } = useQuery({
     queryKey: ['streak'],
     queryFn: async () => {
-      // Fetch last 30 days of reports ordered by date desc
+      // Fetch last 30 days of reports ordered by date desc (optimized select)
       const { data, error } = await supabase
         .from('reports_daily')
-        .select('date, pnl_percent')
+        .select('pnl_percent')
+        .not('published_at', 'is', null)
         .order('date', { ascending: false })
         .limit(30);
 
@@ -34,7 +35,8 @@ export function useStreak() {
 
       return streak;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes - streak data doesn't change often
+    gcTime: 30 * 60 * 1000, // Keep in garbage collection for 30 min
   });
 
   return { streakDays, isLoading };

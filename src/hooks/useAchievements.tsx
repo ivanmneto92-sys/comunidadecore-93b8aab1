@@ -32,17 +32,20 @@ export function useAchievements() {
   const { user } = useAuth();
 
   // Fetch all achievements
+  // Achievement definitions are static - cache aggressively
   const { data: achievements = [], isLoading: achievementsLoading } = useQuery({
     queryKey: ['achievements'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('achievements')
-        .select('*')
+        .select('id, code, name, description, icon, category, xp_reward, rarity, requirement_value, sort_order')
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data as Achievement[];
     },
+    staleTime: 30 * 60 * 1000, // 30 minutes - static data
+    gcTime: 60 * 60 * 1000, // 1 hour
   });
 
   // Fetch user's unlocked achievements
@@ -52,13 +55,15 @@ export function useAchievements() {
       if (!user) return [];
       const { data, error } = await supabase
         .from('user_achievements')
-        .select('*')
+        .select('id, achievement_id, unlocked_at')
         .eq('user_id', user.id);
 
       if (error) throw error;
       return data as UserAchievement[];
     },
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000,
   });
 
   // Fetch user progress data for calculations
@@ -172,7 +177,8 @@ export function useAchievements() {
       };
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000,
   });
 
   // Calculate achievements with progress

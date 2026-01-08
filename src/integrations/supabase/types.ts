@@ -1217,6 +1217,13 @@ export type Database = {
     }
     Functions: {
       generate_affiliate_code: { Args: never; Returns: string }
+      get_unread_counts: {
+        Args: { p_user_id: string }
+        Returns: {
+          channel_id: string
+          unread_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

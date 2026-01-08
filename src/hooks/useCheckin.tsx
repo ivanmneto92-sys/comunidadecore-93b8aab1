@@ -53,28 +53,30 @@ export function useCheckin() {
       const today = new Date().toISOString().split('T')[0];
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-      // Check today's checkin
-      const { data: todayCheckin } = await supabase
-        .from('daily_checkins')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('checkin_date', today)
-        .maybeSingle();
+      // Fetch all data in parallel (optimized)
+      const [todayResult, yesterdayResult, xpResult] = await Promise.all([
+        supabase
+          .from('daily_checkins')
+          .select('streak_count, xp_earned')
+          .eq('user_id', user.id)
+          .eq('checkin_date', today)
+          .maybeSingle(),
+        supabase
+          .from('daily_checkins')
+          .select('streak_count')
+          .eq('user_id', user.id)
+          .eq('checkin_date', yesterday)
+          .maybeSingle(),
+        supabase
+          .from('user_xp')
+          .select('total_xp')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+      ]);
 
-      // Get yesterday's checkin to calculate potential streak
-      const { data: yesterdayCheckin } = await supabase
-        .from('daily_checkins')
-        .select('streak_count')
-        .eq('user_id', user.id)
-        .eq('checkin_date', yesterday)
-        .maybeSingle();
-
-      // Get user XP
-      const { data: userXp } = await supabase
-        .from('user_xp')
-        .select('total_xp')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const todayCheckin = todayResult.data;
+      const yesterdayCheckin = yesterdayResult.data;
+      const userXp = xpResult.data;
 
       const currentStreak = todayCheckin?.streak_count || yesterdayCheckin?.streak_count || 0;
       const potentialStreak = todayCheckin ? currentStreak : (yesterdayCheckin?.streak_count || 0) + 1;

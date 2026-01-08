@@ -61,13 +61,31 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       const startDateStr = startDate.toISOString().split('T')[0];
       
       try {
-        // Fetch latest account metrics
-        const { data: metricsData } = await supabase
-          .from('account_metrics')
-          .select('*')
-          .order('date', { ascending: false })
-          .limit(1)
-          .single();
+        // Fetch all data in parallel for better performance
+        const [metricsResult, monthlyResult, reportsResult] = await Promise.all([
+          // Latest account metrics (optimized select)
+          supabase
+            .from('account_metrics')
+            .select('total_return, deposits_1m, withdrawals_1m, max_drawdown, total_profit, quarter_return, month_return, week_return, day_return, account_balance')
+            .order('date', { ascending: false })
+            .limit(1)
+            .single(),
+          // Monthly returns for chart
+          supabase
+            .from('monthly_returns')
+            .select('month, return_percent')
+            .gte('month', startDateStr.substring(0, 7))
+            .order('month', { ascending: true }),
+          // Daily reports for growth chart
+          supabase
+            .from('reports_daily')
+            .select('date, pnl_percent')
+            .not('published_at', 'is', null)
+            .gte('date', startDateStr)
+            .order('date', { ascending: true }),
+        ]);
+
+        const metricsData = metricsResult.data;
 
         if (metricsData) {
           setMetrics({
@@ -84,29 +102,18 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
           });
         }
 
-        // Fetch monthly returns for chart - filtered by period
-        const { data: monthlyData } = await supabase
-          .from('monthly_returns')
-          .select('*')
-          .gte('month', startDateStr.substring(0, 7))
-          .order('month', { ascending: true });
-
-        if (monthlyData) {
+        // Process monthly returns
+        if (monthlyResult.data) {
           setMonthlyReturns(
-            monthlyData.map((m) => ({
+            monthlyResult.data.map((m) => ({
               month: new Date(m.month).toLocaleDateString('pt-BR', { month: 'short' }),
               returnPercent: Number(m.return_percent),
             }))
           );
         }
 
-        // Generate growth data from daily reports - filtered by period
-        const { data: reportsData } = await supabase
-          .from('reports_daily')
-          .select('date, pnl_percent')
-          .not('published_at', 'is', null)
-          .gte('date', startDateStr)
-          .order('date', { ascending: true });
+        // Process growth data from daily reports
+        const reportsData = reportsResult.data;
 
         if (reportsData && reportsData.length > 0) {
           let balance = 1000; // Starting balance
