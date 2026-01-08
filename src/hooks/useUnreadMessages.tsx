@@ -1,16 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-
-interface UnreadCount {
-  channelId: string;
-  count: number;
-}
 
 export function useUnreadMessages() {
   const { user } = useAuth();
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingUpdatesRef = useRef<Record<string, number>>({});
 
   const fetchUnreadCounts = useCallback(async () => {
     if (!user) {
@@ -20,43 +17,17 @@ export function useUnreadMessages() {
     }
 
     try {
-      // Buscar todos os canais
-      const { data: channels } = await supabase
-        .from('channels')
-        .select('id');
+      // Use the optimized RPC function instead of N+1 queries
+      const { data, error } = await supabase.rpc('get_unread_counts', {
+        p_user_id: user.id
+      });
 
-      if (!channels) return;
+      if (error) throw error;
 
-      // Buscar status de leitura do usuário
-      const { data: readStatus } = await supabase
-        .from('user_channel_read_status')
-        .select('channel_id, last_read_at')
-        .eq('user_id', user.id);
-
-      const readMap = new Map(
-        readStatus?.map(r => [r.channel_id, new Date(r.last_read_at)]) || []
-      );
-
-      // Contar mensagens não lidas por canal
       const counts: Record<string, number> = {};
-
-      for (const channel of channels) {
-        const lastRead = readMap.get(channel.id);
-        
-        let query = supabase
-          .from('messages')
-          .select('id', { count: 'exact', head: true })
-          .eq('channel_id', channel.id)
-          .is('parent_id', null);
-
-        if (lastRead) {
-          query = query.gt('created_at', lastRead.toISOString());
-        }
-
-        const { count } = await query;
-        
-        if (count && count > 0) {
-          counts[channel.id] = count;
+      if (data) {
+        for (const row of data) {
+          counts[row.channel_id] = Number(row.unread_count);
         }
       }
 
@@ -84,7 +55,7 @@ export function useUnreadMessages() {
 
       if (error) throw error;
 
-      // Atualizar estado local
+      // Update local state
       setUnreadCounts(prev => {
         const newCounts = { ...prev };
         delete newCounts[channelId];
@@ -99,7 +70,22 @@ export function useUnreadMessages() {
     fetchUnreadCounts();
   }, [fetchUnreadCounts]);
 
-  // Escutar novas mensagens em tempo real
+  // Debounced batch update for realtime messages
+  const flushPendingUpdates = useCallback(() => {
+    if (Object.keys(pendingUpdatesRef.current).length === 0) return;
+    
+    setUnreadCounts(prev => {
+      const newCounts = { ...prev };
+      for (const [channelId, count] of Object.entries(pendingUpdatesRef.current)) {
+        newCounts[channelId] = (newCounts[channelId] || 0) + count;
+      }
+      return newCounts;
+    });
+    
+    pendingUpdatesRef.current = {};
+  }, []);
+
+  // Listen for new messages in realtime with debounce
   useEffect(() => {
     if (!user) return;
 
@@ -115,23 +101,34 @@ export function useUnreadMessages() {
         (payload) => {
           const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
           
-          // Não contar mensagens do próprio usuário ou replies
+          // Don't count own messages or replies
           if (message.user_id === user.id || message.parent_id) return;
 
-          setUnreadCounts(prev => ({
-            ...prev,
-            [message.channel_id]: (prev[message.channel_id] || 0) + 1
-          }));
+          // Batch updates with debounce (500ms)
+          pendingUpdatesRef.current[message.channel_id] = 
+            (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
+
+          if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+          
+          debounceTimerRef.current = setTimeout(flushPendingUpdates, 500);
         }
       )
       .subscribe();
 
     return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, flushPendingUpdates]);
 
-  const totalUnread = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
+  const totalUnread = useMemo(() => 
+    Object.values(unreadCounts).reduce((acc, count) => acc + count, 0),
+    [unreadCounts]
+  );
 
   return {
     unreadCounts,

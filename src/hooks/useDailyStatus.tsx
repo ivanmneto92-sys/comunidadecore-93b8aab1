@@ -33,13 +33,15 @@ export function useDailyStatus() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('health_scores')
-        .select('*')
+        .select('score, status, profile_type, risk_level, drawdown_status, insight_text')
         .eq('date', today)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: dailyReport, isLoading: isLoadingReport } = useQuery({
@@ -47,7 +49,7 @@ export function useDailyStatus() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('reports_daily')
-        .select('*')
+        .select('pnl_percent, trades_count, win_rate')
         .eq('date', today)
         .not('published_at', 'is', null)
         .maybeSingle();
@@ -67,7 +69,6 @@ export function useDailyStatus() {
         .select(`
           id,
           content,
-          is_bot_message,
           channel:channels(slug, name)
         `)
         .eq('is_highlight', true)
@@ -77,6 +78,8 @@ export function useDailyStatus() {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000,
   });
 
   const dailyStatus: DailyStatus | null = healthScore ? {
