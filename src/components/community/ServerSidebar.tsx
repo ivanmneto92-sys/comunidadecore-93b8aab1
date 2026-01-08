@@ -24,14 +24,14 @@ interface ServerSidebarProps {
 }
 
 const getChannelIconComponent = (channel: Channel, className: string) => {
-  // First check by icon property
+  // Check by icon property (emoji or text)
   if (channel.icon === 'newspaper') return <Newspaper className={className} />;
-  if (channel.icon === 'megaphone') return <Megaphone className={className} />;
-  if (channel.icon === 'chart') return <BarChart3 className={className} />;
-  if (channel.icon === 'brain') return <Brain className={className} />;
-  if (channel.icon === 'help') return <HelpCircle className={className} />;
-  if (channel.icon === 'wrench') return <Wrench className={className} />;
-  if (channel.icon === 'chat') return <MessageCircle className={className} />;
+  if (channel.icon === '📢') return <Megaphone className={className} />;
+  if (channel.icon === '🧠') return <Brain className={className} />;
+  if (channel.icon === '❓') return <HelpCircle className={className} />;
+  if (channel.icon === '🔧') return <Wrench className={className} />;
+  if (channel.icon === '💬') return <MessageCircle className={className} />;
+  if (channel.icon === '📊') return <BarChart3 className={className} />;
   
   // Fallback to slug-based icons
   switch (channel.slug) {
@@ -46,9 +46,14 @@ const getChannelIconComponent = (channel: Channel, className: string) => {
     case 'leitura-risco':
     case 'risk-reading':
       return <Brain className={className} />;
+    case 'duvidas-iniciantes':
     case 'duvidas':
     case 'beginner-questions':
       return <HelpCircle className={className} />;
+    case 'configuracoes':
+      return <Wrench className={className} />;
+    case 'chat-geral':
+      return <MessageCircle className={className} />;
     default:
       return <Hash className={className} />;
   }
