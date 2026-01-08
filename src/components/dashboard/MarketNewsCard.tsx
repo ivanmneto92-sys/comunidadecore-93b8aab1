@@ -5,8 +5,10 @@ import { useMarketNews, NewsItem } from "@/hooks/useMarketNews";
 import { Newspaper, ExternalLink, AlertCircle, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import useEmblaCarousel from "embla-carousel-react";
+import { useCallback, useEffect, useState } from "react";
 
-function NewsItemCard({ news }: { news: NewsItem }) {
+function NewsItemCard({ news, isCarousel = false }: { news: NewsItem; isCarousel?: boolean }) {
   const timeAgo = formatDistanceToNow(new Date(news.datetime * 1000), {
     addSuffix: true,
     locale: ptBR,
@@ -17,15 +19,19 @@ function NewsItemCard({ news }: { news: NewsItem }) {
       href={news.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block p-4 rounded-xl bg-gradient-to-r from-card to-card/80 border border-border/30 hover:border-primary/40 hover:from-primary/5 hover:to-card/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+      className={`group block p-4 rounded-xl bg-gradient-to-r from-card to-card/80 border border-border/30 hover:border-primary/40 hover:from-primary/5 hover:to-card/90 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 ${
+        isCarousel ? "min-w-[280px] w-[280px] flex-shrink-0 h-full" : ""
+      }`}
     >
-      <div className="flex gap-4">
+      <div className={`flex ${isCarousel ? "flex-col gap-3" : "gap-4"}`}>
         {news.image && (
           <div className="relative flex-shrink-0">
             <img
               src={news.image}
               alt=""
-              className="w-20 h-20 rounded-lg object-cover ring-1 ring-border/20 group-hover:ring-primary/30 transition-all duration-300"
+              className={`object-cover ring-1 ring-border/20 group-hover:ring-primary/30 transition-all duration-300 ${
+                isCarousel ? "w-full h-32 rounded-lg" : "w-20 h-20 rounded-lg"
+              }`}
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
@@ -43,16 +49,18 @@ function NewsItemCard({ news }: { news: NewsItem }) {
               Forex
             </Badge>
           </div>
-          <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
+          <h4 className={`text-sm font-medium text-foreground leading-snug group-hover:text-primary transition-colors duration-200 ${
+            isCarousel ? "line-clamp-3" : "line-clamp-2"
+          }`}>
             {news.headline}
           </h4>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-medium">{news.source}</span>
+              <span className="font-medium truncate max-w-[80px]">{news.source}</span>
               <span className="text-border">•</span>
-              <span>{timeAgo}</span>
+              <span className="truncate">{timeAgo}</span>
             </div>
-            <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+            <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 flex-shrink-0" />
           </div>
         </div>
       </div>
@@ -60,7 +68,76 @@ function NewsItemCard({ news }: { news: NewsItem }) {
   );
 }
 
-function NewsSkeletons() {
+function CarouselDots({ count, selected }: { count: number; selected: number }) {
+  return (
+    <div className="flex justify-center gap-1.5 mt-4">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className={`h-1.5 rounded-full transition-all duration-300 ${
+            index === selected 
+              ? "w-4 bg-primary" 
+              : "w-1.5 bg-muted-foreground/30"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function NewsCarousel({ news }: { news: NewsItem[] }) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: true,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <div>
+      <div className="overflow-hidden -mx-4 px-4" ref={emblaRef}>
+        <div className="flex gap-3">
+          {news.map((item) => (
+            <NewsItemCard key={item.id} news={item} isCarousel />
+          ))}
+        </div>
+      </div>
+      <CarouselDots count={news.length} selected={selectedIndex} />
+    </div>
+  );
+}
+
+function NewsSkeletons({ isCarousel = false }: { isCarousel?: boolean }) {
+  if (isCarousel) {
+    return (
+      <div className="flex gap-3 overflow-hidden -mx-4 px-4">
+        {[1, 2].map((i) => (
+          <div key={i} className="min-w-[280px] w-[280px] flex-shrink-0 p-4 rounded-xl bg-card/50 border border-border/20">
+            <Skeleton className="w-full h-32 rounded-lg mb-3" />
+            <Skeleton className="h-4 w-16 rounded-full mb-2" />
+            <Skeleton className="h-4 w-full mb-1" />
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {[1, 2, 3].map((i) => (
@@ -93,37 +170,63 @@ export function MarketNewsCard() {
               Notícias de Forex
             </span>
             <span className="text-xs text-muted-foreground font-normal">
-              Atualizações em tempo real
+              Deslize para ver mais
             </span>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {isLoading && <NewsSkeletons />}
-        
-        {error && (
-          <div className="flex items-center gap-3 text-muted-foreground p-4 rounded-xl bg-destructive/5 border border-destructive/10">
-            <AlertCircle className="w-5 h-5 text-destructive/70" />
-            <span className="text-sm">Não foi possível carregar as notícias</span>
-          </div>
-        )}
-        
-        {news && news.length > 0 && (
-          <div className="space-y-3">
-            {news.map((item) => (
-              <NewsItemCard key={item.id} news={item} />
-            ))}
-          </div>
-        )}
-        
-        {news && news.length === 0 && (
-          <div className="text-center py-8">
-            <Newspaper className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">
-              Nenhuma notícia disponível no momento
-            </p>
-          </div>
-        )}
+        {/* Mobile: Carousel */}
+        <div className="md:hidden">
+          {isLoading && <NewsSkeletons isCarousel />}
+          
+          {error && (
+            <div className="flex items-center gap-3 text-muted-foreground p-4 rounded-xl bg-destructive/5 border border-destructive/10">
+              <AlertCircle className="w-5 h-5 text-destructive/70" />
+              <span className="text-sm">Não foi possível carregar as notícias</span>
+            </div>
+          )}
+          
+          {news && news.length > 0 && <NewsCarousel news={news} />}
+          
+          {news && news.length === 0 && (
+            <div className="text-center py-8">
+              <Newspaper className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
+                Nenhuma notícia disponível no momento
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: Vertical list */}
+        <div className="hidden md:block">
+          {isLoading && <NewsSkeletons />}
+          
+          {error && (
+            <div className="flex items-center gap-3 text-muted-foreground p-4 rounded-xl bg-destructive/5 border border-destructive/10">
+              <AlertCircle className="w-5 h-5 text-destructive/70" />
+              <span className="text-sm">Não foi possível carregar as notícias</span>
+            </div>
+          )}
+          
+          {news && news.length > 0 && (
+            <div className="space-y-3">
+              {news.map((item) => (
+                <NewsItemCard key={item.id} news={item} />
+              ))}
+            </div>
+          )}
+          
+          {news && news.length === 0 && (
+            <div className="text-center py-8">
+              <Newspaper className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
+                Nenhuma notícia disponível no momento
+              </p>
+            </div>
+          )}
+        </div>
         
         <p className="text-[10px] text-muted-foreground/60 mt-4 text-center pt-3 border-t border-border/30">
           Conteúdo apenas para fins educacionais. Não constitui aconselhamento de investimento.
