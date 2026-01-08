@@ -201,8 +201,11 @@ export function DailyReportForm() {
   const onSubmit = async (data: ReportFormData, shouldPublish = false) => {
     setSubmitting(true);
     try {
-      const tradesTotal = data.hasOperations ? data.wins + data.losses : 0;
-      const calculatedWinRate = tradesTotal > 0 ? (data.wins / tradesTotal) * 100 : 0;
+      // Ensure wins and losses are numbers (fix string concatenation bug)
+      const wins = Number(data.wins) || 0;
+      const losses = Number(data.losses) || 0;
+      const tradesTotal = data.hasOperations ? wins + losses : 0;
+      const calculatedWinRate = tradesTotal > 0 ? (wins / tradesTotal) * 100 : 0;
 
       const reportData = {
         date: data.date,
