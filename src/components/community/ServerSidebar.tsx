@@ -141,31 +141,6 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
         ))}
       </div>
 
-      {/* News button - Mobile only */}
-      {onOpenNews && (
-        <>
-          <div className={cn('h-px bg-border mx-auto my-1.5', dividerWidth)} />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onOpenNews}
-                className="relative w-full flex items-center justify-center group"
-              >
-                <div className={cn(
-                  'rounded-full flex items-center justify-center transition-all',
-                  iconSize,
-                  'bg-muted/50 text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground hover:rounded-xl'
-                )}>
-                  <Newspaper className={compact ? 'h-4 w-4' : 'h-5 w-5'} />
-                </div>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <span className="font-semibold">Notícias Forex</span>
-            </TooltipContent>
-          </Tooltip>
-        </>
-      )}
     </div>
   );
 }
