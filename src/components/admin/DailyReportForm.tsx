@@ -78,12 +78,12 @@ export function DailyReportForm() {
   
   // Calculate derived values
   const tradesCount = useMemo(() => {
-    return (watchedValues.wins || 0) + (watchedValues.losses || 0);
+    return Number(watchedValues.wins || 0) + Number(watchedValues.losses || 0);
   }, [watchedValues.wins, watchedValues.losses]);
 
   const winRate = useMemo(() => {
     if (tradesCount === 0) return 0;
-    return ((watchedValues.wins || 0) / tradesCount) * 100;
+    return (Number(watchedValues.wins || 0) / tradesCount) * 100;
   }, [watchedValues.wins, tradesCount]);
 
   // Auto-suggest status based on data
