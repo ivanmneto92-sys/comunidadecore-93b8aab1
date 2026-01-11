@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp } from 'lucide-react';
+import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -95,6 +95,8 @@ export function ChatView({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [showPollModal, setShowPollModal] = useState(false);
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
+  const [isNearBottom, setIsNearBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
@@ -336,14 +338,30 @@ export function ChatView({
     setLoadingMore(false);
   }, [loadingMore, hasMore, messages, fetchMessages]);
 
-  // Handle scroll to detect when user scrolls near top
+  // Scroll to bottom and clear new messages indicator
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setNewMessagesCount(0);
+  }, []);
+
+  // Handle scroll to detect when user scrolls near top or bottom
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.target as HTMLDivElement;
+    
     // Load more when scrolled to top (within 100px threshold)
     if (target.scrollTop < 100 && !loadingMore && hasMore) {
       loadMoreMessages();
     }
-  }, [loadMoreMessages, loadingMore, hasMore]);
+    
+    // Track if user is near bottom (within 200px)
+    const nearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+    setIsNearBottom(nearBottom);
+    
+    // Clear new messages count when scrolled to bottom
+    if (nearBottom && newMessagesCount > 0) {
+      setNewMessagesCount(0);
+    }
+  }, [loadMoreMessages, loadingMore, hasMore, newMessagesCount]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -375,6 +393,22 @@ export function ChatView({
             const enriched = await enrichMessages([payload.new]);
             if (enriched.length > 0) {
               setMessages(prev => [...prev, enriched[0]]);
+              
+              // Increment new messages count if not near bottom and not own message
+              const isOwnMessage = payload.new.user_id === user?.id;
+              if (!isOwnMessage) {
+                setNewMessagesCount(prev => {
+                  // Check if near bottom at the time of receiving the message
+                  const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+                  if (scrollContainer) {
+                    const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+                    if (!nearBottom) {
+                      return prev + 1;
+                    }
+                  }
+                  return prev;
+                });
+              }
             }
           }
         }
@@ -535,7 +569,7 @@ export function ChatView({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
       {/* Channel header - Discord style */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border shrink-0 bg-background">
         {/* Mobile back button */}
@@ -669,6 +703,20 @@ export function ChatView({
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
+
+      {/* New messages indicator */}
+      {newMessagesCount > 0 && !isNearBottom && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
+          <Button
+            onClick={scrollToBottom}
+            size="sm"
+            className="rounded-full shadow-lg gap-1.5 px-4 animate-in slide-in-from-bottom-2"
+          >
+            <ChevronDown className="h-4 w-4" />
+            {newMessagesCount} {newMessagesCount === 1 ? 'nova mensagem' : 'novas mensagens'}
+          </Button>
+        </div>
+      )}
 
       {/* Typing indicator */}
       {canSendMessages && <TypingIndicator channelId={channel.id} />}
