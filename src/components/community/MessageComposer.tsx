@@ -10,6 +10,7 @@ import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { ImageUpload } from './ImageUpload';
 import { MentionPopover } from './MentionPopover';
 import { MentionUser } from '@/hooks/useMentions';
+import { createMentionNotifications } from '@/lib/mentionUtils';
 
 interface MessageComposerProps {
   channelId: string;
@@ -108,14 +109,26 @@ export function MessageComposer({
         content = content ? `${content}\n![image](${imageUrl})` : `![image](${imageUrl})`;
       }
 
-      const { error } = await supabase.from('messages').insert({
+      const { data, error } = await supabase.from('messages').insert({
         channel_id: channelId,
         user_id: user.id,
         content,
         image_url: imageUrl,
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      // Create notifications for mentioned users
+      const senderName = user.user_metadata?.display_name || 'Alguém';
+      await createMentionNotifications({
+        content,
+        senderId: user.id,
+        senderName,
+        channelId,
+        channelName,
+        messageId: data?.id,
+      });
+
       setMessage('');
       setImageUrl(null);
     } catch (error) {
