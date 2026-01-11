@@ -19,6 +19,7 @@ import StreakHistory from "./pages/StreakHistory";
 import Achievements from "./pages/Achievements";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/termos" element={<Terms />} />
             <Route path="/privacidade" element={<Privacy />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/" element={
               <ProtectedRoute>
                 <Dashboard />
