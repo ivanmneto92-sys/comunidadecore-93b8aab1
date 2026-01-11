@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -8,9 +8,13 @@ import {
   Trash2,
   Reply,
   Shield,
-  ShieldCheck
+  ShieldCheck,
+  Pencil,
+  X,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +38,7 @@ interface Message {
   id: string;
   content: string;
   created_at: string;
+  edited_at?: string | null;
   user_id: string | null;
   is_bot_message: boolean;
   is_pinned: boolean;
@@ -67,12 +72,23 @@ export function MessageItem({
   const { user } = useAuth();
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(message.content);
+  const [isSaving, setIsSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Avatar hook para renderizar SVG
   const { svg: avatarSvg } = useAvatar(
     message.profiles?.avatar_id, 
     message.profiles?.display_name || undefined
   );
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
 
   const formatTime = (dateStr: string) => {
     try {
@@ -138,6 +154,53 @@ export function MessageItem({
     } catch (error) {
       console.error('Error deleting message:', error);
       toast({ variant: 'destructive', title: 'Erro ao apagar mensagem' });
+    }
+  };
+
+  const handleEdit = () => {
+    setEditContent(message.content);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent(message.content);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim() || editContent === message.content) {
+      handleCancelEdit();
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ 
+          content: editContent.trim(),
+          edited_at: new Date().toISOString()
+        })
+        .eq('id', message.id);
+
+      if (error) throw error;
+      
+      toast({ title: 'Mensagem editada' });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error editing message:', error);
+      toast({ variant: 'destructive', title: 'Erro ao editar mensagem' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
     }
   };
 
@@ -231,14 +294,50 @@ export function MessageItem({
           <span className="text-[10px] text-muted-foreground">
             {formatTime(message.created_at)}
           </span>
+          {message.edited_at && (
+            <span className="text-[10px] text-muted-foreground italic">
+              (editado)
+            </span>
+          )}
         </div>
         
-        <p className="text-sm text-foreground/90 break-words mt-0.5 whitespace-pre-wrap">
-          {renderContentWithMentions(message.content.replace(/!\[image\]\([^)]+\)/g, ''))}
-        </p>
+        {isEditing ? (
+          <div className="mt-1 flex items-center gap-2">
+            <Input
+              ref={inputRef}
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isSaving}
+              className="flex-1 text-sm h-8"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-primary"
+              onClick={handleSaveEdit}
+              disabled={isSaving}
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground"
+              onClick={handleCancelEdit}
+              disabled={isSaving}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-foreground/90 break-words mt-0.5 whitespace-pre-wrap">
+            {renderContentWithMentions(message.content.replace(/!\[image\]\([^)]+\)/g, ''))}
+          </p>
+        )}
 
         {/* Image display */}
-        {message.image_url && (
+        {message.image_url && !isEditing && (
           <div className="mt-2">
             <img 
               src={message.image_url} 
@@ -250,37 +349,39 @@ export function MessageItem({
         )}
 
         {/* Reactions & Reply count */}
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          {message.reactions?.filter(r => r.count > 0).map((reaction) => (
-            <button
-              key={reaction.emoji}
-              onClick={() => handleReaction(reaction.emoji)}
-              className={cn(
-                'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors',
-                reaction.hasReacted 
-                  ? 'bg-primary/20 text-primary border border-primary/30' 
-                  : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-              )}
-            >
-              <span>{reaction.emoji}</span>
-              <span>{reaction.count}</span>
-            </button>
-          ))}
-          
-          {(message.reply_count ?? 0) > 0 && (
-            <button
-              onClick={onOpenThread}
-              className="flex items-center gap-1 text-xs text-primary hover:underline"
-            >
-              <MessageCircle className="h-3 w-3" />
-              <span>{message.reply_count} {message.reply_count === 1 ? 'resposta' : 'respostas'}</span>
-            </button>
-          )}
-        </div>
+        {!isEditing && (
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            {message.reactions?.filter(r => r.count > 0).map((reaction) => (
+              <button
+                key={reaction.emoji}
+                onClick={() => handleReaction(reaction.emoji)}
+                className={cn(
+                  'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors',
+                  reaction.hasReacted 
+                    ? 'bg-primary/20 text-primary border border-primary/30' 
+                    : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                )}
+              >
+                <span>{reaction.emoji}</span>
+                <span>{reaction.count}</span>
+              </button>
+            ))}
+            
+            {(message.reply_count ?? 0) > 0 && (
+              <button
+                onClick={onOpenThread}
+                className="flex items-center gap-1 text-xs text-primary hover:underline"
+              >
+                <MessageCircle className="h-3 w-3" />
+                <span>{message.reply_count} {message.reply_count === 1 ? 'resposta' : 'respostas'}</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Hover actions */}
-      {showActions && isHovered && (
+      {showActions && isHovered && !isEditing && (
         <div className="absolute -top-3 right-2 flex items-center gap-0.5 bg-card border border-border rounded-md shadow-sm p-0.5">
           <ReactionPicker onSelect={handleReaction} />
           
@@ -303,6 +404,12 @@ export function MessageItem({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {isOwnMessage && !message.is_bot_message && (
+                  <DropdownMenuItem onClick={handleEdit}>
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Editar
+                  </DropdownMenuItem>
+                )}
                 {isAdmin && (
                   <DropdownMenuItem onClick={handlePin}>
                     <Pin className="h-4 w-4 mr-2" />
