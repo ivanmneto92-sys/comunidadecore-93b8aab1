@@ -13,7 +13,8 @@ import { UserManager } from '@/components/admin/UserManager';
 import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { BroadcastManager } from '@/components/admin/BroadcastManager';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History } from 'lucide-react';
+import { SupportManager } from '@/components/admin/SupportManager';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -96,6 +97,10 @@ export default function Admin() {
               <History className="h-4 w-4" />
               <span>Logs</span>
             </TabsTrigger>
+            <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <Headphones className="h-4 w-4" />
+              <span>Suporte</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-4">
@@ -136,6 +141,10 @@ export default function Admin() {
 
           <TabsContent value="logs" className="mt-4">
             <ActivityLogs />
+          </TabsContent>
+
+          <TabsContent value="support" className="mt-4">
+            <SupportManager />
           </TabsContent>
         </Tabs>
       </div>
