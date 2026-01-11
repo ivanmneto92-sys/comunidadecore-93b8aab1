@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp, ChevronDown } from 'lucide-react';
+import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -13,6 +13,9 @@ import { CreatePollModal } from './CreatePollModal';
 import { ThreadView } from './ThreadView';
 import { TypingIndicator } from './TypingIndicator';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { MessageSearch } from './MessageSearch';
+import { OnlineMembersList } from './OnlineMembersList';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 interface Channel {
   id: string;
@@ -97,6 +100,8 @@ export function ChatView({
   const [showPollModal, setShowPollModal] = useState(false);
   const [newMessagesCount, setNewMessagesCount] = useState(0);
   const [isNearBottom, setIsNearBottom] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
@@ -599,10 +604,61 @@ export function ChatView({
           </div>
         )}
         
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        {/* Search button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8"
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          {showSearch ? (
+            <X className="h-5 w-5 text-primary" />
+          ) : (
+            <Search className="h-5 w-5 text-muted-foreground" />
+          )}
+        </Button>
+        
+        {/* Members button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8"
+          onClick={() => setShowMembers(true)}
+        >
           <Users className="h-5 w-5 text-muted-foreground" />
         </Button>
       </div>
+
+      {/* Search panel */}
+      {showSearch && (
+        <div className="border-b border-border h-80 shrink-0">
+          <MessageSearch
+            channelId={channel.id}
+            onResultClick={(messageId, channelSlug) => {
+              setShowSearch(false);
+              // TODO: Scroll to message
+            }}
+            onClose={() => setShowSearch(false)}
+          />
+        </div>
+      )}
+
+      {/* Members Sheet */}
+      <Sheet open={showMembers} onOpenChange={setShowMembers}>
+        <SheetContent side="right" className="p-0 w-64">
+          <SheetHeader className="px-3 py-3 border-b border-border">
+            <SheetTitle className="text-sm">Membros Online</SheetTitle>
+          </SheetHeader>
+          <OnlineMembersList 
+            users={onlineUsers.map(u => ({
+              id: u.user_id,
+              displayName: u.display_name,
+              avatarUrl: u.avatar_url,
+            }))}
+            className="h-full"
+          />
+        </SheetContent>
+      </Sheet>
 
       {/* Pinned messages */}
       {pinnedMessages.length > 0 && (
