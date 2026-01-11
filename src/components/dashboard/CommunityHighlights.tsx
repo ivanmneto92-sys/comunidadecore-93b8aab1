@@ -1,10 +1,10 @@
-import { Brain, Megaphone, BarChart3, ChevronRight } from 'lucide-react';
+import { Megaphone, BarChart3, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 interface Highlight {
   id: string;
-  type: 'risk' | 'announcement' | 'market';
+  type: 'announcement' | 'market';
   title: string;
   channel: string;
 }
@@ -14,13 +14,11 @@ interface CommunityHighlightsProps {
 }
 
 const iconMap = {
-  risk: Brain,
   announcement: Megaphone,
   market: BarChart3,
 };
 
 const typeConfig = {
-  risk: { label: 'Leitura', color: 'text-primary', bg: 'bg-primary/10' },
   announcement: { label: 'Anúncio', color: 'text-status-warning', bg: 'bg-status-warning/10' },
   market: { label: 'Mercado', color: 'text-status-success', bg: 'bg-status-success/10' },
 };

@@ -8,11 +8,10 @@ import { DiscussionThread } from './DiscussionThread';
 import { DiscussionComposer } from './DiscussionComposer';
 import { AnnouncementCard } from './cards/AnnouncementCard';
 import { DailyResultPostCard } from './cards/DailyResultPostCard';
-import { RiskReadingCard } from './cards/RiskReadingCard';
 
 interface Post {
   id: string;
-  post_type: 'announcement' | 'daily_result' | 'risk_reading';
+  post_type: 'announcement' | 'daily_result';
   title: string;
   content: string | null;
   metadata: Record<string, unknown>;
@@ -189,23 +188,8 @@ export function DiscussionView({ post, onBack, isAdmin }: DiscussionViewProps) {
             onOpenDiscussion={() => {}}
           />
         );
-      case 'risk_reading':
-        return (
-          <RiskReadingCard
-            id={post.id}
-            title={post.title}
-            content={post.content || ''}
-            publishedAt={post.published_at}
-            isPinned={post.is_pinned}
-            discussionCount={discussionCount}
-            metadata={post.metadata as {
-              summary?: string;
-              keyPoints?: string[];
-              impact?: string;
-            }}
-            onOpenDiscussion={() => {}}
-          />
-        );
+      default:
+        return null;
     }
   };
 

@@ -1,4 +1,4 @@
-import { Newspaper, Megaphone, BarChart3, Brain, HelpCircle, Hash, MessageCircle, Wrench } from 'lucide-react';
+import { Newspaper, Megaphone, BarChart3, HelpCircle, Hash, MessageCircle, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import logoCoreImage from '@/assets/logo-core.png';
@@ -27,7 +27,6 @@ const getChannelIconComponent = (channel: Channel, className: string) => {
   // Check by icon property (emoji or text)
   if (channel.icon === 'newspaper') return <Newspaper className={className} />;
   if (channel.icon === '📢') return <Megaphone className={className} />;
-  if (channel.icon === '🧠') return <Brain className={className} />;
   if (channel.icon === '❓') return <HelpCircle className={className} />;
   if (channel.icon === '🔧') return <Wrench className={className} />;
   if (channel.icon === '💬') return <MessageCircle className={className} />;
@@ -43,9 +42,6 @@ const getChannelIconComponent = (channel: Channel, className: string) => {
     case 'resultados':
     case 'daily-results':
       return <BarChart3 className={className} />;
-    case 'leitura-risco':
-    case 'risk-reading':
-      return <Brain className={className} />;
     case 'duvidas-iniciantes':
     case 'duvidas':
     case 'beginner-questions':
