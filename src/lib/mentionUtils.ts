@@ -88,3 +88,51 @@ export async function createMentionNotifications({
     await supabase.from('notifications').insert(notificationsToCreate);
   }
 }
+
+/**
+ * Cria uma notificação quando alguém responde à mensagem de um usuário
+ */
+export async function createReplyNotification({
+  parentMessageUserId,
+  replyContent,
+  replierId,
+  replierName,
+  channelId,
+  channelName,
+  replyMessageId,
+}: {
+  parentMessageUserId: string;
+  replyContent: string;
+  replierId: string;
+  replierName: string;
+  channelId: string;
+  channelName: string;
+  replyMessageId?: string;
+}) {
+  // Don't notify if replying to own message
+  if (parentMessageUserId === replierId) return;
+
+  // Check user notification settings
+  const { data: settings } = await supabase
+    .from('user_notification_settings')
+    .select('notify_replies, muted_channels')
+    .eq('user_id', parentMessageUserId)
+    .maybeSingle();
+
+  // Default to enabled if no settings
+  if (settings) {
+    if (!settings.notify_replies) return;
+    if (settings.muted_channels?.includes(channelId)) return;
+  }
+
+  // Create the notification
+  await supabase.from('notifications').insert({
+    user_id: parentMessageUserId,
+    type: 'reply',
+    title: `${replierName} respondeu sua mensagem`,
+    message: replyContent.slice(0, 100) + (replyContent.length > 100 ? '...' : ''),
+    link: `/community?channel=${channelName}`,
+    related_message_id: replyMessageId || null,
+    related_channel_id: channelId,
+  });
+}

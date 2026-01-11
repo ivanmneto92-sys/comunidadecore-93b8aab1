@@ -7,7 +7,7 @@ import { MessageItem } from './MessageItem';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
+import { createReplyNotification, createMentionNotifications } from '@/lib/mentionUtils';
 interface Message {
   id: string;
   content: string;
@@ -25,10 +25,11 @@ interface Message {
 interface ThreadViewProps {
   parentMessage: Message;
   channelId: string;
+  channelName: string;
   onClose: () => void;
 }
 
-export function ThreadView({ parentMessage, channelId, onClose }: ThreadViewProps) {
+export function ThreadView({ parentMessage, channelId, channelName, onClose }: ThreadViewProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [replies, setReplies] = useState<Message[]>([]);
@@ -138,14 +139,41 @@ export function ThreadView({ parentMessage, channelId, onClose }: ThreadViewProp
 
     setSending(true);
     try {
-      const { error } = await supabase.from('messages').insert({
+      const { data, error } = await supabase.from('messages').insert({
         channel_id: channelId,
         parent_id: parentMessage.id,
         user_id: user.id,
         content: newReply.trim(),
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      const replierName = user.user_metadata?.display_name || 'Alguém';
+      const content = newReply.trim();
+
+      // Create reply notification for original message author
+      if (parentMessage.user_id) {
+        await createReplyNotification({
+          parentMessageUserId: parentMessage.user_id,
+          replyContent: content,
+          replierId: user.id,
+          replierName,
+          channelId,
+          channelName,
+          replyMessageId: data?.id,
+        });
+      }
+
+      // Also check for mentions in the reply
+      await createMentionNotifications({
+        content,
+        senderId: user.id,
+        senderName: replierName,
+        channelId,
+        channelName,
+        messageId: data?.id,
+      });
+
       setNewReply('');
     } catch (error) {
       console.error('Error sending reply:', error);
