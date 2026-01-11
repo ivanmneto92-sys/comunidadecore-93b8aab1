@@ -162,6 +162,7 @@ export function DiscordLayout() {
           <ThreadView
             parentMessage={threadMessage}
             channelId={selectedChannel.id}
+            channelName={selectedChannel.name}
             onClose={() => setThreadMessage(null)}
           />
         </div>
@@ -225,6 +226,7 @@ export function DiscordLayout() {
             <ThreadView
               parentMessage={threadMessage}
               channelId={selectedChannel.id}
+              channelName={selectedChannel.name}
               onClose={() => setThreadMessage(null)}
             />
           </div>
