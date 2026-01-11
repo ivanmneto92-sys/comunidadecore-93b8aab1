@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Pin, ChevronLeft, Hash, Users } from 'lucide-react';
+import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -77,6 +77,8 @@ interface ChatViewProps {
   onlineUsers?: OnlineUser[];
 }
 
+const MESSAGES_PER_PAGE = 50;
+
 export function ChatView({ 
   channel, 
   onOpenThread, 
@@ -90,8 +92,12 @@ export function ChatView({
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [showPollModal, setShowPollModal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const isInitialLoad = useRef(true);
 
   // Admins podem postar em canais admin-only, mas não em bot-only
   const canSendMessages = isAdmin 
@@ -105,118 +111,137 @@ export function ChatView({
     }
   }, [channel.id, user, markAsRead]);
 
-  const fetchMessages = useCallback(async () => {
+  const enrichMessages = useCallback(async (messagesData: any[]) => {
+    if (!messagesData || messagesData.length === 0) return [];
+
+    // Get unique user IDs
+    const userIds = [...new Set(messagesData.map(m => m.user_id).filter(Boolean))] as string[];
+    const messageIds = messagesData.map(m => m.id);
+
+    // Fetch profiles
+    let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }> = {};
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url, avatar_id')
+        .in('id', userIds);
+
+      if (profilesData) {
+        profilesMap = profilesData.reduce((acc, profile) => {
+          acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url, avatar_id: profile.avatar_id };
+          return acc;
+        }, {} as Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }>);
+      }
+    }
+
+    // Fetch user roles (admin/moderator)
+    let rolesMap: Record<string, 'admin' | 'moderator'> = {};
+    if (userIds.length > 0) {
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds)
+        .in('role', ['admin', 'moderator']);
+
+      if (rolesData) {
+        rolesData.forEach(r => {
+          // Priorizar admin sobre moderator
+          if (!rolesMap[r.user_id] || r.role === 'admin') {
+            rolesMap[r.user_id] = r.role as 'admin' | 'moderator';
+          }
+        });
+      }
+    }
+
+    // Fetch reply counts
+    let replyCounts: Record<string, number> = {};
+    if (messageIds.length > 0) {
+      const { data: replyData } = await supabase
+        .from('messages')
+        .select('parent_id')
+        .in('parent_id', messageIds);
+
+      if (replyData) {
+        replyCounts = replyData.reduce((acc, r) => {
+          acc[r.parent_id!] = (acc[r.parent_id!] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+      }
+    }
+
+    // Fetch reactions
+    let reactionsMap: Record<string, Reaction[]> = {};
+    if (messageIds.length > 0) {
+      const { data: reactionsData } = await supabase
+        .from('message_reactions')
+        .select('message_id, emoji, user_id')
+        .in('message_id', messageIds);
+
+      if (reactionsData) {
+        const grouped: Record<string, Record<string, { count: number; userIds: string[] }>> = {};
+        
+        reactionsData.forEach(r => {
+          if (!grouped[r.message_id]) grouped[r.message_id] = {};
+          if (!grouped[r.message_id][r.emoji]) {
+            grouped[r.message_id][r.emoji] = { count: 0, userIds: [] };
+          }
+          grouped[r.message_id][r.emoji].count++;
+          grouped[r.message_id][r.emoji].userIds.push(r.user_id);
+        });
+
+        Object.keys(grouped).forEach(msgId => {
+          reactionsMap[msgId] = Object.entries(grouped[msgId]).map(([emoji, data]) => ({
+            emoji,
+            count: data.count,
+            hasReacted: user ? data.userIds.includes(user.id) : false,
+          }));
+        });
+      }
+    }
+
+    // Combine all data
+    return messagesData.map(msg => ({
+      ...msg,
+      profiles: msg.user_id ? profilesMap[msg.user_id] || null : null,
+      reply_count: replyCounts[msg.id] || 0,
+      reactions: reactionsMap[msg.id] || [],
+      author_role: msg.user_id ? rolesMap[msg.user_id] || null : null,
+    })) as Message[];
+  }, [user]);
+
+  const fetchMessages = useCallback(async (beforeDate?: string) => {
     try {
-      // Fetch messages
-      const { data: messagesData, error: messagesError } = await supabase
+      let query = supabase
         .from('messages')
         .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
-        .order('created_at', { ascending: true })
-        .limit(100);
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PER_PAGE);
+
+      if (beforeDate) {
+        query = query.lt('created_at', beforeDate);
+      }
+
+      const { data: messagesData, error: messagesError } = await query;
 
       if (messagesError) throw messagesError;
 
-      // Get unique user IDs
-      const userIds = [...new Set((messagesData || []).map(m => m.user_id).filter(Boolean))] as string[];
-      const messageIds = (messagesData || []).map(m => m.id);
-
-      // Fetch profiles
-      let profilesMap: Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }> = {};
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('id, display_name, avatar_url, avatar_id')
-          .in('id', userIds);
-
-        if (profilesData) {
-          profilesMap = profilesData.reduce((acc, profile) => {
-            acc[profile.id] = { display_name: profile.display_name, avatar_url: profile.avatar_url, avatar_id: profile.avatar_id };
-            return acc;
-          }, {} as Record<string, { display_name: string | null; avatar_url: string | null; avatar_id: string | null }>);
-        }
+      // Check if there are more messages
+      if (!messagesData || messagesData.length < MESSAGES_PER_PAGE) {
+        setHasMore(false);
       }
 
-      // Fetch user roles (admin/moderator)
-      let rolesMap: Record<string, 'admin' | 'moderator'> = {};
-      if (userIds.length > 0) {
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('user_id, role')
-          .in('user_id', userIds)
-          .in('role', ['admin', 'moderator']);
+      // Reverse to show oldest first
+      const orderedMessages = (messagesData || []).reverse();
+      const enrichedMessages = await enrichMessages(orderedMessages);
 
-        if (rolesData) {
-          rolesData.forEach(r => {
-            // Priorizar admin sobre moderator
-            if (!rolesMap[r.user_id] || r.role === 'admin') {
-              rolesMap[r.user_id] = r.role as 'admin' | 'moderator';
-            }
-          });
-        }
-      }
-
-      // Fetch reply counts
-      let replyCounts: Record<string, number> = {};
-      if (messageIds.length > 0) {
-        const { data: replyData } = await supabase
-          .from('messages')
-          .select('parent_id')
-          .in('parent_id', messageIds);
-
-        if (replyData) {
-          replyCounts = replyData.reduce((acc, r) => {
-            acc[r.parent_id!] = (acc[r.parent_id!] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>);
-        }
-      }
-
-      // Fetch reactions
-      let reactionsMap: Record<string, Reaction[]> = {};
-      if (messageIds.length > 0) {
-        const { data: reactionsData } = await supabase
-          .from('message_reactions')
-          .select('message_id, emoji, user_id')
-          .in('message_id', messageIds);
-
-        if (reactionsData) {
-          const grouped: Record<string, Record<string, { count: number; userIds: string[] }>> = {};
-          
-          reactionsData.forEach(r => {
-            if (!grouped[r.message_id]) grouped[r.message_id] = {};
-            if (!grouped[r.message_id][r.emoji]) {
-              grouped[r.message_id][r.emoji] = { count: 0, userIds: [] };
-            }
-            grouped[r.message_id][r.emoji].count++;
-            grouped[r.message_id][r.emoji].userIds.push(r.user_id);
-          });
-
-          Object.keys(grouped).forEach(msgId => {
-            reactionsMap[msgId] = Object.entries(grouped[msgId]).map(([emoji, data]) => ({
-              emoji,
-              count: data.count,
-              hasReacted: user ? data.userIds.includes(user.id) : false,
-            }));
-          });
-        }
-      }
-
-      // Combine all data
-      const messagesWithData = (messagesData || []).map(msg => ({
-        ...msg,
-        profiles: msg.user_id ? profilesMap[msg.user_id] || null : null,
-        reply_count: replyCounts[msg.id] || 0,
-        reactions: reactionsMap[msg.id] || [],
-        author_role: msg.user_id ? rolesMap[msg.user_id] || null : null,
-      }));
-
-      setMessages(messagesWithData as Message[]);
+      return enrichedMessages;
     } catch (error) {
       console.error('Error fetching messages:', error);
+      return [];
     }
-  }, [channel.id, user]);
+  }, [channel.id, enrichMessages]);
 
   const fetchPolls = useCallback(async () => {
     try {
@@ -283,28 +308,106 @@ export function ChatView({
     }
   }, [channel.id, user]);
 
+  const loadMoreMessages = useCallback(async () => {
+    if (loadingMore || !hasMore || messages.length === 0) return;
+
+    setLoadingMore(true);
+    
+    // Get the oldest message date
+    const oldestMessage = messages[0];
+    const olderMessages = await fetchMessages(oldestMessage.created_at);
+    
+    if (olderMessages.length > 0) {
+      // Preserve scroll position
+      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      const previousScrollHeight = scrollContainer?.scrollHeight || 0;
+      
+      setMessages(prev => [...olderMessages, ...prev]);
+      
+      // Restore scroll position after render
+      requestAnimationFrame(() => {
+        if (scrollContainer) {
+          const newScrollHeight = scrollContainer.scrollHeight;
+          scrollContainer.scrollTop = newScrollHeight - previousScrollHeight;
+        }
+      });
+    }
+    
+    setLoadingMore(false);
+  }, [loadingMore, hasMore, messages, fetchMessages]);
+
+  // Handle scroll to detect when user scrolls near top
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLDivElement;
+    // Load more when scrolled to top (within 100px threshold)
+    if (target.scrollTop < 100 && !loadingMore && hasMore) {
+      loadMoreMessages();
+    }
+  }, [loadMoreMessages, loadingMore, hasMore]);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchMessages(), fetchPolls()]);
+      isInitialLoad.current = true;
+      setHasMore(true);
+      
+      const [initialMessages] = await Promise.all([fetchMessages(), fetchPolls()]);
+      setMessages(initialMessages);
       setLoading(false);
     };
 
     loadData();
 
-    // Realtime subscriptions
+    // Realtime subscriptions - only for new messages
     const messagesChannel = supabase
       .channel(`messages-${channel.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'messages',
           filter: `channel_id=eq.${channel.id}`,
         },
-        () => {
-          fetchMessages();
+        async (payload) => {
+          // Only handle new root messages
+          if (payload.new && !payload.new.parent_id) {
+            const enriched = await enrichMessages([payload.new]);
+            if (enriched.length > 0) {
+              setMessages(prev => [...prev, enriched[0]]);
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `channel_id=eq.${channel.id}`,
+        },
+        async (payload) => {
+          if (payload.new) {
+            const enriched = await enrichMessages([payload.new]);
+            if (enriched.length > 0) {
+              setMessages(prev => prev.map(m => m.id === payload.new.id ? enriched[0] : m));
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'messages',
+          filter: `channel_id=eq.${channel.id}`,
+        },
+        (payload) => {
+          if (payload.old) {
+            setMessages(prev => prev.filter(m => m.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -318,8 +421,38 @@ export function ChatView({
           schema: 'public',
           table: 'message_reactions',
         },
-        () => {
-          fetchMessages();
+        async (payload) => {
+          // Refresh only the affected message
+          const newData = payload.new as { message_id?: string } | null;
+          const oldData = payload.old as { message_id?: string } | null;
+          const messageId = newData?.message_id || oldData?.message_id;
+          if (messageId) {
+            const { data: reactionsData } = await supabase
+              .from('message_reactions')
+              .select('emoji, user_id')
+              .eq('message_id', messageId);
+
+            if (reactionsData) {
+              const grouped: Record<string, { count: number; userIds: string[] }> = {};
+              reactionsData.forEach(r => {
+                if (!grouped[r.emoji]) {
+                  grouped[r.emoji] = { count: 0, userIds: [] };
+                }
+                grouped[r.emoji].count++;
+                grouped[r.emoji].userIds.push(r.user_id);
+              });
+
+              const reactions = Object.entries(grouped).map(([emoji, data]) => ({
+                emoji,
+                count: data.count,
+                hasReacted: user ? data.userIds.includes(user.id) : false,
+              }));
+
+              setMessages(prev => prev.map(m => 
+                m.id === messageId ? { ...m, reactions } : m
+              ));
+            }
+          }
         }
       )
       .subscribe();
@@ -356,13 +489,31 @@ export function ChatView({
       supabase.removeChannel(reactionsChannel);
       supabase.removeChannel(pollsChannel);
     };
-  }, [channel.id, fetchMessages, fetchPolls]);
+  }, [channel.id, fetchMessages, fetchPolls, enrichMessages, user]);
 
+  // Scroll to bottom on initial load and when new messages arrive
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isInitialLoad.current && messages.length > 0) {
+      isInitialLoad.current = false;
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollIntoView({ behavior: 'auto' });
+      });
     }
   }, [messages]);
+
+  // Auto-scroll to bottom when a new message is added (not loading old messages)
+  useEffect(() => {
+    if (!loading && !loadingMore && messages.length > 0) {
+      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        // Only auto-scroll if near bottom (within 200px)
+        const isNearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+        if (isNearBottom) {
+          scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  }, [messages.length, loading, loadingMore]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -440,8 +591,35 @@ export function ChatView({
       )}
 
       {/* Content area */}
-      <ScrollArea className="flex-1">
+      <ScrollArea 
+        className="flex-1" 
+        ref={scrollAreaRef}
+        onScrollCapture={handleScroll}
+      >
         <div className="py-3 px-1">
+          {/* Load more indicator */}
+          {loadingMore && (
+            <div className="flex items-center justify-center py-3">
+              <Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+              <span className="text-xs text-muted-foreground">Carregando mensagens...</span>
+            </div>
+          )}
+          
+          {/* Load more button (fallback) */}
+          {hasMore && !loadingMore && messages.length > 0 && (
+            <div className="flex justify-center py-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadMoreMessages}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                <ChevronUp className="h-4 w-4 mr-1" />
+                Carregar mensagens anteriores
+              </Button>
+            </div>
+          )}
+
           {/* Recent polls */}
           {polls.length > 0 && (
             <div className="px-2 mb-4 space-y-3">
