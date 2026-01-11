@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Brain, GraduationCap } from 'lucide-react';
+import { BarChart3, Users, GraduationCap } from 'lucide-react';
 
 const quickActions = [
   { 
@@ -11,9 +11,9 @@ const quickActions = [
   },
   { 
     to: '/community', 
-    icon: Brain, 
-    label: 'Leitura',
-    sublabel: 'de Risco'
+    icon: Users, 
+    label: 'Comunidade',
+    sublabel: ''
   },
   { 
     to: '/academy', 

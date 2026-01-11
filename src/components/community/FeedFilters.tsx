@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Megaphone, BarChart3, Brain, LayoutGrid, Pin } from 'lucide-react';
+import { Megaphone, BarChart3, LayoutGrid, Pin } from 'lucide-react';
 
-export type PostFilter = 'all' | 'announcement' | 'daily_result' | 'risk_reading';
+export type PostFilter = 'all' | 'announcement' | 'daily_result';
 export type SortOrder = 'recent' | 'pinned';
 
 interface FeedFiltersProps {
@@ -16,7 +16,6 @@ const filters: { value: PostFilter; label: string; icon: React.ReactNode }[] = [
   { value: 'all', label: 'Todos', icon: <LayoutGrid className="h-4 w-4" /> },
   { value: 'announcement', label: 'Anúncios', icon: <Megaphone className="h-4 w-4" /> },
   { value: 'daily_result', label: 'Resultados', icon: <BarChart3 className="h-4 w-4" /> },
-  { value: 'risk_reading', label: 'Risco', icon: <Brain className="h-4 w-4" /> },
 ];
 
 export function FeedFilters({ activeFilter, onFilterChange, sortOrder, onSortChange }: FeedFiltersProps) {

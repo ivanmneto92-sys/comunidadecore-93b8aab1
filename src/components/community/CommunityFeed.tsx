@@ -6,11 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { FeedFilters, PostFilter, SortOrder } from './FeedFilters';
 import { AnnouncementCard } from './cards/AnnouncementCard';
 import { DailyResultPostCard } from './cards/DailyResultPostCard';
-import { RiskReadingCard } from './cards/RiskReadingCard';
 
 interface Post {
   id: string;
-  post_type: 'announcement' | 'daily_result' | 'risk_reading';
+  post_type: 'announcement' | 'daily_result';
   title: string;
   content: string | null;
   metadata: Record<string, unknown>;
@@ -61,7 +60,7 @@ export function CommunityFeed({ onOpenDiscussion }: CommunityFeedProps) {
 
             return {
               ...post,
-              post_type: post.post_type as 'announcement' | 'daily_result' | 'risk_reading',
+              post_type: post.post_type as 'announcement' | 'daily_result',
               metadata: (post.metadata || {}) as Record<string, unknown>,
               discussion_count: count || 0,
             };
@@ -131,24 +130,8 @@ export function CommunityFeed({ onOpenDiscussion }: CommunityFeedProps) {
             onOpenDiscussion={() => onOpenDiscussion(post)}
           />
         );
-      case 'risk_reading':
-        return (
-          <RiskReadingCard
-            key={post.id}
-            id={post.id}
-            title={post.title}
-            content={post.content || ''}
-            publishedAt={post.published_at}
-            isPinned={post.is_pinned}
-            discussionCount={post.discussion_count}
-            metadata={post.metadata as {
-              summary?: string;
-              keyPoints?: string[];
-              impact?: string;
-            }}
-            onOpenDiscussion={() => onOpenDiscussion(post)}
-          />
-        );
+      default:
+        return null;
     }
   };
 
