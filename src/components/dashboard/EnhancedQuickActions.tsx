@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Brain, GraduationCap } from 'lucide-react';
+import { BarChart3, Users, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickAction {
@@ -20,9 +20,8 @@ const quickActions: QuickAction[] = [
   },
   { 
     to: '/community', 
-    icon: Brain, 
-    label: 'Leitura',
-    isNew: true,
+    icon: Users, 
+    label: 'Comunidade',
     bgColor: 'bg-status-success/10 hover:bg-status-success/20',
   },
   { 
