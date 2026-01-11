@@ -10,6 +10,7 @@ import { ChatView } from './ChatView';
 import { ThreadView } from './ThreadView';
 import { NewsChannelView } from './NewsChannelView';
 import { CommunityNewsPanel } from './CommunityNewsPanel';
+import { SupportView } from '@/components/support/SupportView';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface Channel {
@@ -39,7 +40,7 @@ interface Message {
   } | null;
 }
 
-type MobileView = 'channels' | 'chat';
+type MobileView = 'channels' | 'chat' | 'support';
 
 export function DiscordLayout() {
   const { user } = useAuth();
@@ -50,6 +51,7 @@ export function DiscordLayout() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [threadMessage, setThreadMessage] = useState<Message | null>(null);
+  const [showSupport, setShowSupport] = useState(false);
   const [showNews, setShowNews] = useState(false);
   
   // Mobile navigation state
@@ -104,11 +106,13 @@ export function DiscordLayout() {
   const handleSelectChannel = (channel: Channel) => {
     setSelectedChannel(channel);
     setThreadMessage(null);
-    setMobileView('chat'); // Navigate to chat on mobile
+    setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
+    setMobileView(channel.icon === '🔧' || channel.slug === 'suporte' ? 'support' : 'chat');
   };
 
   const handleGoBack = () => {
     setMobileView('channels');
+    setShowSupport(false);
   };
 
   return (
@@ -135,6 +139,8 @@ export function DiscordLayout() {
               onSelectChannel={handleSelectChannel}
               unreadCounts={unreadCounts}
             />
+          ) : mobileView === 'support' ? (
+            <SupportView onGoBack={handleGoBack} />
           ) : selectedChannel?.slug === 'noticias-mercado' ? (
             <NewsChannelView
               channel={selectedChannel}
@@ -185,6 +191,7 @@ export function DiscordLayout() {
             onSelectChannel={(channel) => {
               setSelectedChannel(channel);
               setThreadMessage(null);
+              setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
             }}
           />
         </div>
@@ -197,6 +204,7 @@ export function DiscordLayout() {
             onSelectChannel={(channel) => {
               setSelectedChannel(channel);
               setThreadMessage(null);
+              setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
             }}
             unreadCounts={unreadCounts}
           />
@@ -204,7 +212,9 @@ export function DiscordLayout() {
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {selectedChannel?.slug === 'noticias-mercado' ? (
+          {showSupport ? (
+            <SupportView />
+          ) : selectedChannel?.slug === 'noticias-mercado' ? (
             <NewsChannelView
               channel={selectedChannel}
               onlineCount={onlineCount}
