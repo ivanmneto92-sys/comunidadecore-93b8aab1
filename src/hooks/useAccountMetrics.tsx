@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { subDays, startOfYear, format } from 'date-fns';
 
@@ -14,6 +14,8 @@ export interface AccountMetrics {
   monthReturn: number;
   weekReturn: number;
   dayReturn: number;
+  initialBalance: number;
+  currency: string;
 }
 
 export interface MonthlyReturn {
@@ -32,8 +34,15 @@ interface DailyReport {
   drawdown_percent: number;
 }
 
+interface TradingConfig {
+  initial_balance: number;
+  start_date: string;
+  currency: string;
+}
+
 export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
   const [reports, setReports] = useState<DailyReport[]>([]);
+  const [config, setConfig] = useState<TradingConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -41,6 +50,17 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     try {
       setLoading(true);
       setError(null);
+
+      // Fetch trading config
+      const { data: configData } = await supabase
+        .from('trading_config')
+        .select('initial_balance, start_date, currency')
+        .limit(1)
+        .single();
+
+      if (configData) {
+        setConfig(configData);
+      }
 
       // Fetch all published reports for calculations
       const { data: reportsData, error: reportsError } = await supabase
@@ -67,6 +87,10 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
   // Calculate metrics dynamically from reports_daily
   const metrics = useMemo((): AccountMetrics | null => {
     if (!reports.length) return null;
+
+    // Use config values or defaults
+    const initialBalance = config?.initial_balance || 100000;
+    const currency = config?.currency || 'USD';
 
     const today = format(new Date(), 'yyyy-MM-dd');
     const weekAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
@@ -114,8 +138,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const deposits1m = 0;
     const withdrawals1m = 0;
 
-    // Total profit calculation (assuming $100k initial balance for display)
-    const initialBalance = 100000;
+    // Total profit calculation using configured initial balance
     const totalProfit = initialBalance * (totalReturn / 100);
 
     return {
@@ -128,8 +151,10 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       monthReturn,
       weekReturn,
       dayReturn,
+      initialBalance,
+      currency,
     };
-  }, [reports, filterPeriod]);
+  }, [reports, config, filterPeriod]);
 
   // Calculate monthly returns dynamically
   const monthlyReturns = useMemo((): MonthlyReturn[] => {
@@ -152,7 +177,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
   const growthData = useMemo((): AccountGrowthPoint[] => {
     if (!reports.length) return [];
 
-    const initialBalance = 100000;
+    const initialBalance = config?.initial_balance || 100000;
     let cumulativeReturn = 0;
 
     // Filter based on filterPeriod
@@ -189,7 +214,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
         balance: Math.round(balance),
       };
     });
-  }, [reports, filterPeriod]);
+  }, [reports, config, filterPeriod]);
 
   return {
     metrics,
