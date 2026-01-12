@@ -37,7 +37,10 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
   };
 
   const formatPercent = (value: number) => {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+    const sign = value >= 0 ? '+' : '';
+    // Ensure we're working with a number and format properly
+    const numValue = typeof value === 'number' ? value : parseFloat(value) || 0;
+    return `${sign}${numValue.toFixed(2)}%`;
   };
 
   const mainMetrics = [

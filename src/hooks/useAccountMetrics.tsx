@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfYear, subDays } from 'date-fns';
+import { startOfDay, subDays, startOfMonth, startOfQuarter, startOfYear, format, parseISO } from 'date-fns';
 
-export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd';
+export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
 
-interface AccountMetrics {
+export interface AccountMetrics {
   totalReturn: number;
   deposits1m: number;
   withdrawals1m: number;
@@ -14,141 +14,191 @@ interface AccountMetrics {
   monthReturn: number;
   weekReturn: number;
   dayReturn: number;
-  accountBalance: number;
 }
 
-interface MonthlyReturn {
+export interface MonthlyReturn {
   month: string;
   returnPercent: number;
 }
 
-interface AccountGrowthPoint {
+export interface AccountGrowthPoint {
   date: string;
   balance: number;
 }
 
+interface DailyReport {
+  date: string;
+  pnl_percent: number;
+  drawdown_percent: number;
+}
+
 export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
-  const [metrics, setMetrics] = useState<AccountMetrics | null>(null);
-  const [monthlyReturns, setMonthlyReturns] = useState<MonthlyReturn[]>([]);
-  const [growthData, setGrowthData] = useState<AccountGrowthPoint[]>([]);
+  const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    // Calculate date range based on filter
-    const now = new Date();
-    let startDate: Date;
-    
-    switch (filterPeriod) {
-      case '7d':
-        startDate = subDays(now, 7);
-        break;
-      case '30d':
-        startDate = subDays(now, 30);
-        break;
-      case '90d':
-        startDate = subDays(now, 90);
-        break;
-      case 'ytd':
-        startDate = startOfYear(now);
-        break;
-      default:
-        startDate = subDays(now, 30);
-    }
-    
-    const startDateStr = startDate.toISOString().split('T')[0];
-    
     try {
-      // Fetch all data in parallel for better performance
-      const [metricsResult, monthlyResult, reportsResult] = await Promise.all([
-        // Latest account metrics (optimized select)
-        supabase
-          .from('account_metrics')
-          .select('total_return, deposits_1m, withdrawals_1m, max_drawdown, total_profit, quarter_return, month_return, week_return, day_return, account_balance')
-          .order('date', { ascending: false })
-          .limit(1)
-          .single(),
-        // Monthly returns for chart
-        supabase
-          .from('monthly_returns')
-          .select('month, return_percent')
-          .gte('month', startDateStr.substring(0, 7))
-          .order('month', { ascending: true }),
-        // Daily reports for growth chart
-        supabase
-          .from('reports_daily')
-          .select('date, pnl_percent')
-          .not('published_at', 'is', null)
-          .gte('date', startDateStr)
-          .order('date', { ascending: true }),
-      ]);
+      setLoading(true);
+      setError(null);
 
-      const metricsData = metricsResult.data;
+      // Fetch all published reports for calculations
+      const { data: reportsData, error: reportsError } = await supabase
+        .from('reports_daily')
+        .select('date, pnl_percent, drawdown_percent')
+        .not('published_at', 'is', null)
+        .order('date', { ascending: true });
 
-      if (metricsData) {
-        setMetrics({
-          totalReturn: Number(metricsData.total_return),
-          deposits1m: Number(metricsData.deposits_1m),
-          withdrawals1m: Number(metricsData.withdrawals_1m),
-          maxDrawdown: Number(metricsData.max_drawdown),
-          totalProfit: Number(metricsData.total_profit),
-          quarterReturn: Number(metricsData.quarter_return),
-          monthReturn: Number(metricsData.month_return),
-          weekReturn: Number(metricsData.week_return),
-          dayReturn: Number(metricsData.day_return),
-          accountBalance: Number(metricsData.account_balance),
-        });
-      }
+      if (reportsError) throw reportsError;
 
-      // Process monthly returns
-      if (monthlyResult.data) {
-        setMonthlyReturns(
-          monthlyResult.data.map((m) => ({
-            month: new Date(m.month).toLocaleDateString('pt-BR', { month: 'short' }),
-            returnPercent: Number(m.return_percent),
-          }))
-        );
-      }
-
-      // Process growth data from daily reports
-      const reportsData = reportsResult.data;
-
-      if (reportsData && reportsData.length > 0) {
-        let balance = 1000; // Starting balance
-        const growth: AccountGrowthPoint[] = [];
-        
-        reportsData.forEach((report) => {
-          balance = balance * (1 + Number(report.pnl_percent) / 100);
-          const date = new Date(report.date);
-          const dateLabel = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-          growth.push({ 
-            date: dateLabel, 
-            balance: Math.round(balance) 
-          });
-        });
-        
-        setGrowthData(growth);
-      } else {
-        setGrowthData([]);
-      }
+      setReports(reportsData || []);
     } catch (err) {
+      setError(err as Error);
       console.error('Error fetching account metrics:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch metrics'));
     } finally {
       setLoading(false);
     }
-  }, [filterPeriod]);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const refetch = () => {
-    fetchData();
-  };
+  // Calculate metrics dynamically from reports_daily
+  const metrics = useMemo((): AccountMetrics | null => {
+    if (!reports.length) return null;
 
-  return { metrics, monthlyReturns, growthData, loading, error, refetch };
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const weekAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
+    const monthAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+    const quarterAgo = format(subDays(new Date(), 90), 'yyyy-MM-dd');
+
+    // Total return (all time)
+    const totalReturn = reports.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+
+    // Day return (today only)
+    const todayReport = reports.find(r => r.date === today);
+    const dayReturn = todayReport?.pnl_percent || 0;
+
+    // Week return (last 7 days)
+    const weekReturn = reports
+      .filter(r => r.date >= weekAgo)
+      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+
+    // Month return (last 30 days)
+    const monthReturn = reports
+      .filter(r => r.date >= monthAgo)
+      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+
+    // Quarter return (last 90 days)
+    const quarterReturn = reports
+      .filter(r => r.date >= quarterAgo)
+      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+
+    // Max drawdown (from filtered period based on filterPeriod)
+    let filteredForDrawdown = reports;
+    if (filterPeriod === '7d') {
+      filteredForDrawdown = reports.filter(r => r.date >= weekAgo);
+    } else if (filterPeriod === '30d') {
+      filteredForDrawdown = reports.filter(r => r.date >= monthAgo);
+    } else if (filterPeriod === '90d') {
+      filteredForDrawdown = reports.filter(r => r.date >= quarterAgo);
+    } else if (filterPeriod === 'ytd') {
+      const yearStart = format(startOfYear(new Date()), 'yyyy-MM-dd');
+      filteredForDrawdown = reports.filter(r => r.date >= yearStart);
+    }
+
+    const maxDrawdown = Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0);
+
+    // Placeholder values for deposits/withdrawals (would need separate data source)
+    const deposits1m = 0;
+    const withdrawals1m = 0;
+
+    // Total profit calculation (assuming $100k initial balance for display)
+    const initialBalance = 100000;
+    const totalProfit = initialBalance * (totalReturn / 100);
+
+    return {
+      totalReturn,
+      deposits1m,
+      withdrawals1m,
+      maxDrawdown,
+      totalProfit,
+      quarterReturn,
+      monthReturn,
+      weekReturn,
+      dayReturn,
+    };
+  }, [reports, filterPeriod]);
+
+  // Calculate monthly returns dynamically
+  const monthlyReturns = useMemo((): MonthlyReturn[] => {
+    if (!reports.length) return [];
+
+    // Group by month and sum pnl_percent
+    const monthlyMap = reports.reduce((acc, report) => {
+      const month = report.date.substring(0, 7); // "2026-01"
+      acc[month] = (acc[month] || 0) + (report.pnl_percent || 0);
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Convert to array and sort by month
+    return Object.entries(monthlyMap)
+      .map(([month, returnPercent]) => ({ month, returnPercent }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [reports]);
+
+  // Calculate growth data (cumulative balance)
+  const growthData = useMemo((): AccountGrowthPoint[] => {
+    if (!reports.length) return [];
+
+    const initialBalance = 100000;
+    let cumulativeReturn = 0;
+
+    // Filter based on filterPeriod
+    let filteredReports = reports;
+    const today = new Date();
+    
+    if (filterPeriod === '7d') {
+      const cutoff = format(subDays(today, 7), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= cutoff);
+    } else if (filterPeriod === '30d') {
+      const cutoff = format(subDays(today, 30), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= cutoff);
+    } else if (filterPeriod === '90d') {
+      const cutoff = format(subDays(today, 90), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= cutoff);
+    } else if (filterPeriod === 'ytd') {
+      const yearStart = format(startOfYear(today), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= yearStart);
+    }
+
+    // Calculate cumulative balance starting from the first report in the filter
+    // First, calculate the cumulative return up to the start of filtered period
+    const firstFilteredDate = filteredReports[0]?.date;
+    if (firstFilteredDate) {
+      const beforeFiltered = reports.filter(r => r.date < firstFilteredDate);
+      cumulativeReturn = beforeFiltered.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+    }
+
+    return filteredReports.map(report => {
+      cumulativeReturn += report.pnl_percent || 0;
+      const balance = initialBalance * (1 + cumulativeReturn / 100);
+      return {
+        date: report.date,
+        balance: Math.round(balance),
+      };
+    });
+  }, [reports, filterPeriod]);
+
+  return {
+    metrics,
+    monthlyReturns,
+    growthData,
+    loading,
+    error,
+    refetch: fetchData,
+  };
 }
+
+export { useAccountMetrics as default };
