@@ -5,10 +5,12 @@ import { cn } from '@/lib/utils';
 interface PerformanceOverviewProps {
   metrics: {
     totalReturn: number;
+    periodReturn: number;
     deposits1m: number;
     withdrawals1m: number;
     maxDrawdown: number;
     totalProfit: number;
+    periodProfit: number;
     quarterReturn: number;
     monthReturn: number;
     weekReturn: number;
@@ -45,10 +47,10 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
 
   const mainMetrics = [
     {
-      label: 'Retorno Total',
-      value: formatPercent(metrics.totalReturn),
+      label: 'Retorno Período',
+      value: formatPercent(metrics.periodReturn),
       icon: TrendingUp,
-      isPositive: metrics.totalReturn >= 0,
+      isPositive: metrics.periodReturn >= 0,
     },
     {
       label: 'Depósitos',
@@ -127,20 +129,20 @@ export function PerformanceOverview({ metrics }: PerformanceOverviewProps) {
         ))}
       </div>
 
-      {/* Total Profit */}
+      {/* Period Profit */}
       <Card className="p-3 bg-primary/5 border-primary/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Lucro Total
+              Lucro do Período
             </span>
           </div>
           <span className={cn(
             'text-lg font-bold',
-            metrics.totalProfit >= 0 ? 'text-emerald-500' : 'text-destructive'
+            metrics.periodProfit >= 0 ? 'text-emerald-500' : 'text-destructive'
           )}>
-            {formatCurrency(metrics.totalProfit)}
+            {formatCurrency(metrics.periodProfit)}
           </span>
         </div>
       </Card>

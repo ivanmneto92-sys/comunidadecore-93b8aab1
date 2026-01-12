@@ -7,10 +7,12 @@ export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
 
 export interface AccountMetrics {
   totalReturn: number;
+  periodReturn: number; // Return for selected filter period
   deposits1m: number;
   withdrawals1m: number;
   maxDrawdown: number;
   totalProfit: number;
+  periodProfit: number; // Profit for selected filter period
   quarterReturn: number;
   monthReturn: number;
   weekReturn: number;
@@ -218,39 +220,50 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const sortedMonthlyReturns = [...combinedMonthlyReturns].slice(-3);
     const quarterReturn = sortedMonthlyReturns.reduce((sum, m) => sum + m.returnPercent, 0);
 
-    // Max drawdown (from filtered period based on filterPeriod)
-    let filteredForDrawdown = reports;
+    // Calculate period-based return (based on filterPeriod)
+    let filteredForPeriod = reports;
     if (filterPeriod === '7d') {
-      filteredForDrawdown = reports.filter(r => r.date >= weekAgo);
+      filteredForPeriod = reports.filter(r => r.date >= weekAgo);
     } else if (filterPeriod === '30d') {
-      filteredForDrawdown = reports.filter(r => r.date >= monthAgo);
+      filteredForPeriod = reports.filter(r => r.date >= monthAgo);
     } else if (filterPeriod === '90d') {
-      filteredForDrawdown = reports.filter(r => r.date >= quarterAgo);
+      filteredForPeriod = reports.filter(r => r.date >= quarterAgo);
     } else if (filterPeriod === 'ytd') {
       const yearStart = format(startOfYear(new Date()), 'yyyy-MM-dd');
-      filteredForDrawdown = reports.filter(r => r.date >= yearStart);
+      filteredForPeriod = reports.filter(r => r.date >= yearStart);
     }
 
-    const calculatedMaxDrawdown = filteredForDrawdown.length > 0 
-      ? Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0)
+    // Period return: sum of PnL% for the selected period
+    const periodReturn = filteredForPeriod.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+
+    // Max drawdown (from filtered period)
+    const calculatedMaxDrawdown = filteredForPeriod.length > 0 
+      ? Math.max(...filteredForPeriod.map(r => r.drawdown_percent || 0), 0)
       : 0;
 
-    // Use the greater of calculated or override (historical max)
-    const maxDrawdown = Math.max(calculatedMaxDrawdown, config?.max_drawdown_override || 0);
+    // Use the greater of calculated or override (historical max) only for 'all' filter
+    const maxDrawdown = filterPeriod === 'all' 
+      ? Math.max(calculatedMaxDrawdown, config?.max_drawdown_override || 0)
+      : calculatedMaxDrawdown;
 
     // Get deposits/withdrawals from trading config
     const deposits1m = config?.total_deposits || 0;
     const withdrawals1m = config?.total_withdrawals || 0;
 
-    // Total profit calculation using compound return
+    // Total profit calculation (all time)
     const totalProfit = initialBalance * (totalReturn / 100);
+    
+    // Period profit calculation
+    const periodProfit = initialBalance * (periodReturn / 100);
 
     return {
       totalReturn,
+      periodReturn,
       deposits1m,
       withdrawals1m,
       maxDrawdown,
       totalProfit,
+      periodProfit,
       quarterReturn,
       monthReturn,
       weekReturn,
