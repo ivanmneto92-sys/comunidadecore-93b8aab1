@@ -110,7 +110,7 @@ const Install = () => {
       {/* Header */}
       <div className="p-6 pb-0">
         <div className="flex items-center justify-center mb-8">
-          <img src={logoCore} alt="CORE" className="h-16 w-auto" />
+          <img src={logoCore} alt="CORE" width={280} height={64} className="h-16 w-auto" />
         </div>
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Instale o App</h1>
