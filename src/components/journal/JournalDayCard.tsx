@@ -8,9 +8,10 @@ import { JournalEntry } from '@/hooks/useJournal';
 interface JournalDayCardProps {
   entry: JournalEntry;
   onClick?: () => void;
+  pnlInReais?: number;
 }
 
-export function JournalDayCard({ entry, onClick }: JournalDayCardProps) {
+export function JournalDayCard({ entry, onClick, pnlInReais }: JournalDayCardProps) {
   const isPositive = entry.pnl_percent > 0;
   const isNegative = entry.pnl_percent < 0;
   const winRate = entry.trades_count > 0 
@@ -22,6 +23,14 @@ export function JournalDayCard({ entry, onClick }: JournalDayCardProps) {
     : entry.emotional_state === 'stressed' 
       ? Frown 
       : Meh;
+
+  const formatCurrency = (value: number) => {
+    const absValue = Math.abs(value);
+    if (absValue >= 1000) {
+      return `${value >= 0 ? '+' : '-'}R$${(absValue / 1000).toFixed(1)}k`;
+    }
+    return `${value >= 0 ? '+' : '-'}R$${absValue.toFixed(0)}`;
+  };
 
   return (
     <Card 
@@ -47,7 +56,7 @@ export function JournalDayCard({ entry, onClick }: JournalDayCardProps) {
           </div>
 
           {/* Main stats */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               {isPositive ? (
                 <TrendingUp className="h-4 w-4 text-success" />
@@ -65,6 +74,16 @@ export function JournalDayCard({ entry, onClick }: JournalDayCardProps) {
               </span>
             </div>
 
+            {pnlInReais !== undefined && (
+              <span className={cn(
+                "text-xs font-medium",
+                isPositive && "text-success",
+                isNegative && "text-destructive"
+              )}>
+                {formatCurrency(pnlInReais)}
+              </span>
+            )}
+
             <div className="text-xs text-muted-foreground">
               <span className="text-success">{entry.wins}W</span>
               {' / '}
@@ -72,7 +91,7 @@ export function JournalDayCard({ entry, onClick }: JournalDayCardProps) {
             </div>
 
             {entry.trades_count > 0 && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground hidden sm:block">
                 {winRate}% WR
               </div>
             )}

@@ -46,9 +46,24 @@ export default function Journal() {
     handleDayClick(todayStr, todayEntry);
   };
 
-  // Get recent entries (last 5)
-  const recentEntries = [...entries]
-    .sort((a, b) => b.date.localeCompare(a.date))
+  // Get recent entries (last 5) and calculate P&L in R$
+  const recentEntriesWithPnl = [...entries]
+    .sort((a, b) => a.date.localeCompare(b.date)) // Sort ascending for cumulative calculation
+    .reduce((acc, entry) => {
+      const prevBalance = acc.length > 0 
+        ? acc[acc.length - 1].cumulativeBalance 
+        : (settings?.initial_balance || 0);
+      const dailyPnl = prevBalance * (entry.pnl_percent / 100);
+      const newBalance = prevBalance + dailyPnl;
+      
+      acc.push({
+        entry,
+        pnlInReais: dailyPnl,
+        cumulativeBalance: newBalance,
+      });
+      return acc;
+    }, [] as { entry: JournalEntry; pnlInReais: number; cumulativeBalance: number }[])
+    .reverse() // Reverse to get most recent first
     .slice(0, 5);
 
   return (
@@ -79,6 +94,7 @@ export default function Journal() {
             totalPnL={monthStats.totalPnL}
             avgWinRate={monthStats.avgWinRate}
             monthLabel={monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}
+            initialBalance={settings?.initial_balance}
           />
         )}
 
@@ -103,16 +119,17 @@ export default function Journal() {
         )}
 
         {/* Recent Entries */}
-        {!isLoading && recentEntries.length > 0 && (
+        {!isLoading && recentEntriesWithPnl.length > 0 && (
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-muted-foreground">
               Registros Recentes
             </h2>
             <div className="space-y-2">
-              {recentEntries.map(entry => (
+              {recentEntriesWithPnl.map(({ entry, pnlInReais }) => (
                 <JournalDayCard
                   key={entry.id}
                   entry={entry}
+                  pnlInReais={settings?.initial_balance ? pnlInReais : undefined}
                   onClick={() => handleDayClick(entry.date, entry)}
                 />
               ))}
