@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null, // Prevents render-blocking registerSW.js injection
-      includeAssets: ["logo-core.webp", "favicon.ico"],
+      includeAssets: ["app-icon.png", "favicon.ico"],
       manifest: {
         name: "Comunidade CORE",
         short_name: "CORE",
@@ -28,15 +28,15 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "/logo-core.webp",
+            src: "/app-icon.png",
             sizes: "192x192",
-            type: "image/webp",
+            type: "image/png",
             purpose: "any"
           },
           {
-            src: "/logo-core.webp",
+            src: "/app-icon.png",
             sizes: "512x512",
-            type: "image/webp",
+            type: "image/png",
             purpose: "any maskable"
           }
         ]
