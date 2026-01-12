@@ -7,6 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  LabelList,
 } from 'recharts';
 
 interface MonthlyReturnsChartProps {
@@ -85,6 +86,16 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
                   fillOpacity={1}
                 />
               ))}
+              <LabelList
+                dataKey="returnPercent"
+                position="top"
+                formatter={(value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`}
+                style={{ 
+                  fontSize: '8px', 
+                  fontWeight: 600,
+                  fill: 'hsl(var(--foreground))'
+                }}
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
