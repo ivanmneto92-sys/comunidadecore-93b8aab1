@@ -87,8 +87,11 @@ export function MonthlyReturnsManager() {
   const mergedData = useMemo(() => {
     const allMonths = new Set<string>();
     
-    // Add months from saved data
-    monthlyReturns.forEach(r => allMonths.add(r.month));
+    // Add months from saved data (normalize from "2024-06-01" to "2024-06")
+    monthlyReturns.forEach(r => {
+      const monthKey = r.month.substring(0, 7);
+      allMonths.add(monthKey);
+    });
     
     // Add months from calculated data
     Object.keys(calculatedMonthlyReturns).forEach(m => allMonths.add(m));
@@ -106,7 +109,8 @@ export function MonthlyReturnsManager() {
     return Array.from(allMonths)
       .sort((a, b) => b.localeCompare(a)) // Descending order
       .map(month => {
-        const saved = monthlyReturns.find(r => r.month === month);
+        // Find saved data by matching first 7 chars (handles both "2024-06" and "2024-06-01")
+        const saved = monthlyReturns.find(r => r.month.substring(0, 7) === month);
         const calculated = calculatedMonthlyReturns[month];
 
         return {
@@ -124,7 +128,8 @@ export function MonthlyReturnsManager() {
   const handleSaveMonthReturn = async (month: string, returnPercent: number) => {
     setSaving(month);
     try {
-      const existing = monthlyReturns.find(r => r.month === month);
+      // Find saved by normalized month key
+      const existing = monthlyReturns.find(r => r.month.substring(0, 7) === month);
       
       if (existing) {
         const { error } = await supabase
@@ -133,6 +138,7 @@ export function MonthlyReturnsManager() {
           .eq('id', existing.id);
         if (error) throw error;
       } else {
+        // Insert with full date format "2024-06-01"
         const { error } = await supabase
           .from('monthly_returns')
           .insert({ month: `${month}-01`, return_percent: returnPercent });
