@@ -14,7 +14,8 @@ import { ModerationPanel } from '@/components/admin/ModerationPanel';
 import { BroadcastManager } from '@/components/admin/BroadcastManager';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
 import { SupportManager } from '@/components/admin/SupportManager';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones } from 'lucide-react';
+import { CoreBotManager } from '@/components/admin/CoreBotManager';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -89,6 +90,10 @@ export default function Admin() {
               <Megaphone className="h-4 w-4" />
               <span>Broadcast</span>
             </TabsTrigger>
+            <TabsTrigger value="corebot" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <Bot className="h-4 w-4" />
+              <span>CORE Bot</span>
+            </TabsTrigger>
             <TabsTrigger value="affiliates" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <Users className="h-4 w-4" />
               <span>Afiliados</span>
@@ -133,6 +138,10 @@ export default function Admin() {
 
           <TabsContent value="broadcast" className="mt-4">
             <BroadcastManager />
+          </TabsContent>
+
+          <TabsContent value="corebot" className="mt-4">
+            <CoreBotManager />
           </TabsContent>
 
           <TabsContent value="affiliates" className="mt-4">

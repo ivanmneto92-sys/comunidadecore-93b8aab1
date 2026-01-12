@@ -187,6 +187,42 @@ export type Database = {
           },
         ]
       }
+      bot_templates: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       broadcasts: {
         Row: {
           channel_id: string | null
@@ -1078,6 +1114,76 @@ export type Database = {
           win_rate?: number
         }
         Relationships: []
+      }
+      scheduled_posts: {
+        Row: {
+          channel_id: string
+          content: string
+          created_at: string
+          created_by: string | null
+          executed_at: string | null
+          id: string
+          is_pinned: boolean
+          message_id: string | null
+          repeat_type: string | null
+          scheduled_for: string
+          status: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel_id: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          executed_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          message_id?: string | null
+          repeat_type?: string | null
+          scheduled_for: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel_id?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          executed_at?: string | null
+          id?: string
+          is_pinned?: boolean
+          message_id?: string | null
+          repeat_type?: string | null
+          scheduled_for?: string
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "bot_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_messages: {
         Row: {
