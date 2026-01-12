@@ -96,8 +96,8 @@ export function MonthlyReturnsManager() {
     // Add months from calculated data
     Object.keys(calculatedMonthlyReturns).forEach(m => allMonths.add(m));
 
-    // Generate months from Jun 2024 to current
-    const startMonth = new Date(2024, 5, 1); // June 2024
+    // Generate months from Jan 2025 to current
+    const startMonth = new Date(2025, 0, 1); // January 2025
     const endMonth = new Date();
     let current = startMonth;
     while (current <= endMonth) {
