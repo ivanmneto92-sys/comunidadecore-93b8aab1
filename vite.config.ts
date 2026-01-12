@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null, // Prevents render-blocking registerSW.js injection
       includeAssets: ["logo-core.webp", "favicon.ico"],
       manifest: {
         name: "Comunidade CORE",
