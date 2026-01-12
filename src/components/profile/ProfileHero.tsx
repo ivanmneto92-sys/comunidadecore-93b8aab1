@@ -5,6 +5,8 @@ import { Camera, Edit3, Shield, Crown, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MembershipTier, AppRole } from '@/hooks/useUserProfile';
+import { StatusSelector, StatusIndicator } from '@/components/community/StatusSelector';
+import { useUserStatus } from '@/hooks/useUserStatus';
 
 interface ProfileHeroProps {
   profile: {
@@ -27,9 +29,17 @@ const tierConfig = {
   elite: { label: 'Elite', color: 'bg-gradient-to-r from-primary to-amber-400 text-background', icon: Crown },
 };
 
+const statusLabels = {
+  online: 'Online',
+  idle: 'Ausente',
+  dnd: 'Não Perturbe',
+  invisible: 'Invisível',
+};
+
 export function ProfileHero({ profile, tier, roles, onEditClick, onAvatarClick }: ProfileHeroProps) {
   const displayName = profile?.display_name || profile?.username || 'Usuário';
   const { svg } = useAvatar(profile?.avatar_id, displayName);
+  const { currentStatus } = useUserStatus();
   
   const isAdmin = roles.includes('admin');
   const isModerator = roles.includes('moderator');
@@ -77,6 +87,14 @@ export function ProfileHero({ profile, tier, roles, onEditClick, onAvatarClick }
             {tierInfo.label}
           </Badge>
         </div>
+
+        {/* Status Selector */}
+        <StatusSelector align="center">
+          <Button variant="ghost" size="sm" className="gap-2 mb-3">
+            <StatusIndicator status={currentStatus} size="md" />
+            <span className="text-sm">{statusLabels[currentStatus]}</span>
+          </Button>
+        </StatusSelector>
 
         {/* Role badges */}
         {(isAdmin || isModerator) && (

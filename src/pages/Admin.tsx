@@ -7,6 +7,7 @@ import { DailyReportForm } from '@/components/admin/DailyReportForm';
 import { HealthScoreForm } from '@/components/admin/HealthScoreForm';
 import { TutorialManager } from '@/components/admin/TutorialManager';
 import { ChannelManager } from '@/components/admin/ChannelManager';
+import { CategoryManager } from '@/components/admin/CategoryManager';
 import { AffiliateManager } from '@/components/admin/AffiliateManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { UserManager } from '@/components/admin/UserManager';
@@ -17,7 +18,7 @@ import { SupportManager } from '@/components/admin/SupportManager';
 import { CoreBotManager } from '@/components/admin/CoreBotManager';
 import { TradingConfigForm } from '@/components/admin/TradingConfigForm';
 import { MonthlyReturnsManager } from '@/components/admin/MonthlyReturnsManager';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot, Settings, CalendarRange } from 'lucide-react';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot, Settings, CalendarRange, FolderOpen } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -84,6 +85,10 @@ export default function Admin() {
               <GraduationCap className="h-4 w-4" />
               <span>Academy</span>
             </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <FolderOpen className="h-4 w-4" />
+              <span>Categorias</span>
+            </TabsTrigger>
             <TabsTrigger value="channels" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <MessageSquare className="h-4 w-4" />
               <span>Canais</span>
@@ -134,6 +139,10 @@ export default function Admin() {
 
           <TabsContent value="academy" className="mt-4">
             <TutorialManager />
+          </TabsContent>
+
+          <TabsContent value="categories" className="mt-4">
+            <CategoryManager />
           </TabsContent>
 
           <TabsContent value="channels" className="mt-4">

@@ -271,9 +271,40 @@ export type Database = {
           },
         ]
       }
+      channel_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          is_collapsed: boolean | null
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_collapsed?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_collapsed?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       channels: {
         Row: {
           category: string
+          category_id: string | null
           created_at: string
           description: string | null
           icon: string | null
@@ -286,6 +317,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           icon?: string | null
@@ -298,6 +330,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           icon?: string | null
@@ -308,7 +341,15 @@ export type Database = {
           slug?: string
           sort_order?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "channels_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "channel_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       commissions: {
         Row: {
@@ -961,6 +1002,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          presence_status: string | null
           referred_by: string | null
           updated_at: string
           username: string | null
@@ -972,6 +1014,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          presence_status?: string | null
           referred_by?: string | null
           updated_at?: string
           username?: string | null
@@ -983,6 +1026,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          presence_status?: string | null
           referred_by?: string | null
           updated_at?: string
           username?: string | null

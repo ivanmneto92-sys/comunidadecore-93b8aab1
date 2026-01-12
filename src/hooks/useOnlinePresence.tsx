@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import type { PresenceStatus } from '@/hooks/useUserStatus';
 
 interface PresenceState {
   user_id: string;
   display_name: string;
   avatar_url: string | null;
+  avatar_id: string | null;
+  presence_status: PresenceStatus;
   online_at: string;
 }
 
@@ -24,19 +27,23 @@ export function useOnlinePresence(channelId: string | null) {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         const users = Object.values(state).flat() as unknown as PresenceState[];
+        // Filter out invisible users for the count
+        const visibleUsers = users.filter(u => u.presence_status !== 'invisible');
         setOnlineUsers(users);
-        setOnlineCount(users.length);
+        setOnlineCount(visibleUsers.length);
       })
       .on('presence', { event: 'join' }, ({ newPresences }) => {
         const newUsers = newPresences as unknown as PresenceState[];
         setOnlineUsers(prev => [...prev, ...newUsers]);
-        setOnlineCount(prev => prev + newUsers.length);
+        const visibleNewUsers = newUsers.filter(u => u.presence_status !== 'invisible');
+        setOnlineCount(prev => prev + visibleNewUsers.length);
       })
       .on('presence', { event: 'leave' }, ({ leftPresences }) => {
         const leftUsers = leftPresences as unknown as PresenceState[];
         const leftIds = leftUsers.map(p => p.user_id);
         setOnlineUsers(prev => prev.filter(u => !leftIds.includes(u.user_id)));
-        setOnlineCount(prev => Math.max(0, prev - leftUsers.length));
+        const visibleLeftUsers = leftUsers.filter(u => u.presence_status !== 'invisible');
+        setOnlineCount(prev => Math.max(0, prev - visibleLeftUsers.length));
       })
       .subscribe(async (status) => {
         if (status !== 'SUBSCRIBED') return;
@@ -44,7 +51,7 @@ export function useOnlinePresence(channelId: string | null) {
         // Get user profile for presence data
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, avatar_url')
+          .select('display_name, avatar_url, avatar_id, presence_status')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -53,6 +60,8 @@ export function useOnlinePresence(channelId: string | null) {
           user_id: user.id,
           display_name: profile?.display_name || 'Usuário',
           avatar_url: profile?.avatar_url,
+          avatar_id: profile?.avatar_id,
+          presence_status: (profile?.presence_status as PresenceStatus) || 'online',
           online_at: new Date().toISOString(),
         });
       });
@@ -80,19 +89,20 @@ export function useCommunityPresence() {
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         const users = Object.values(state).flat() as unknown as PresenceState[];
-        // Remove duplicates by user_id
+        // Remove duplicates by user_id and filter invisible users
         const uniqueUsers = users.filter((u, i, self) => 
           i === self.findIndex(t => t.user_id === u.user_id)
         );
+        const visibleUsers = uniqueUsers.filter(u => u.presence_status !== 'invisible');
         setOnlineUsers(uniqueUsers);
-        setOnlineCount(uniqueUsers.length);
+        setOnlineCount(visibleUsers.length);
       })
       .subscribe(async (status) => {
         if (status !== 'SUBSCRIBED') return;
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, avatar_url')
+          .select('display_name, avatar_url, avatar_id, presence_status')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -100,6 +110,8 @@ export function useCommunityPresence() {
           user_id: user.id,
           display_name: profile?.display_name || 'Usuário',
           avatar_url: profile?.avatar_url,
+          avatar_id: profile?.avatar_id,
+          presence_status: (profile?.presence_status as PresenceStatus) || 'online',
           online_at: new Date().toISOString(),
         });
       });
