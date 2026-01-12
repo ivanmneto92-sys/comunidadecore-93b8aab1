@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { JournalCalendar } from '@/components/journal/JournalCalendar';
 import { JournalStats } from '@/components/journal/JournalStats';
+import { JournalStreakCard } from '@/components/journal/JournalStreakCard';
 import { JournalDayCard } from '@/components/journal/JournalDayCard';
 import { JournalEntryDrawer } from '@/components/journal/JournalEntryDrawer';
 import { JournalDayDetailDrawer } from '@/components/journal/JournalDayDetailDrawer';
@@ -11,6 +12,7 @@ import { JournalSettingsModal } from '@/components/journal/JournalSettingsModal'
 import { JournalBalanceChart } from '@/components/journal/JournalBalanceChart';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
 import { useJournalSettings } from '@/hooks/useJournalSettings';
+import { useJournalStreak } from '@/hooks/useJournalStreak';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Journal() {
@@ -29,6 +31,7 @@ export default function Journal() {
   } = useJournal(currentMonth);
 
   const { settings, saveSettings } = useJournalSettings();
+  const { currentStreak, longestStreak, isLoading: streakLoading } = useJournalStreak();
 
   const monthLabel = currentMonth.toLocaleDateString('pt-BR', { 
     month: 'long', 
@@ -104,6 +107,13 @@ export default function Journal() {
             Hoje
           </Button>
         </div>
+
+        {/* Streak Card */}
+        <JournalStreakCard
+          currentStreak={currentStreak}
+          longestStreak={longestStreak}
+          isLoading={streakLoading}
+        />
 
         {/* Stats */}
         {isLoading ? (
