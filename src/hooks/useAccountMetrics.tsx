@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { subDays, startOfYear, format } from 'date-fns';
+import { subDays, startOfYear, format, parse } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
 
@@ -40,8 +41,14 @@ interface TradingConfig {
   currency: string;
 }
 
+interface SavedMonthlyReturn {
+  month: string;
+  return_percent: number | null;
+}
+
 export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
   const [reports, setReports] = useState<DailyReport[]>([]);
+  const [savedMonthlyReturns, setSavedMonthlyReturns] = useState<SavedMonthlyReturn[]>([]);
   const [config, setConfig] = useState<TradingConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -71,7 +78,16 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
 
       if (reportsError) throw reportsError;
 
+      // Fetch saved monthly returns (historical data)
+      const { data: monthlyData, error: monthlyError } = await supabase
+        .from('monthly_returns')
+        .select('month, return_percent')
+        .order('month', { ascending: true });
+
+      if (monthlyError) throw monthlyError;
+
       setReports(reportsData || []);
+      setSavedMonthlyReturns(monthlyData || []);
     } catch (err) {
       setError(err as Error);
       console.error('Error fetching account metrics:', err);
@@ -84,10 +100,54 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     fetchData();
   }, [fetchData]);
 
-  // Calculate metrics dynamically from reports_daily
-  const metrics = useMemo((): AccountMetrics | null => {
-    if (!reports.length) return null;
+  // Combine monthly_returns (historical) with calculated from reports_daily
+  const combinedMonthlyReturns = useMemo((): MonthlyReturn[] => {
+    // Create a map from saved monthly returns (format: "2024-06-01" -> "2024-06")
+    const savedMap = new Map<string, number>();
+    savedMonthlyReturns.forEach(mr => {
+      const monthKey = mr.month.substring(0, 7); // "2024-06-01" -> "2024-06"
+      savedMap.set(monthKey, mr.return_percent || 0);
+    });
 
+    // Calculate monthly returns from reports_daily
+    const calculatedMap = new Map<string, number>();
+    reports.forEach(report => {
+      const monthKey = report.date.substring(0, 7); // "2026-01-10" -> "2026-01"
+      calculatedMap.set(monthKey, (calculatedMap.get(monthKey) || 0) + (report.pnl_percent || 0));
+    });
+
+    // Combine: prefer saved data, fallback to calculated for recent months
+    const allMonths = new Set([...savedMap.keys(), ...calculatedMap.keys()]);
+    const result: MonthlyReturn[] = [];
+
+    allMonths.forEach(monthKey => {
+      // If we have saved data for this month, use it
+      // Otherwise use calculated data
+      const returnPercent = savedMap.has(monthKey) 
+        ? savedMap.get(monthKey)! 
+        : calculatedMap.get(monthKey) || 0;
+      
+      // Format month label (e.g., "Jun 24")
+      const date = parse(monthKey + '-01', 'yyyy-MM-dd', new Date());
+      const formattedMonth = format(date, 'MMM yy', { locale: ptBR });
+      
+      result.push({ month: formattedMonth, returnPercent });
+    });
+
+    // Sort by original month key
+    const monthKeys = [...allMonths].sort();
+    return monthKeys.map(key => {
+      const returnPercent = savedMap.has(key) 
+        ? savedMap.get(key)! 
+        : calculatedMap.get(key) || 0;
+      const date = parse(key + '-01', 'yyyy-MM-dd', new Date());
+      const formattedMonth = format(date, 'MMM yy', { locale: ptBR });
+      return { month: formattedMonth, returnPercent };
+    });
+  }, [reports, savedMonthlyReturns]);
+
+  // Calculate metrics dynamically combining saved monthly returns + daily reports
+  const metrics = useMemo((): AccountMetrics | null => {
     // Use config values or defaults
     const initialBalance = config?.initial_balance || 100000;
     const currency = config?.currency || 'USD';
@@ -97,24 +157,39 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const monthAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
     const quarterAgo = format(subDays(new Date(), 90), 'yyyy-MM-dd');
 
-    // Total return (all time)
-    const totalReturn = reports.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+    // Get months with saved returns
+    const savedMonthsSet = new Set<string>();
+    savedMonthlyReturns.forEach(mr => {
+      savedMonthsSet.add(mr.month.substring(0, 7));
+    });
 
-    // Day return (today only)
+    // Total return = sum of saved monthly returns + daily reports for months NOT in saved
+    const savedTotal = savedMonthlyReturns.reduce((sum, mr) => sum + (mr.return_percent || 0), 0);
+    
+    // Calculate from daily reports only for months not in savedMonthlyReturns
+    const dailyNotInSaved = reports.filter(r => {
+      const monthKey = r.date.substring(0, 7);
+      return !savedMonthsSet.has(monthKey);
+    });
+    const dailyTotal = dailyNotInSaved.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+    
+    const totalReturn = savedTotal + dailyTotal;
+
+    // Day return (today only) - always from reports_daily
     const todayReport = reports.find(r => r.date === today);
     const dayReturn = todayReport?.pnl_percent || 0;
 
-    // Week return (last 7 days)
+    // Week return (last 7 days) - from reports_daily
     const weekReturn = reports
       .filter(r => r.date >= weekAgo)
       .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
 
-    // Month return (last 30 days)
+    // Month return (last 30 days) - from reports_daily
     const monthReturn = reports
       .filter(r => r.date >= monthAgo)
       .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
 
-    // Quarter return (last 90 days)
+    // Quarter return (last 90 days) - from reports_daily
     const quarterReturn = reports
       .filter(r => r.date >= quarterAgo)
       .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
@@ -132,7 +207,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       filteredForDrawdown = reports.filter(r => r.date >= yearStart);
     }
 
-    const maxDrawdown = Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0);
+    const maxDrawdown = filteredForDrawdown.length > 0 
+      ? Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0)
+      : 0;
 
     // Placeholder values for deposits/withdrawals (would need separate data source)
     const deposits1m = 0;
@@ -154,24 +231,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       initialBalance,
       currency,
     };
-  }, [reports, config, filterPeriod]);
-
-  // Calculate monthly returns dynamically
-  const monthlyReturns = useMemo((): MonthlyReturn[] => {
-    if (!reports.length) return [];
-
-    // Group by month and sum pnl_percent
-    const monthlyMap = reports.reduce((acc, report) => {
-      const month = report.date.substring(0, 7); // "2026-01"
-      acc[month] = (acc[month] || 0) + (report.pnl_percent || 0);
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Convert to array and sort by month
-    return Object.entries(monthlyMap)
-      .map(([month, returnPercent]) => ({ month, returnPercent }))
-      .sort((a, b) => a.month.localeCompare(b.month));
-  }, [reports]);
+  }, [reports, savedMonthlyReturns, config, filterPeriod]);
 
   // Calculate growth data (cumulative balance)
   const growthData = useMemo((): AccountGrowthPoint[] => {
@@ -218,7 +278,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
 
   return {
     metrics,
-    monthlyReturns,
+    monthlyReturns: combinedMonthlyReturns,
     growthData,
     loading,
     error,
