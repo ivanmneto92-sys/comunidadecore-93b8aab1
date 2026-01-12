@@ -225,9 +225,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     if (filterPeriod === '7d') {
       filteredForPeriod = reports.filter(r => r.date >= weekAgo);
     } else if (filterPeriod === '30d') {
-      // Use current calendar month (same as "Mês" card)
-      filteredForPeriod = reports.filter(r => r.date.startsWith(currentMonthKey));
+      filteredForPeriod = reports.filter(r => r.date >= monthAgo);
     } else if (filterPeriod === '90d') {
+      // 90 dias = soma dos últimos 3 meses (não filtra reports, usa monthly_returns)
       filteredForPeriod = reports.filter(r => r.date >= quarterAgo);
     } else if (filterPeriod === 'ytd') {
       const yearStart = format(startOfYear(new Date()), 'yyyy-MM-dd');
@@ -235,7 +235,14 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     }
 
     // Period return: sum of PnL% for the selected period
-    const periodReturn = filteredForPeriod.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+    // For 90d, use the sum of the last 3 months from monthly_returns
+    let periodReturn: number;
+    if (filterPeriod === '90d') {
+      const last3Months = [...combinedMonthlyReturns].slice(-3);
+      periodReturn = last3Months.reduce((sum, m) => sum + m.returnPercent, 0);
+    } else {
+      periodReturn = filteredForPeriod.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+    }
 
     // Max drawdown (from filtered period)
     const calculatedMaxDrawdown = filteredForPeriod.length > 0 
@@ -288,9 +295,8 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       const cutoff = format(subDays(today, 7), 'yyyy-MM-dd');
       filteredReports = reports.filter(r => r.date >= cutoff);
     } else if (filterPeriod === '30d') {
-      // Use current calendar month (same as "Mês" card)
-      const currentMonthKey = format(today, 'yyyy-MM');
-      filteredReports = reports.filter(r => r.date.startsWith(currentMonthKey));
+      const cutoff = format(subDays(today, 30), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= cutoff);
     } else if (filterPeriod === '90d') {
       const cutoff = format(subDays(today, 90), 'yyyy-MM-dd');
       filteredReports = reports.filter(r => r.date >= cutoff);
