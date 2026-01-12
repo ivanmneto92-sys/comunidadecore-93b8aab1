@@ -6,6 +6,7 @@ import { format, isSameDay, parseISO, startOfMonth, endOfMonth, subMonths, addMo
 import { ptBR } from 'date-fns/locale';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MonthYearSelector } from './MonthYearSelector';
 
 interface DailyReport {
   id: string;
@@ -94,6 +95,13 @@ export function ReportsCalendar({
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Month/Year Quick Navigation */}
+        <MonthYearSelector
+          currentMonth={month}
+          onMonthChange={onMonthChange}
+          minYear={2024}
+        />
+        
         <Calendar
           mode="single"
           selected={selectedDate}

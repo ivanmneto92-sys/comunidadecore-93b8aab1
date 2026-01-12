@@ -1253,6 +1253,33 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_config: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          initial_balance: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          initial_balance?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          initial_balance?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tutorial_progress: {
         Row: {
           completed_at: string | null

@@ -15,7 +15,9 @@ import { BroadcastManager } from '@/components/admin/BroadcastManager';
 import { ActivityLogs } from '@/components/admin/ActivityLogs';
 import { SupportManager } from '@/components/admin/SupportManager';
 import { CoreBotManager } from '@/components/admin/CoreBotManager';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot } from 'lucide-react';
+import { TradingConfigForm } from '@/components/admin/TradingConfigForm';
+import { MonthlyReturnsManager } from '@/components/admin/MonthlyReturnsManager';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot, Settings, CalendarRange } from 'lucide-react';
 
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
@@ -120,7 +122,9 @@ export default function Admin() {
             <ModerationPanel />
           </TabsContent>
 
-          <TabsContent value="results" className="mt-4">
+          <TabsContent value="results" className="mt-4 space-y-6">
+            <TradingConfigForm />
+            <MonthlyReturnsManager />
             <DailyReportForm />
           </TabsContent>
 
