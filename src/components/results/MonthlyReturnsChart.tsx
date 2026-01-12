@@ -66,11 +66,13 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
               labelStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number) => [`${value.toFixed(2)}%`, 'Retorno']}
             />
-            <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]} maxBarSize={40}>
+            <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]} maxBarSize={40} fill="transparent">
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.returnPercent >= 0 ? '#22C55E' : '#EF4444'}
+                  stroke={entry.returnPercent >= 0 ? '#22C55E' : '#EF4444'}
+                  fillOpacity={1}
                 />
               ))}
             </Bar>
