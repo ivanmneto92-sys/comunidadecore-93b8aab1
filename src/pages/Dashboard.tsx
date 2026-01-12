@@ -17,6 +17,7 @@ export default function Dashboard() {
 
   // Default values for demo/fallback
   const defaultStatus = {
+    score: 85,
     status: 'success' as const,
     profileType: 'normal' as const,
     riskLevel: 'baixo' as const,
@@ -54,6 +55,7 @@ export default function Dashboard() {
           <>
             {/* 3. Hero Status Card */}
             <AnimatedStatusCard
+              score={dailyStatus?.score ?? defaultStatus.score}
               status={dailyStatus?.status || defaultStatus.status}
               profileType={dailyStatus?.profileType || defaultStatus.profileType}
               riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}

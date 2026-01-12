@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { Shield, Activity, AlertTriangle, LucideIcon } from 'lucide-react';
 
 interface AnimatedStatusCardProps {
+  score: number;
   status: 'success' | 'warning' | 'danger';
   profileType: 'defensivo' | 'normal' | 'agressivo';
   riskLevel: 'baixo' | 'moderado' | 'alto';
@@ -88,7 +89,7 @@ function HorizontalStatusBar({ percentage, status }: { percentage: number; statu
   );
 }
 
-export function AnimatedStatusCard({ status, profileType, riskLevel, drawdownStatus, insightText }: AnimatedStatusCardProps) {
+export function AnimatedStatusCard({ score, status, profileType, riskLevel, drawdownStatus, insightText }: AnimatedStatusCardProps) {
   const config = statusConfig[status];
   const Icon = config.Icon;
 
@@ -113,7 +114,7 @@ export function AnimatedStatusCard({ status, profileType, riskLevel, drawdownSta
 
       {/* Horizontal Status Bar */}
       <div className="mb-6">
-        <HorizontalStatusBar percentage={config.percentage} status={status} />
+        <HorizontalStatusBar percentage={score} status={status} />
       </div>
 
       {/* Pills */}

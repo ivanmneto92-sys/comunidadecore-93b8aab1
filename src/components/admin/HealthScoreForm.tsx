@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +19,10 @@ const healthSchema = z.object({
   date: z.string().min(1, 'Data é obrigatória'),
   score: z.coerce.number().min(0).max(100, 'Entre 0 e 100'),
   status: z.enum(['success', 'warning', 'danger']),
+  profile_type: z.enum(['defensivo', 'normal', 'agressivo']),
+  risk_level: z.enum(['baixo', 'moderado', 'alto']),
+  drawdown_status: z.enum(['controlado', 'em_observacao', 'fora_do_padrao']),
+  insight_text: z.string().optional(),
 });
 
 type HealthFormData = z.infer<typeof healthSchema>;
@@ -27,6 +32,10 @@ interface HealthScore {
   date: string;
   score: number;
   status: 'success' | 'warning' | 'danger';
+  profile_type: string | null;
+  risk_level: string | null;
+  drawdown_status: string | null;
+  insight_text: string | null;
 }
 
 export function HealthScoreForm() {
@@ -41,6 +50,10 @@ export function HealthScoreForm() {
       date: format(new Date(), 'yyyy-MM-dd'),
       score: 85,
       status: 'success',
+      profile_type: 'normal',
+      risk_level: 'baixo',
+      drawdown_status: 'controlado',
+      insight_text: '',
     },
   });
 
@@ -70,6 +83,10 @@ export function HealthScoreForm() {
         date: data.date,
         score: data.score,
         status: data.status,
+        profile_type: data.profile_type,
+        risk_level: data.risk_level,
+        drawdown_status: data.drawdown_status,
+        insight_text: data.insight_text || null,
       });
 
       if (error) throw error;
@@ -102,14 +119,32 @@ export function HealthScoreForm() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success':
-        return 'bg-green-500/20 text-green-500';
+        return 'bg-status-success/20 text-status-success';
       case 'warning':
-        return 'bg-yellow-500/20 text-yellow-500';
+        return 'bg-status-warning/20 text-status-warning';
       case 'danger':
-        return 'bg-red-500/20 text-red-500';
+        return 'bg-status-danger/20 text-status-danger';
       default:
         return '';
     }
+  };
+
+  const profileLabels: Record<string, string> = {
+    defensivo: 'Defensivo',
+    normal: 'Normal',
+    agressivo: 'Agressivo',
+  };
+
+  const riskLabels: Record<string, string> = {
+    baixo: 'Baixo',
+    moderado: 'Moderado',
+    alto: 'Alto',
+  };
+
+  const ddLabels: Record<string, string> = {
+    controlado: 'OK',
+    em_observacao: 'Atenção',
+    fora_do_padrao: 'Crítico',
   };
 
   return (
@@ -178,6 +213,94 @@ export function HealthScoreForm() {
                 />
               </div>
 
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="profile_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Perfil</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Perfil" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="defensivo">Defensivo</SelectItem>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="agressivo">Agressivo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="risk_level"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nível de Risco</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Risco" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="baixo">Baixo</SelectItem>
+                          <SelectItem value="moderado">Moderado</SelectItem>
+                          <SelectItem value="alto">Alto</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="drawdown_status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status DD</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="DD" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="controlado">Controlado</SelectItem>
+                          <SelectItem value="em_observacao">Em Observação</SelectItem>
+                          <SelectItem value="fora_do_padrao">Fora do Padrão</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="insight_text"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Insight / Análise (opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ex: Sistema operando com cautela devido à volatilidade do mercado..."
+                        className="resize-none"
+                        rows={2}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Button type="submit" disabled={submitting} className="w-full">
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -204,38 +327,52 @@ export function HealthScoreForm() {
           ) : scores.length === 0 ? (
             <p className="text-center text-muted-foreground py-4">Nenhum score registrado</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {scores.map((score) => (
-                  <TableRow key={score.id}>
-                    <TableCell>{format(new Date(score.date), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell className="font-semibold">{score.score}%</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(score.status)}>
-                        {score.status === 'success' ? 'Sucesso' : score.status === 'warning' ? 'Alerta' : 'Perigo'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => deleteScore(score.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Perfil</TableHead>
+                    <TableHead>Risco</TableHead>
+                    <TableHead>DD</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {scores.map((score) => (
+                    <TableRow key={score.id}>
+                      <TableCell>{format(new Date(score.date), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell className="font-semibold">{score.score}%</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(score.status)}>
+                          {score.status === 'success' ? 'Sucesso' : score.status === 'warning' ? 'Alerta' : 'Perigo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {score.profile_type ? profileLabels[score.profile_type] || score.profile_type : '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {score.risk_level ? riskLabels[score.risk_level] || score.risk_level : '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {score.drawdown_status ? ddLabels[score.drawdown_status] || score.drawdown_status : '-'}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => deleteScore(score.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
