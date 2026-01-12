@@ -70,7 +70,7 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.returnPercent >= 0 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'}
+                  fill={entry.returnPercent >= 0 ? '#22C55E' : '#EF4444'}
                 />
               ))}
             </Bar>
