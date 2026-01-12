@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useStreak() {
-  const { data: streakDays = 0, isLoading } = useQuery({
+  const { data: streakDays = 0, isLoading, isError, refetch } = useQuery({
     queryKey: ['streak'],
     queryFn: async () => {
       // Fetch last 30 days of reports ordered by date desc (optimized select)
@@ -15,7 +15,7 @@ export function useStreak() {
 
       if (error) {
         console.error('Error fetching streak data:', error);
-        return 0;
+        throw error;
       }
 
       if (!data || data.length === 0) {
@@ -39,5 +39,5 @@ export function useStreak() {
     gcTime: 30 * 60 * 1000, // Keep in garbage collection for 30 min
   });
 
-  return { streakDays, isLoading };
+  return { streakDays, isLoading, isError, refetch };
 }

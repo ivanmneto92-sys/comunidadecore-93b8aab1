@@ -142,6 +142,11 @@ export function MessageItem({
       }
     } catch (error) {
       console.error('Error toggling reaction:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao reagir',
+        description: 'Não foi possível adicionar sua reação.',
+      });
     }
   };
 
@@ -157,6 +162,11 @@ export function MessageItem({
       });
     } catch (error) {
       console.error('Error pinning message:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao fixar mensagem',
+        description: 'Tente novamente.',
+      });
     }
   };
 

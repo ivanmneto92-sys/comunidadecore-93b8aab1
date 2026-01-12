@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/hooks/use-toast';
 import type { Affiliate } from '@/hooks/useAffiliate';
 
 interface PayoutRequestFormProps {
@@ -20,6 +21,7 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
   const [pixKey, setPixKey] = useState(affiliate.pix_key || '');
   const [paypalEmail, setPaypalEmail] = useState(affiliate.payment_email || '');
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   const canPayout = affiliate.available_balance >= MIN_PAYOUT;
   const progressPercent = Math.min((affiliate.available_balance / MIN_PAYOUT) * 100, 100);
@@ -34,7 +36,15 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
       const success = await onRequest(parseFloat(amount) || affiliate.available_balance, method, details);
       if (success) {
         setAmount('');
+        toast({ title: 'Solicitação enviada com sucesso!' });
       }
+    } catch (error) {
+      console.error('Error requesting payout:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao solicitar saque',
+        description: 'Verifique seus dados e tente novamente.',
+      });
     } finally {
       setLoading(false);
     }

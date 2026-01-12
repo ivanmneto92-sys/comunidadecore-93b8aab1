@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { achievementDefinitions, AchievementCheckData } from '@/lib/achievementDefinitions';
 
 interface Achievement {
@@ -30,6 +31,7 @@ interface AchievementWithProgress extends Achievement {
 
 export function useAchievements() {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Fetch all achievements
   // Achievement definitions are static - cache aggressively
@@ -230,6 +232,11 @@ export function useAchievements() {
       return true;
     } catch (error) {
       console.error('Error unlocking achievement:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao desbloquear conquista',
+        description: 'Tente novamente mais tarde.',
+      });
       return false;
     }
   };
