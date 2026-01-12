@@ -14,6 +14,8 @@ interface TradingConfig {
   initial_balance: number;
   start_date: string;
   currency: string;
+  total_deposits: number;
+  total_withdrawals: number;
 }
 
 export function TradingConfigForm() {
@@ -25,6 +27,8 @@ export function TradingConfigForm() {
   // Form state
   const [initialBalance, setInitialBalance] = useState('100000');
   const [startDate, setStartDate] = useState('2024-06-01');
+  const [totalDeposits, setTotalDeposits] = useState('0');
+  const [totalWithdrawals, setTotalWithdrawals] = useState('0');
   const [currency, setCurrency] = useState('USD');
 
   const fetchConfig = async () => {
@@ -44,6 +48,8 @@ export function TradingConfigForm() {
         setInitialBalance(String(data.initial_balance));
         setStartDate(data.start_date);
         setCurrency(data.currency);
+        setTotalDeposits(String(data.total_deposits || 0));
+        setTotalWithdrawals(String(data.total_withdrawals || 0));
       }
     } catch (err) {
       console.error('Error fetching trading config:', err);
@@ -63,6 +69,8 @@ export function TradingConfigForm() {
         initial_balance: parseFloat(initialBalance) || 100000,
         start_date: startDate,
         currency,
+        total_deposits: parseFloat(totalDeposits) || 0,
+        total_withdrawals: parseFloat(totalWithdrawals) || 0,
       };
 
       if (config?.id) {
@@ -160,6 +168,44 @@ export function TradingConfigForm() {
           />
           <p className="text-xs text-muted-foreground">
             Data em que o copy trading começou
+          </p>
+        </div>
+
+        {/* Total Deposits */}
+        <div className="space-y-2">
+          <Label htmlFor="total_deposits" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-status-success" />
+            Total de Depósitos
+          </Label>
+          <Input
+            id="total_deposits"
+            type="number"
+            value={totalDeposits}
+            onChange={(e) => setTotalDeposits(e.target.value)}
+            placeholder="0"
+            className="max-w-xs"
+          />
+          <p className="text-xs text-muted-foreground">
+            Valor total de aportes realizados na banca
+          </p>
+        </div>
+
+        {/* Total Withdrawals */}
+        <div className="space-y-2">
+          <Label htmlFor="total_withdrawals" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-status-danger" />
+            Total de Retiradas
+          </Label>
+          <Input
+            id="total_withdrawals"
+            type="number"
+            value={totalWithdrawals}
+            onChange={(e) => setTotalWithdrawals(e.target.value)}
+            placeholder="0"
+            className="max-w-xs"
+          />
+          <p className="text-xs text-muted-foreground">
+            Valor total de saques realizados da banca
           </p>
         </div>
 
