@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -31,25 +31,29 @@ interface UserProfileData {
   isAdmin: boolean;
   isModerator: boolean;
   loading: boolean;
+  error: Error | null;
 }
 
-export function useUserProfile(): UserProfileData & { refetch?: () => void } {
+export function useUserProfile(): UserProfileData & { refetch: () => void } {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [membership, setMembership] = useState<MembershipTier>('free');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     if (!user) {
       setProfile(null);
       setRoles([]);
       setMembership('free');
       setLoading(false);
+      setError(null);
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       // Fetch profile
       const { data: profileData } = await supabase
@@ -78,16 +82,17 @@ export function useUserProfile(): UserProfileData & { refetch?: () => void } {
       if (membershipData) {
         setMembership((membershipData as Membership).tier);
       }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch user data'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchUserData();
-  }, [user]);
+  }, [fetchUserData]);
 
   return {
     profile,
@@ -96,6 +101,7 @@ export function useUserProfile(): UserProfileData & { refetch?: () => void } {
     isAdmin: roles.includes('admin'),
     isModerator: roles.includes('moderator'),
     loading,
+    error,
     refetch: fetchUserData
   };
 }

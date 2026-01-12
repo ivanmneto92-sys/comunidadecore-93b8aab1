@@ -4,6 +4,7 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 import DOMPurify from 'dompurify';
 
 interface Tutorial {
@@ -55,6 +56,7 @@ export function TutorialDetailModal({
   hasNext,
 }: TutorialDetailModalProps) {
   const [isMarking, setIsMarking] = useState(false);
+  const { toast } = useToast();
 
   if (!tutorial) return null;
 
@@ -65,6 +67,14 @@ export function TutorialDetailModal({
     setIsMarking(true);
     try {
       await onMarkComplete();
+      toast({ title: 'Tutorial concluído! 🎉' });
+    } catch (error) {
+      console.error('Error marking tutorial complete:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao marcar como concluído',
+        description: 'Tente novamente.',
+      });
     } finally {
       setIsMarking(false);
     }
