@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { JournalCalendar } from '@/components/journal/JournalCalendar';
 import { JournalStats } from '@/components/journal/JournalStats';
 import { JournalDayCard } from '@/components/journal/JournalDayCard';
 import { JournalEntryDrawer } from '@/components/journal/JournalEntryDrawer';
+import { JournalDayDetailDrawer } from '@/components/journal/JournalDayDetailDrawer';
 import { JournalSettingsModal } from '@/components/journal/JournalSettingsModal';
 import { JournalBalanceChart } from '@/components/journal/JournalBalanceChart';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
@@ -14,7 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Journal() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | undefined>();
 
@@ -33,26 +35,15 @@ export default function Journal() {
     year: 'numeric' 
   });
 
-  const handleDayClick = (date: string, entry?: JournalEntry) => {
-    setSelectedDate(date);
-    setSelectedEntry(entry);
-    setDrawerOpen(true);
-  };
-
-  const handleAddToday = () => {
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const todayEntry = entries.find(e => e.date === todayStr);
-    handleDayClick(todayStr, todayEntry);
-  };
-
-  // Get recent entries (last 5) and calculate P&L in R$
-  const recentEntriesWithPnl = [...entries]
-    .sort((a, b) => a.date.localeCompare(b.date)) // Sort ascending for cumulative calculation
-    .reduce((acc, entry) => {
+  // Calculate cumulative balances for all entries
+  const entriesWithBalances = useMemo(() => {
+    const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+    const initialBalance = settings?.initial_balance || 0;
+    
+    return sorted.reduce((acc, entry) => {
       const prevBalance = acc.length > 0 
         ? acc[acc.length - 1].cumulativeBalance 
-        : (settings?.initial_balance || 0);
+        : initialBalance;
       const dailyPnl = prevBalance * (entry.pnl_percent / 100);
       const newBalance = prevBalance + dailyPnl;
       
@@ -62,8 +53,38 @@ export default function Journal() {
         cumulativeBalance: newBalance,
       });
       return acc;
-    }, [] as { entry: JournalEntry; pnlInReais: number; cumulativeBalance: number }[])
-    .reverse() // Reverse to get most recent first
+    }, [] as { entry: JournalEntry; pnlInReais: number; cumulativeBalance: number }[]);
+  }, [entries, settings?.initial_balance]);
+
+  // Get data for selected date
+  const selectedEntryData = useMemo(() => {
+    if (!selectedDate) return undefined;
+    return entriesWithBalances.find(e => e.entry.date === selectedDate);
+  }, [selectedDate, entriesWithBalances]);
+
+  const handleDayClick = (date: string, entry?: JournalEntry) => {
+    setSelectedDate(date);
+    setSelectedEntry(entry);
+    setDetailDrawerOpen(true);
+  };
+
+  const handleEditFromDetail = () => {
+    setDetailDrawerOpen(false);
+    setEditDrawerOpen(true);
+  };
+
+  const handleAddToday = () => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const todayEntry = entries.find(e => e.date === todayStr);
+    setSelectedDate(todayStr);
+    setSelectedEntry(todayEntry);
+    setEditDrawerOpen(true);
+  };
+
+  // Get recent entries (last 5)
+  const recentEntriesWithPnl = [...entriesWithBalances]
+    .reverse()
     .slice(0, 5);
 
   return (
@@ -151,10 +172,21 @@ export default function Journal() {
         )}
       </div>
 
-      {/* Entry Drawer */}
+      {/* Detail Drawer */}
+      <JournalDayDetailDrawer
+        open={detailDrawerOpen}
+        onOpenChange={setDetailDrawerOpen}
+        date={selectedDate}
+        entry={selectedEntry}
+        pnlInReais={selectedEntryData?.pnlInReais}
+        cumulativeBalance={selectedEntryData?.cumulativeBalance}
+        onEdit={handleEditFromDetail}
+      />
+
+      {/* Edit Entry Drawer */}
       <JournalEntryDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        open={editDrawerOpen}
+        onOpenChange={setEditDrawerOpen}
         date={selectedDate}
         entry={selectedEntry}
         onSave={saveEntry}
