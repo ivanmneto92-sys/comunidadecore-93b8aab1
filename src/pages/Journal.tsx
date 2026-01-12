@@ -7,6 +7,7 @@ import { JournalStats } from '@/components/journal/JournalStats';
 import { JournalDayCard } from '@/components/journal/JournalDayCard';
 import { JournalEntryDrawer } from '@/components/journal/JournalEntryDrawer';
 import { JournalSettingsModal } from '@/components/journal/JournalSettingsModal';
+import { JournalBalanceChart } from '@/components/journal/JournalBalanceChart';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
 import { useJournalSettings } from '@/hooks/useJournalSettings';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -78,6 +79,14 @@ export default function Journal() {
             totalPnL={monthStats.totalPnL}
             avgWinRate={monthStats.avgWinRate}
             monthLabel={monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}
+          />
+        )}
+
+        {/* Balance Evolution Chart */}
+        {!isLoading && settings?.initial_balance && entries.length > 0 && (
+          <JournalBalanceChart 
+            entries={entries} 
+            initialBalance={settings.initial_balance} 
           />
         )}
 
