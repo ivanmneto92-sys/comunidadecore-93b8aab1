@@ -16,6 +16,22 @@ interface MonthlyReturnsChartProps {
   }>;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const isPositive = value >= 0;
+    return (
+      <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-lg">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className={`text-sm font-bold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+          {isPositive ? '+' : ''}{value.toFixed(2)}%
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
   if (data.length === 0) {
     return (
@@ -56,15 +72,9 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
               axisLine={false}
               width={35}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'hsl(var(--popover))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
-                fontSize: '12px',
-              }}
-              labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number) => [`${value.toFixed(2)}%`, 'Retorno']}
+            <Tooltip 
+              content={<CustomTooltip />}
+              cursor={{ fill: 'transparent' }}
             />
             <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]} maxBarSize={40} fill="transparent">
               {data.map((entry, index) => (
