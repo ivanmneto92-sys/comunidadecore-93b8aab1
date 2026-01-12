@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { subDays, startOfYear, format, parse } from 'date-fns';
+import { subDays, startOfYear, startOfWeek, endOfWeek, format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
@@ -200,23 +200,20 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const todayReport = reports.find(r => r.date === today);
     const dayReturn = todayReport?.pnl_percent || 0;
 
-    // Week return (last 7 days) - compound
-    const weekReturns = reports
-      .filter(r => r.date >= weekAgo)
-      .map(r => r.pnl_percent || 0);
-    const weekReturn = calculateCompoundReturn(weekReturns);
+    // Week return (current calendar week - Monday to Sunday)
+    const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+    const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+    const currentWeekReports = reports.filter(r => r.date >= weekStart && r.date <= weekEnd);
+    const weekReturn = currentWeekReports.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
 
-    // Month return (last 30 days) - compound
-    const monthReturns = reports
-      .filter(r => r.date >= monthAgo)
-      .map(r => r.pnl_percent || 0);
-    const monthReturn = calculateCompoundReturn(monthReturns);
+    // Month return (current month - sum of all days in the current month)
+    const currentMonthKey = format(new Date(), 'yyyy-MM');
+    const currentMonthReports = reports.filter(r => r.date.startsWith(currentMonthKey));
+    const monthReturn = currentMonthReports.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
 
-    // Quarter return (last 90 days) - compound
-    const quarterReturns = reports
-      .filter(r => r.date >= quarterAgo)
-      .map(r => r.pnl_percent || 0);
-    const quarterReturn = calculateCompoundReturn(quarterReturns);
+    // Quarter return (last 3 months - compound of monthly returns)
+    const sortedMonthlyReturns = [...combinedMonthlyReturns].slice(-3);
+    const quarterReturn = calculateCompoundReturn(sortedMonthlyReturns.map(m => m.returnPercent));
 
     // Max drawdown (from filtered period based on filterPeriod)
     let filteredForDrawdown = reports;
@@ -255,7 +252,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       initialBalance,
       currency,
     };
-  }, [reports, savedMonthlyReturns, config, filterPeriod]);
+  }, [reports, savedMonthlyReturns, combinedMonthlyReturns, config, filterPeriod]);
 
   // Calculate growth data (cumulative balance using compound returns)
   const growthData = useMemo((): AccountGrowthPoint[] => {
