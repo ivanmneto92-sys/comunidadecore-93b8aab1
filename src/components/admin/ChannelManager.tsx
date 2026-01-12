@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useChannelCategories } from '@/hooks/useChannelCategories';
 import { Loader2, Plus, Trash2, MessageSquare, Lock, Bot } from 'lucide-react';
 
 const channelSchema = z.object({
@@ -19,7 +21,7 @@ const channelSchema = z.object({
   slug: z.string().min(1, 'Slug é obrigatório').max(50),
   description: z.string().optional(),
   icon: z.string().optional(),
-  category: z.string().min(1, 'Categoria é obrigatória'),
+  category_id: z.string().optional(),
   is_admin_only: z.boolean(),
   is_bot_only: z.boolean(),
   sort_order: z.coerce.number(),
@@ -34,6 +36,7 @@ interface Channel {
   description: string | null;
   icon: string | null;
   category: string;
+  category_id: string | null;
   is_admin_only: boolean;
   is_bot_only: boolean;
   sort_order: number;
@@ -41,6 +44,7 @@ interface Channel {
 
 export function ChannelManager() {
   const { toast } = useToast();
+  const { categories } = useChannelCategories();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +56,7 @@ export function ChannelManager() {
       slug: '',
       description: '',
       icon: '',
-      category: 'general',
+      category_id: '',
       is_admin_only: false,
       is_bot_only: false,
       sort_order: 0,
@@ -80,12 +84,16 @@ export function ChannelManager() {
   const onSubmit = async (data: ChannelFormData) => {
     setSubmitting(true);
     try {
+      // Get category slug from category_id
+      const selectedCategory = categories.find(c => c.id === data.category_id);
+      
       const { error } = await supabase.from('channels').insert({
         name: data.name,
         slug: data.slug,
         description: data.description || null,
         icon: data.icon || null,
-        category: data.category,
+        category: selectedCategory?.slug || 'general',
+        category_id: data.category_id || null,
         is_admin_only: data.is_admin_only,
         is_bot_only: data.is_bot_only,
         sort_order: data.sort_order,
@@ -191,13 +199,24 @@ export function ChannelManager() {
                 />
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="category_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
-                      <FormControl>
-                        <Input placeholder="general" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.icon} {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
