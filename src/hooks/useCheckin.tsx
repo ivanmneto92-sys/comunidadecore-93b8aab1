@@ -12,9 +12,25 @@ interface CheckinData {
   isLoading: boolean;
 }
 
+// Get local date string in YYYY-MM-DD format (user's timezone)
+const getLocalDateString = (date: Date = new Date()): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Get yesterday's date string in local timezone
+const getYesterdayDateString = (): string => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return getLocalDateString(yesterday);
+};
+
 // Calculate XP reward based on streak
 const calculateXpReward = (streak: number): number => {
   if (streak >= 30) return 100; // 30-day bonus
+  if (streak >= 14) return 50;  // 2 weeks+ bonus
   if (streak >= 7) return 30;   // Week+ bonus
   if (streak >= 4) return 20;   // 4-6 days
   if (streak >= 2) return 15;   // 2-3 days
@@ -50,8 +66,8 @@ export function useCheckin() {
     }
 
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const today = getLocalDateString();
+      const yesterday = getYesterdayDateString();
 
       // Fetch all data in parallel (optimized)
       const [todayResult, yesterdayResult, xpResult] = await Promise.all([
@@ -105,8 +121,8 @@ export function useCheckin() {
     }
 
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const today = getLocalDateString();
+      const yesterday = getYesterdayDateString();
 
       // Check yesterday's streak
       const { data: yesterdayCheckin } = await supabase
@@ -119,19 +135,22 @@ export function useCheckin() {
       const newStreak = (yesterdayCheckin?.streak_count || 0) + 1;
       const xpEarned = calculateXpReward(newStreak);
 
-      // Insert today's checkin
+      // Upsert today's checkin (prevents duplicates)
       const { error: checkinError } = await supabase
         .from('daily_checkins')
-        .insert({
+        .upsert({
           user_id: user.id,
           checkin_date: today,
           streak_count: newStreak,
           xp_earned: xpEarned,
+        }, { 
+          onConflict: 'user_id,checkin_date',
+          ignoreDuplicates: true 
         });
 
       if (checkinError) throw checkinError;
 
-      // Update or insert user XP
+      // Update or insert user XP with error handling
       const { data: existingXp } = await supabase
         .from('user_xp')
         .select('total_xp')
@@ -139,14 +158,18 @@ export function useCheckin() {
         .maybeSingle();
 
       if (existingXp) {
-        await supabase
+        const { error: updateError } = await supabase
           .from('user_xp')
           .update({ total_xp: existingXp.total_xp + xpEarned })
           .eq('user_id', user.id);
+        
+        if (updateError) throw updateError;
       } else {
-        await supabase
+        const { error: insertError } = await supabase
           .from('user_xp')
           .insert({ user_id: user.id, total_xp: xpEarned });
+        
+        if (insertError) throw insertError;
       }
 
       // Update local state
