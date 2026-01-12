@@ -6,7 +6,9 @@ import { JournalCalendar } from '@/components/journal/JournalCalendar';
 import { JournalStats } from '@/components/journal/JournalStats';
 import { JournalDayCard } from '@/components/journal/JournalDayCard';
 import { JournalEntryDrawer } from '@/components/journal/JournalEntryDrawer';
+import { JournalSettingsModal } from '@/components/journal/JournalSettingsModal';
 import { useJournal, JournalEntry } from '@/hooks/useJournal';
+import { useJournalSettings } from '@/hooks/useJournalSettings';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Journal() {
@@ -22,6 +24,8 @@ export default function Journal() {
     saveEntry, 
     deleteEntry 
   } = useJournal(currentMonth);
+
+  const { settings, saveSettings } = useJournalSettings();
 
   const monthLabel = currentMonth.toLocaleDateString('pt-BR', { 
     month: 'long', 
@@ -51,9 +55,12 @@ export default function Journal() {
       <div className="px-4 py-6 space-y-4 pb-24">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">Meu Diário</h1>
-            <p className="text-sm text-muted-foreground">Registre seus resultados diários</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h1 className="text-xl font-bold">Meu Diário</h1>
+              <p className="text-sm text-muted-foreground">Registre seus resultados diários</p>
+            </div>
+            <JournalSettingsModal settings={settings} onSave={saveSettings} />
           </div>
           <Button size="sm" onClick={handleAddToday}>
             <Plus className="h-4 w-4 mr-1" />
