@@ -102,8 +102,10 @@ export function ChatView({
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialLoad = useRef(true);
 
   // Admins podem postar em canais admin-only, mas não em bot-only
@@ -348,6 +350,81 @@ export function ChatView({
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     setNewMessagesCount(0);
   }, []);
+
+  // Scroll to a specific message by ID
+  const scrollToMessage = useCallback(async (messageId: string) => {
+    // First check if message is already loaded
+    const messageElement = messageRefs.current.get(messageId);
+    if (messageElement) {
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightedMessageId(messageId);
+      // Remove highlight after 3 seconds
+      setTimeout(() => setHighlightedMessageId(null), 3000);
+      return;
+    }
+
+    // Message not in current view - need to fetch it and surrounding messages
+    try {
+      // Get the target message to find its position
+      const { data: targetMessage, error: targetError } = await supabase
+        .from('messages')
+        .select('id, created_at')
+        .eq('id', messageId)
+        .eq('channel_id', channel.id)
+        .maybeSingle();
+
+      if (targetError || !targetMessage) {
+        console.error('Message not found:', targetError);
+        return;
+      }
+
+      // Fetch messages around the target message
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('messages')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
+        .eq('channel_id', channel.id)
+        .is('parent_id', null)
+        .gte('created_at', targetMessage.created_at)
+        .order('created_at', { ascending: true })
+        .limit(MESSAGES_PER_PAGE);
+
+      if (messagesError) throw messagesError;
+
+      // Also fetch some messages before the target
+      const { data: beforeMessages } = await supabase
+        .from('messages')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
+        .eq('channel_id', channel.id)
+        .is('parent_id', null)
+        .lt('created_at', targetMessage.created_at)
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      // Combine and sort messages
+      const allMessages = [
+        ...((beforeMessages || []).reverse()),
+        ...(messagesData || [])
+      ];
+
+      const enrichedMessages = await enrichMessages(allMessages);
+      setMessages(enrichedMessages);
+      setHasMore(beforeMessages && beforeMessages.length >= 25);
+
+      // Wait for render, then scroll to message
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const element = messageRefs.current.get(messageId);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setHighlightedMessageId(messageId);
+            setTimeout(() => setHighlightedMessageId(null), 3000);
+          }
+        }, 100);
+      });
+    } catch (error) {
+      console.error('Error scrolling to message:', error);
+    }
+  }, [channel.id, enrichMessages]);
 
   // Handle scroll to detect when user scrolls near top or bottom
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
@@ -634,9 +711,9 @@ export function ChatView({
         <div className="border-b border-border h-80 shrink-0">
           <MessageSearch
             channelId={channel.id}
-            onResultClick={(messageId, channelSlug) => {
+            onResultClick={(messageId) => {
               setShowSearch(false);
-              // TODO: Scroll to message
+              scrollToMessage(messageId);
             }}
             onClose={() => setShowSearch(false)}
           />
@@ -734,7 +811,14 @@ export function ChatView({
                 formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
 
               return (
-                <div key={message.id}>
+                <div 
+                  key={message.id}
+                  ref={(el) => {
+                    if (el) messageRefs.current.set(message.id, el);
+                    else messageRefs.current.delete(message.id);
+                  }}
+                  className={highlightedMessageId === message.id ? 'animate-pulse bg-primary/10 rounded-lg transition-colors duration-300' : ''}
+                >
                   {showDate && (
                     <div className="flex items-center gap-2 my-3 px-2">
                       <div className="flex-1 h-px bg-border" />
