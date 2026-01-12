@@ -146,6 +146,15 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     });
   }, [reports, savedMonthlyReturns]);
 
+  // Helper function to calculate compound return from an array of percentages
+  const calculateCompoundReturn = (returns: number[]): number => {
+    if (returns.length === 0) return 0;
+    // Multiply all factors: (1 + r1/100) × (1 + r2/100) × ...
+    const compoundFactor = returns.reduce((acc, r) => acc * (1 + r / 100), 1);
+    // Return percentage: (factor - 1) × 100
+    return (compoundFactor - 1) * 100;
+  };
+
   // Calculate metrics dynamically combining saved monthly returns + daily reports
   const metrics = useMemo((): AccountMetrics | null => {
     // Use config values or defaults
@@ -163,36 +172,51 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       savedMonthsSet.add(mr.month.substring(0, 7));
     });
 
-    // Total return = sum of saved monthly returns + daily reports for months NOT in saved
-    const savedTotal = savedMonthlyReturns.reduce((sum, mr) => sum + (mr.return_percent || 0), 0);
-    
-    // Calculate from daily reports only for months not in savedMonthlyReturns
-    const dailyNotInSaved = reports.filter(r => {
+    // Collect all monthly returns in order for compound calculation
+    // First: saved monthly returns (sorted by month)
+    const savedReturnsList = [...savedMonthlyReturns]
+      .sort((a, b) => a.month.localeCompare(b.month))
+      .map(mr => mr.return_percent || 0);
+
+    // Second: daily returns for months NOT in saved (grouped by month, then summed)
+    const dailyByMonth = new Map<string, number>();
+    reports.forEach(r => {
       const monthKey = r.date.substring(0, 7);
-      return !savedMonthsSet.has(monthKey);
+      if (!savedMonthsSet.has(monthKey)) {
+        dailyByMonth.set(monthKey, (dailyByMonth.get(monthKey) || 0) + (r.pnl_percent || 0));
+      }
     });
-    const dailyTotal = dailyNotInSaved.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
     
-    const totalReturn = savedTotal + dailyTotal;
+    // Sort unsaved months and get their returns
+    const unsavedMonthReturns = [...dailyByMonth.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([_, ret]) => ret);
+
+    // Combine: compound of saved returns, then compound with unsaved months
+    const allMonthlyReturns = [...savedReturnsList, ...unsavedMonthReturns];
+    const totalReturn = calculateCompoundReturn(allMonthlyReturns);
 
     // Day return (today only) - always from reports_daily
     const todayReport = reports.find(r => r.date === today);
     const dayReturn = todayReport?.pnl_percent || 0;
 
-    // Week return (last 7 days) - from reports_daily
-    const weekReturn = reports
+    // Week return (last 7 days) - compound
+    const weekReturns = reports
       .filter(r => r.date >= weekAgo)
-      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+      .map(r => r.pnl_percent || 0);
+    const weekReturn = calculateCompoundReturn(weekReturns);
 
-    // Month return (last 30 days) - from reports_daily
-    const monthReturn = reports
+    // Month return (last 30 days) - compound
+    const monthReturns = reports
       .filter(r => r.date >= monthAgo)
-      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+      .map(r => r.pnl_percent || 0);
+    const monthReturn = calculateCompoundReturn(monthReturns);
 
-    // Quarter return (last 90 days) - from reports_daily
-    const quarterReturn = reports
+    // Quarter return (last 90 days) - compound
+    const quarterReturns = reports
       .filter(r => r.date >= quarterAgo)
-      .reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+      .map(r => r.pnl_percent || 0);
+    const quarterReturn = calculateCompoundReturn(quarterReturns);
 
     // Max drawdown (from filtered period based on filterPeriod)
     let filteredForDrawdown = reports;
@@ -215,7 +239,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const deposits1m = 0;
     const withdrawals1m = 0;
 
-    // Total profit calculation using configured initial balance
+    // Total profit calculation using compound return
     const totalProfit = initialBalance * (totalReturn / 100);
 
     return {
@@ -233,12 +257,11 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     };
   }, [reports, savedMonthlyReturns, config, filterPeriod]);
 
-  // Calculate growth data (cumulative balance)
+  // Calculate growth data (cumulative balance using compound returns)
   const growthData = useMemo((): AccountGrowthPoint[] => {
     if (!reports.length) return [];
 
     const initialBalance = config?.initial_balance || 100000;
-    let cumulativeReturn = 0;
 
     // Filter based on filterPeriod
     let filteredReports = reports;
@@ -258,20 +281,25 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       filteredReports = reports.filter(r => r.date >= yearStart);
     }
 
-    // Calculate cumulative balance starting from the first report in the filter
-    // First, calculate the cumulative return up to the start of filtered period
+    // Calculate the starting balance (compound up to the first filtered date)
     const firstFilteredDate = filteredReports[0]?.date;
+    let startingBalance = initialBalance;
+    
     if (firstFilteredDate) {
       const beforeFiltered = reports.filter(r => r.date < firstFilteredDate);
-      cumulativeReturn = beforeFiltered.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
+      // Apply compound returns for all days before the filtered period
+      beforeFiltered.forEach(r => {
+        startingBalance *= (1 + (r.pnl_percent || 0) / 100);
+      });
     }
 
+    // Build growth data using compound calculation
+    let currentBalance = startingBalance;
     return filteredReports.map(report => {
-      cumulativeReturn += report.pnl_percent || 0;
-      const balance = initialBalance * (1 + cumulativeReturn / 100);
+      currentBalance *= (1 + (report.pnl_percent || 0) / 100);
       return {
         date: report.date,
-        balance: Math.round(balance),
+        balance: Math.round(currentBalance),
       };
     });
   }, [reports, config, filterPeriod]);
