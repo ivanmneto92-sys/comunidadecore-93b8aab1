@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfDay, subDays, startOfMonth, startOfQuarter, startOfYear, format, parseISO } from 'date-fns';
+import { subDays, startOfYear, format } from 'date-fns';
 
 export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
 
