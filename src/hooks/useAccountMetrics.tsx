@@ -225,7 +225,8 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     if (filterPeriod === '7d') {
       filteredForPeriod = reports.filter(r => r.date >= weekAgo);
     } else if (filterPeriod === '30d') {
-      filteredForPeriod = reports.filter(r => r.date >= monthAgo);
+      // Use current calendar month (same as "Mês" card)
+      filteredForPeriod = reports.filter(r => r.date.startsWith(currentMonthKey));
     } else if (filterPeriod === '90d') {
       filteredForPeriod = reports.filter(r => r.date >= quarterAgo);
     } else if (filterPeriod === 'ytd') {
@@ -287,8 +288,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       const cutoff = format(subDays(today, 7), 'yyyy-MM-dd');
       filteredReports = reports.filter(r => r.date >= cutoff);
     } else if (filterPeriod === '30d') {
-      const cutoff = format(subDays(today, 30), 'yyyy-MM-dd');
-      filteredReports = reports.filter(r => r.date >= cutoff);
+      // Use current calendar month (same as "Mês" card)
+      const currentMonthKey = format(today, 'yyyy-MM');
+      filteredReports = reports.filter(r => r.date.startsWith(currentMonthKey));
     } else if (filterPeriod === '90d') {
       const cutoff = format(subDays(today, 90), 'yyyy-MM-dd');
       filteredReports = reports.filter(r => r.date >= cutoff);
