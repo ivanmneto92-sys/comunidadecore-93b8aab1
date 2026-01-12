@@ -1259,6 +1259,7 @@ export type Database = {
           currency: string
           id: string
           initial_balance: number
+          max_drawdown_override: number | null
           start_date: string
           total_deposits: number | null
           total_withdrawals: number | null
@@ -1269,6 +1270,7 @@ export type Database = {
           currency?: string
           id?: string
           initial_balance?: number
+          max_drawdown_override?: number | null
           start_date?: string
           total_deposits?: number | null
           total_withdrawals?: number | null
@@ -1279,6 +1281,7 @@ export type Database = {
           currency?: string
           id?: string
           initial_balance?: number
+          max_drawdown_override?: number | null
           start_date?: string
           total_deposits?: number | null
           total_withdrawals?: number | null

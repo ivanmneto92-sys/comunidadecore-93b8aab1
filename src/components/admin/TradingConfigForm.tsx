@@ -16,6 +16,7 @@ interface TradingConfig {
   currency: string;
   total_deposits: number;
   total_withdrawals: number;
+  max_drawdown_override: number | null;
 }
 
 export function TradingConfigForm() {
@@ -29,6 +30,7 @@ export function TradingConfigForm() {
   const [startDate, setStartDate] = useState('2024-06-01');
   const [totalDeposits, setTotalDeposits] = useState('0');
   const [totalWithdrawals, setTotalWithdrawals] = useState('0');
+  const [maxDrawdownOverride, setMaxDrawdownOverride] = useState('');
   const [currency, setCurrency] = useState('USD');
 
   const fetchConfig = async () => {
@@ -50,6 +52,7 @@ export function TradingConfigForm() {
         setCurrency(data.currency);
         setTotalDeposits(String(data.total_deposits || 0));
         setTotalWithdrawals(String(data.total_withdrawals || 0));
+        setMaxDrawdownOverride(data.max_drawdown_override ? String(data.max_drawdown_override) : '');
       }
     } catch (err) {
       console.error('Error fetching trading config:', err);
@@ -71,6 +74,7 @@ export function TradingConfigForm() {
         currency,
         total_deposits: parseFloat(totalDeposits) || 0,
         total_withdrawals: parseFloat(totalWithdrawals) || 0,
+        max_drawdown_override: maxDrawdownOverride ? parseFloat(maxDrawdownOverride) : null,
       };
 
       if (config?.id) {
@@ -206,6 +210,26 @@ export function TradingConfigForm() {
           />
           <p className="text-xs text-muted-foreground">
             Valor total de saques realizados da banca
+          </p>
+        </div>
+
+        {/* Max Drawdown Override */}
+        <div className="space-y-2">
+          <Label htmlFor="max_drawdown_override" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-status-warning" />
+            DD Máximo Histórico (%)
+          </Label>
+          <Input
+            id="max_drawdown_override"
+            type="number"
+            step="0.01"
+            value={maxDrawdownOverride}
+            onChange={(e) => setMaxDrawdownOverride(e.target.value)}
+            placeholder="Ex: 19.9"
+            className="max-w-xs"
+          />
+          <p className="text-xs text-muted-foreground">
+            Valor máximo de drawdown já registrado historicamente (override)
           </p>
         </div>
 

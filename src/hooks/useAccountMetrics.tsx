@@ -41,6 +41,7 @@ interface TradingConfig {
   currency: string;
   total_deposits: number;
   total_withdrawals: number;
+  max_drawdown_override: number | null;
 }
 
 interface SavedMonthlyReturn {
@@ -63,7 +64,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       // Fetch trading config
       const { data: configData } = await supabase
         .from('trading_config')
-        .select('initial_balance, start_date, currency, total_deposits, total_withdrawals')
+        .select('initial_balance, start_date, currency, total_deposits, total_withdrawals, max_drawdown_override')
         .limit(1)
         .single();
 
@@ -230,9 +231,12 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       filteredForDrawdown = reports.filter(r => r.date >= yearStart);
     }
 
-    const maxDrawdown = filteredForDrawdown.length > 0 
+    const calculatedMaxDrawdown = filteredForDrawdown.length > 0 
       ? Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0)
       : 0;
+
+    // Use the greater of calculated or override (historical max)
+    const maxDrawdown = Math.max(calculatedMaxDrawdown, config?.max_drawdown_override || 0);
 
     // Get deposits/withdrawals from trading config
     const deposits1m = config?.total_deposits || 0;
