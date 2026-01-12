@@ -1445,6 +1445,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trading_journal: {
+        Row: {
+          created_at: string | null
+          date: string
+          emotional_state: string | null
+          followed_plan: boolean | null
+          id: string
+          losses: number | null
+          notes: string | null
+          pnl_percent: number | null
+          trades_count: number | null
+          updated_at: string | null
+          user_id: string
+          wins: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          emotional_state?: string | null
+          followed_plan?: boolean | null
+          id?: string
+          losses?: number | null
+          notes?: string | null
+          pnl_percent?: number | null
+          trades_count?: number | null
+          updated_at?: string | null
+          user_id: string
+          wins?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          emotional_state?: string | null
+          followed_plan?: boolean | null
+          id?: string
+          losses?: number | null
+          notes?: string | null
+          pnl_percent?: number | null
+          trades_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+          wins?: number | null
+        }
+        Relationships: []
+      }
       user_xp: {
         Row: {
           created_at: string
