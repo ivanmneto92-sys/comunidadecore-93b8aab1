@@ -192,9 +192,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([_, ret]) => ret);
 
-    // Combine: compound of saved returns, then compound with unsaved months
+    // Combine: simple sum of all monthly returns
     const allMonthlyReturns = [...savedReturnsList, ...unsavedMonthReturns];
-    const totalReturn = calculateCompoundReturn(allMonthlyReturns);
+    const totalReturn = allMonthlyReturns.reduce((sum, r) => sum + r, 0);
 
     // Day return (today only) - always from reports_daily
     const todayReport = reports.find(r => r.date === today);
@@ -211,9 +211,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     const currentMonthReports = reports.filter(r => r.date.startsWith(currentMonthKey));
     const monthReturn = currentMonthReports.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
 
-    // Quarter return (last 3 months - compound of monthly returns)
+    // Quarter return (last 3 months - simple sum of monthly returns)
     const sortedMonthlyReturns = [...combinedMonthlyReturns].slice(-3);
-    const quarterReturn = calculateCompoundReturn(sortedMonthlyReturns.map(m => m.returnPercent));
+    const quarterReturn = sortedMonthlyReturns.reduce((sum, m) => sum + m.returnPercent, 0);
 
     // Max drawdown (from filtered period based on filterPeriod)
     let filteredForDrawdown = reports;
