@@ -1260,6 +1260,8 @@ export type Database = {
           id: string
           initial_balance: number
           start_date: string
+          total_deposits: number | null
+          total_withdrawals: number | null
           updated_at: string
         }
         Insert: {
@@ -1268,6 +1270,8 @@ export type Database = {
           id?: string
           initial_balance?: number
           start_date?: string
+          total_deposits?: number | null
+          total_withdrawals?: number | null
           updated_at?: string
         }
         Update: {
@@ -1276,6 +1280,8 @@ export type Database = {
           id?: string
           initial_balance?: number
           start_date?: string
+          total_deposits?: number | null
+          total_withdrawals?: number | null
           updated_at?: string
         }
         Relationships: []

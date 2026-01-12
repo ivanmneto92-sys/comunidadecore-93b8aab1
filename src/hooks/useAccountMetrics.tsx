@@ -39,6 +39,8 @@ interface TradingConfig {
   initial_balance: number;
   start_date: string;
   currency: string;
+  total_deposits: number;
+  total_withdrawals: number;
 }
 
 interface SavedMonthlyReturn {
@@ -61,7 +63,7 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       // Fetch trading config
       const { data: configData } = await supabase
         .from('trading_config')
-        .select('initial_balance, start_date, currency')
+        .select('initial_balance, start_date, currency, total_deposits, total_withdrawals')
         .limit(1)
         .single();
 
@@ -232,9 +234,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
       ? Math.max(...filteredForDrawdown.map(r => r.drawdown_percent || 0), 0)
       : 0;
 
-    // Placeholder values for deposits/withdrawals (would need separate data source)
-    const deposits1m = 0;
-    const withdrawals1m = 0;
+    // Get deposits/withdrawals from trading config
+    const deposits1m = config?.total_deposits || 0;
+    const withdrawals1m = config?.total_withdrawals || 0;
 
     // Total profit calculation using compound return
     const totalProfit = initialBalance * (totalReturn / 100);
