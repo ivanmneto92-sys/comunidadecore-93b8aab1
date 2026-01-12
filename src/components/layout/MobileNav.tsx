@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BarChart3, MessageCircle, GraduationCap, User } from 'lucide-react';
+import { Home, BarChart3, BookOpen, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/results', icon: BarChart3, label: 'Resultados' },
+  { to: '/journal', icon: BookOpen, label: 'Diário' },
   { to: '/community', icon: MessageCircle, label: 'Comunidade' },
-  { to: '/academy', icon: GraduationCap, label: 'Academia' },
   { to: '/profile', icon: User, label: 'Perfil' },
 ];
 

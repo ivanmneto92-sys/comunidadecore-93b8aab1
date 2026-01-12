@@ -17,6 +17,7 @@ import Onboarding from "./pages/Onboarding";
 import Affiliates from "./pages/Affiliates";
 import StreakHistory from "./pages/StreakHistory";
 import Achievements from "./pages/Achievements";
+import Journal from "./pages/Journal";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Install from "./pages/Install";
@@ -81,6 +82,11 @@ const App = () => (
             <Route path="/achievements" element={
               <ProtectedRoute>
                 <Achievements />
+              </ProtectedRoute>
+            } />
+            <Route path="/journal" element={
+              <ProtectedRoute>
+                <Journal />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
