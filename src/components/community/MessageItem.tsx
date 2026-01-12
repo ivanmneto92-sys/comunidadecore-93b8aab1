@@ -74,6 +74,7 @@ export function MessageItem({
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -347,7 +348,7 @@ export function MessageItem({
       </div>
 
       {/* Hover actions */}
-      {showActions && isHovered && !isEditing && (
+      {showActions && (isHovered || isDropdownOpen) && !isEditing && (
         <div className="absolute -top-3 right-2 flex items-center gap-0.5 bg-card border border-border rounded-md shadow-sm p-0.5">
           <ReactionPicker onSelect={handleReaction} />
           
@@ -363,7 +364,7 @@ export function MessageItem({
           )}
 
           {(isOwnMessage || isAdmin) && (
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
                   <MoreHorizontal className="h-3.5 w-3.5" />
