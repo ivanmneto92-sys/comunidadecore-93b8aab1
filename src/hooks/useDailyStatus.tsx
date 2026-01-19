@@ -29,19 +29,21 @@ export function useDailyStatus() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: healthScore, isLoading: isLoadingHealth } = useQuery({
-    queryKey: ['health-score', today],
+    queryKey: ['health-score-latest'],
     queryFn: async () => {
+      // Fetch the most recent health score (auto-calculated from daily reports)
       const { data, error } = await supabase
         .from('health_scores')
-        .select('score, status, profile_type, risk_level, drawdown_status, insight_text')
-        .eq('date', today)
+        .select('score, status, profile_type, risk_level, drawdown_status, insight_text, date')
+        .order('date', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 seconds - updates when report is published
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: dailyReportData, isLoading: isLoadingReport } = useQuery({
