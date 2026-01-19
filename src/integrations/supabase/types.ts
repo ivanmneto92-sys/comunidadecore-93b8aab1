@@ -1676,6 +1676,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_health_score: {
+        Args: { target_date: string }
+        Returns: {
+          calc_drawdown_status: string
+          calc_insight_text: string
+          calc_profile_type: string
+          calc_risk_level: string
+          calc_score: number
+          calc_status: string
+        }[]
+      }
       generate_affiliate_code: { Args: never; Returns: string }
       get_unread_counts: {
         Args: { p_user_id: string }
