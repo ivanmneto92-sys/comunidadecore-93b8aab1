@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email with OTP code
     const emailResponse = await resend.emails.send({
-      from: "CORE <noreply@resend.dev>",
+      from: "CORE <noreply@meoocore.com.br>",
       to: [email],
       subject: "Código de Recuperação de Senha - CORE",
       html: `
