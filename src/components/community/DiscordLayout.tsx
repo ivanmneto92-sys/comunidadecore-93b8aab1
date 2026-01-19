@@ -117,38 +117,38 @@ export function DiscordLayout() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
-      {/* ===== MOBILE LAYOUT - FULLSCREEN NAVIGATION ===== */}
+      {/* ===== MOBILE LAYOUT ===== */}
       <div className="flex h-full w-full md:hidden">
-        {mobileView === 'channels' ? (
-          // Fullscreen Channel List
-          <div className="flex-1 h-full overflow-hidden">
+        {/* ServerSidebar - ALWAYS visible, compact */}
+        <div className="w-[52px] shrink-0 h-full">
+          <ServerSidebar
+            channels={channels}
+            selectedChannel={selectedChannel}
+            onSelectChannel={handleSelectChannel}
+            compact={true}
+            onOpenNews={() => setShowNews(true)}
+          />
+        </div>
+        
+        {/* Main content area - switches between channels and chat */}
+        <div className="flex-1 h-full overflow-hidden">
+          {mobileView === 'channels' ? (
             <ChannelListPanel
               channels={channels}
               selectedChannel={selectedChannel}
               onSelectChannel={handleSelectChannel}
               unreadCounts={unreadCounts}
-              onlineCount={onlineCount}
-              showFullHeader
             />
-          </div>
-        ) : mobileView === 'support' ? (
-          // Fullscreen Support View
-          <div className="flex-1 h-full overflow-hidden">
+          ) : mobileView === 'support' ? (
             <SupportView onGoBack={handleGoBack} />
-          </div>
-        ) : selectedChannel?.slug === 'noticias-mercado' ? (
-          // Fullscreen News Channel
-          <div className="flex-1 h-full overflow-hidden">
+          ) : selectedChannel?.slug === 'noticias-mercado' ? (
             <NewsChannelView
               channel={selectedChannel}
               onGoBack={handleGoBack}
               onlineCount={onlineCount}
             />
-          </div>
-        ) : (
-          // Fullscreen Chat View
-          selectedChannel && (
-            <div className="flex-1 h-full overflow-hidden">
+          ) : (
+            selectedChannel && (
               <ChatView
                 channel={selectedChannel}
                 isAdmin={isAdmin}
@@ -157,9 +157,9 @@ export function DiscordLayout() {
                 onlineCount={onlineCount}
                 onlineUsers={onlineUsers}
               />
-            </div>
-          )
-        )}
+            )
+          )}
+        </div>
       </div>
 
       {/* Mobile Thread Modal */}
