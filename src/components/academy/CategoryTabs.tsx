@@ -1,17 +1,18 @@
 import { cn } from '@/lib/utils';
 
-interface CategoryTabsProps {
-  categories: string[];
-  activeCategory: string | null;
-  onCategoryChange: (category: string | null) => void;
-  tutorialCounts: Record<string, number>;
+interface TutorialCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
 }
 
-const categoryConfig: Record<string, { label: string }> = {
-  beginner: { label: 'Iniciante' },
-  intermediate: { label: 'Intermed.' },
-  advanced: { label: 'Avançado' },
-};
+interface CategoryTabsProps {
+  categories: TutorialCategory[];
+  activeCategory: string | null;
+  onCategoryChange: (categoryId: string | null) => void;
+  tutorialCounts: Record<string, number>;
+}
 
 export function CategoryTabs({
   categories,
@@ -21,17 +22,13 @@ export function CategoryTabs({
 }: CategoryTabsProps) {
   const totalCount = Object.values(tutorialCounts).reduce((a, b) => a + b, 0);
 
-  // Build tabs: All + existing categories in order
-  const orderedCategories = ['beginner', 'intermediate', 'advanced'].filter(
-    (cat) => categories.includes(cat)
-  );
-
   const tabs = [
-    { key: null, label: 'Todos', count: totalCount },
-    ...orderedCategories.map((key) => ({
-      key,
-      label: categoryConfig[key]?.label || key,
-      count: tutorialCounts[key] || 0,
+    { key: null, label: 'Todos', count: totalCount, icon: null },
+    ...categories.map((cat) => ({
+      key: cat.id,
+      label: cat.name,
+      count: tutorialCounts[cat.id] || 0,
+      icon: cat.icon,
     })),
   ];
 
@@ -57,6 +54,7 @@ export function CategoryTabs({
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
+              {tab.icon && <span className="text-base mb-0.5">{tab.icon}</span>}
               <span className="truncate">{tab.label}</span>
               <span
                 className={cn(
@@ -70,6 +68,38 @@ export function CategoryTabs({
           );
         })}
       </div>
+      {/* Show more tabs if needed */}
+      {tabs.length > 4 && (
+        <div className="grid gap-1 mt-1" style={{ gridTemplateColumns: `repeat(${Math.min(tabs.length - 4, 4)}, minmax(0, 1fr))` }}>
+          {tabs.slice(4).map((tab) => {
+            const isActive = activeCategory === tab.key;
+
+            return (
+              <button
+                key={tab.key ?? 'extra'}
+                onClick={() => onCategoryChange(tab.key)}
+                className={cn(
+                  'flex flex-col items-center justify-center py-2 px-1 rounded-md text-xs font-medium transition-colors',
+                  isActive
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {tab.icon && <span className="text-base mb-0.5">{tab.icon}</span>}
+                <span className="truncate">{tab.label}</span>
+                <span
+                  className={cn(
+                    'text-[10px] mt-0.5',
+                    isActive ? 'text-primary' : 'text-muted-foreground/70'
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

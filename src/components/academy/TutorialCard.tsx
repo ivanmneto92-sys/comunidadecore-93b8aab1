@@ -6,7 +6,7 @@ interface Tutorial {
   id: string;
   title: string;
   description: string | null;
-  category: string;
+  category_id?: string | null;
   tier_required: 'free' | 'plus' | 'elite';
   video_url?: string | null;
 }
@@ -18,12 +18,6 @@ interface TutorialCardProps {
   onSelect: () => void;
   className?: string;
 }
-
-const categoryLabels: Record<string, string> = {
-  beginner: 'Iniciante',
-  intermediate: 'Intermediário',
-  advanced: 'Avançado',
-};
 
 const tierBadges: Record<string, { label: string; className: string }> = {
   plus: {
@@ -101,9 +95,6 @@ export function TutorialCard({
           </p>
         )}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
-            {categoryLabels[tutorial.category] || tutorial.category}
-          </span>
           {tierBadge && (
             <Badge
               variant="outline"

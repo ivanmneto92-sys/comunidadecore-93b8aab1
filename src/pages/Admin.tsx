@@ -8,6 +8,7 @@ import { HealthScoreForm } from '@/components/admin/HealthScoreForm';
 import { TutorialManager } from '@/components/admin/TutorialManager';
 import { ChannelManager } from '@/components/admin/ChannelManager';
 import { CategoryManager } from '@/components/admin/CategoryManager';
+import { TutorialCategoryManager } from '@/components/admin/TutorialCategoryManager';
 import { AffiliateManager } from '@/components/admin/AffiliateManager';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { UserManager } from '@/components/admin/UserManager';
@@ -91,6 +92,10 @@ export default function Admin() {
               <GraduationCap className="h-4 w-4" />
               <span>Academy</span>
             </TabsTrigger>
+            <TabsTrigger value="tutorial-categories" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
+              <FolderOpen className="h-4 w-4" />
+              <span>Módulos</span>
+            </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <FolderOpen className="h-4 w-4" />
               <span>Categorias</span>
@@ -145,6 +150,10 @@ export default function Admin() {
 
           <TabsContent value="academy" className="mt-4">
             <TutorialManager />
+          </TabsContent>
+
+          <TabsContent value="tutorial-categories" className="mt-4">
+            <TutorialCategoryManager />
           </TabsContent>
 
           <TabsContent value="categories" className="mt-4">
