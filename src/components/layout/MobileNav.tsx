@@ -1,17 +1,30 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, BarChart3, GraduationCap, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/results', icon: BarChart3, label: 'Resultados' },
-  { to: '/academy', icon: GraduationCap, label: 'Tutoriais' },
-  { to: '/community', icon: MessageCircle, label: 'Comunidade' },
-  { to: '/profile', icon: User, label: 'Perfil' },
+  { to: '/', icon: Home, label: 'Home', prefetchKey: null },
+  { to: '/results', icon: BarChart3, label: 'Resultados', prefetchKey: 'reports-prefetch' },
+  { to: '/academy', icon: GraduationCap, label: 'Tutoriais', prefetchKey: 'tutorials-prefetch' },
+  { to: '/community', icon: MessageCircle, label: 'Comunidade', prefetchKey: 'channels-prefetch' },
+  { to: '/profile', icon: User, label: 'Perfil', prefetchKey: null },
 ];
 
 export function MobileNav() {
   const location = useLocation();
+  const queryClient = useQueryClient();
+
+  // Prefetch data on hover/touch for faster navigation
+  const handlePrefetch = useCallback((route: string) => {
+    if (route === '/results') {
+      queryClient.prefetchQuery({
+        queryKey: ['account-metrics', '30d'],
+        staleTime: 60 * 1000,
+      });
+    }
+  }, [queryClient]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
@@ -26,6 +39,8 @@ export function MobileNav() {
             <NavLink
               key={item.to}
               to={item.to}
+              onMouseEnter={() => handlePrefetch(item.to)}
+              onTouchStart={() => handlePrefetch(item.to)}
               className={cn(
                 'flex flex-col items-center justify-center gap-0.5 rounded-lg px-3 py-1.5 text-[10px] font-medium transition-colors min-w-[56px]',
                 isActive

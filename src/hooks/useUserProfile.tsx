@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -36,77 +36,55 @@ interface UserProfileData {
 
 export function useUserProfile(): UserProfileData & { refetch: () => void } {
   const { user, loading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [roles, setRoles] = useState<AppRole[]>([]);
-  const [membership, setMembership] = useState<MembershipTier>('free');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchUserData = useCallback(async () => {
-    // Wait for auth to finish loading before checking user
-    if (authLoading) {
-      return;
-    }
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
-    if (!user) {
-      setProfile(null);
-      setRoles([]);
-      setMembership('free');
-      setLoading(false);
-      setError(null);
-      return;
-    }
+      // Fetch all user data in parallel for speed
+      const [profileResult, rolesResult, membershipResult] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        supabase.from('user_roles').select('role').eq('user_id', user.id),
+        supabase.from('memberships').select('tier, expires_at').eq('user_id', user.id).single(),
+      ]);
 
-    setLoading(true);
-    setError(null);
-    try {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      setProfile(profileData);
+      return {
+        profile: profileResult.data as Profile | null,
+        roles: ((rolesResult.data as UserRole[]) || []).map(r => r.role),
+        membership: (membershipResult.data as Membership)?.tier || 'free',
+      };
+    },
+    enabled: !authLoading && !!user,
+    staleTime: 10 * 60 * 1000, // 10 minutes - profile data rarely changes
+    gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
+  });
 
-      // Fetch roles
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
-      
-      setRoles((rolesData as UserRole[] || []).map(r => r.role));
+  // Handle case when user logs out
+  if (!user && !authLoading) {
+    return {
+      profile: null,
+      roles: [],
+      membership: 'free',
+      isAdmin: false,
+      isModerator: false,
+      loading: false,
+      error: null,
+      refetch: () => queryClient.invalidateQueries({ queryKey: ['user-profile'] }),
+    };
+  }
 
-      // Fetch membership
-      const { data: membershipData } = await supabase
-        .from('memberships')
-        .select('tier, expires_at')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (membershipData) {
-        setMembership((membershipData as Membership).tier);
-      }
-    } catch (err) {
-      console.error('Error fetching user data:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch user data'));
-    } finally {
-      setLoading(false);
-    }
-  }, [user, authLoading]);
-
-  useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+  const roles = data?.roles || [];
 
   return {
-    profile,
+    profile: data?.profile || null,
     roles,
-    membership,
+    membership: data?.membership || 'free',
     isAdmin: roles.includes('admin'),
     isModerator: roles.includes('moderator'),
-    loading: authLoading || loading,
-    error,
-    refetch: fetchUserData
+    loading: authLoading || isLoading,
+    error: error instanceof Error ? error : null,
+    refetch: () => refetch(),
   };
 }
