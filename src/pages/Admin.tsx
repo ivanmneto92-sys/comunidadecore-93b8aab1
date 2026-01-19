@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +23,12 @@ import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users,
 export default function Admin() {
   const { isAdmin, loading } = useUserProfile();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'dashboard';
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -59,7 +65,7 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="flex w-full overflow-x-auto scrollbar-hidden bg-card gap-1 p-1">
             <TabsTrigger value="dashboard" className="flex items-center gap-1.5 text-xs px-3 shrink-0">
               <LayoutDashboard className="h-4 w-4" />
