@@ -29,6 +29,7 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [tokenId, setTokenId] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,6 +40,7 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
     setStep('email');
     setEmail('');
     setOtpCode('');
+    setTokenId('');
     setPassword('');
     setConfirmPassword('');
     setErrors({});
@@ -65,13 +67,21 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { data, error } = await supabase.functions.invoke('send-reset-code', {
+        body: { email },
+      });
 
       if (error) {
         toast({
           variant: 'destructive',
           title: 'Erro',
-          description: error.message,
+          description: error.message || 'Erro ao enviar código',
+        });
+      } else if (data?.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: data.error,
         });
       } else {
         setStep('otp');
@@ -80,6 +90,12 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
           description: 'Verifique sua caixa de entrada.',
         });
       }
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: err.message || 'Erro ao enviar código',
+      });
     } finally {
       setLoading(false);
     }
@@ -100,21 +116,32 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otpCode,
-        type: 'recovery',
+      const { data, error } = await supabase.functions.invoke('verify-reset-code', {
+        body: { email, code: otpCode },
       });
 
       if (error) {
         toast({
           variant: 'destructive',
-          title: 'Código inválido',
-          description: 'Verifique o código e tente novamente.',
+          title: 'Erro',
+          description: error.message || 'Erro ao verificar código',
         });
-      } else {
+      } else if (data?.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Código inválido',
+          description: data.error,
+        });
+      } else if (data?.success) {
+        setTokenId(data.tokenId);
         setStep('password');
       }
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: err.message || 'Erro ao verificar código',
+      });
     } finally {
       setLoading(false);
     }
@@ -123,13 +150,15 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
   const handleResendCode = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { data, error } = await supabase.functions.invoke('send-reset-code', {
+        body: { email },
+      });
 
-      if (error) {
+      if (error || data?.error) {
         toast({
           variant: 'destructive',
           title: 'Erro',
-          description: error.message,
+          description: error?.message || data?.error || 'Erro ao reenviar código',
         });
       } else {
         setOtpCode('');
@@ -138,6 +167,12 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
           description: 'Verifique sua caixa de entrada.',
         });
       }
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: err.message || 'Erro ao reenviar código',
+      });
     } finally {
       setLoading(false);
     }
@@ -167,17 +202,31 @@ export function ForgotPasswordModal({ open, onOpenChange }: ForgotPasswordModalP
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { data, error } = await supabase.functions.invoke('reset-password', {
+        body: { email, tokenId, newPassword: password },
+      });
 
       if (error) {
         toast({
           variant: 'destructive',
           title: 'Erro',
-          description: error.message,
+          description: error.message || 'Erro ao redefinir senha',
         });
-      } else {
+      } else if (data?.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: data.error,
+        });
+      } else if (data?.success) {
         setStep('success');
       }
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: err.message || 'Erro ao redefinir senha',
+      });
     } finally {
       setLoading(false);
     }
