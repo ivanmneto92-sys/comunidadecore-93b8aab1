@@ -29,6 +29,7 @@ export default function Results() {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterPeriod>('30d');
+  const [visibleCount, setVisibleCount] = useState(15); // Virtualization: start with 15 items
   
   // Pass filter to useAccountMetrics so all data respects the filter
   const { metrics, monthlyReturns, growthData, loading: metricsLoading } = useAccountMetrics(filter);
@@ -39,7 +40,7 @@ export default function Results() {
       try {
         const { data, error } = await supabase
           .from('reports_daily')
-          .select('*')
+          .select('id, date, trades_count, win_rate, pnl_percent, drawdown_percent, profile_type, status, ai_comment')
           .not('published_at', 'is', null)
           .order('date', { ascending: false });
 
@@ -54,6 +55,11 @@ export default function Results() {
 
     fetchReports();
   }, []);
+  
+  // Reset visible count when filter changes
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [filter]);
 
   const filteredReports = useMemo(() => {
     const now = new Date();
@@ -170,7 +176,7 @@ export default function Results() {
           </div>
         )}
 
-        {/* Daily Results Feed */}
+        {/* Daily Results Feed - Virtualized */}
         <div className="space-y-2 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Histórico Diário
@@ -181,15 +187,25 @@ export default function Results() {
             </p>
           ) : (
             <div className="space-y-2">
-              {filteredReports.map((report, index) => (
+              {filteredReports.slice(0, visibleCount).map((report, index) => (
                 <div 
                   key={report.id} 
                   className="animate-fade-in"
-                  style={{ animationDelay: `${350 + index * 30}ms` }}
+                  style={{ animationDelay: `${Math.min(index * 20, 150)}ms` }}
                 >
                   <DailyResultItem report={report} />
                 </div>
               ))}
+              
+              {/* Load More Button */}
+              {visibleCount < filteredReports.length && (
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 15)}
+                  className="w-full py-3 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  Carregar mais ({filteredReports.length - visibleCount} restantes)
+                </button>
+              )}
             </div>
           )}
         </div>

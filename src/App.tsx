@@ -26,7 +26,16 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute default
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      refetchOnWindowFocus: false, // Don't refetch when switching tabs
+      retry: 1, // Only 1 retry on failure
+    },
+  },
+});
 
 // Minimal loading fallback that doesn't affect UX
 const PageLoader = () => (

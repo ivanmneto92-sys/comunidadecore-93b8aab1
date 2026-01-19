@@ -57,18 +57,19 @@ export function useDailyStatus() {
 
       if (todayError) throw todayError;
 
-      // Fetch all reports to calculate positive days streak
-      const { data: allReports, error: allError } = await supabase
+      // Fetch last 30 reports to calculate positive days streak (optimized)
+      const { data: recentReports, error: recentError } = await supabase
         .from('reports_daily')
-        .select('pnl_percent, date')
+        .select('pnl_percent')
         .not('published_at', 'is', null)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .limit(30);
 
-      if (allError) throw allError;
+      if (recentError) throw recentError;
 
       let positiveDays = 0;
-      if (allReports && allReports.length > 0) {
-        for (const report of allReports) {
+      if (recentReports && recentReports.length > 0) {
+        for (const report of recentReports) {
           if (Number(report.pnl_percent) > 0) {
             positiveDays++;
           } else {
@@ -79,8 +80,8 @@ export function useDailyStatus() {
 
       return { todayReport, positiveDays };
     },
-    staleTime: 0,
-    refetchOnMount: true,
+    staleTime: 30 * 1000, // 30 seconds - balance freshness with performance
+    refetchOnMount: 'always',
   });
 
   const { data: highlights, isLoading: isLoadingHighlights } = useQuery({
