@@ -19,9 +19,10 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   
   const { signIn, signUp, user } = useAuth();
@@ -47,7 +48,7 @@ export default function Auth() {
   }, [user, navigate, from]);
 
   const validate = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
     
     try {
       emailSchema.parse(email);
@@ -63,6 +64,11 @@ export default function Auth() {
       if (e instanceof z.ZodError) {
         newErrors.password = e.errors[0].message;
       }
+    }
+
+    // Validate password confirmation only for signup
+    if (!isLogin && password !== confirmPassword) {
+      newErrors.confirmPassword = 'As senhas não coincidem';
     }
 
     setErrors(newErrors);
@@ -226,6 +232,23 @@ export default function Auth() {
                 )}
               </div>
 
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    aria-invalid={!!errors.confirmPassword}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              )}
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLogin ? 'Entrar' : 'Criar conta'}
@@ -237,7 +260,10 @@ export default function Auth() {
                 <p className="text-muted-foreground">
                   Não tem conta?{' '}
                   <button
-                    onClick={() => setIsLogin(false)}
+                    onClick={() => {
+                      setIsLogin(false);
+                      setErrors({});
+                    }}
                     className="text-primary hover:underline"
                   >
                     Cadastre-se
@@ -247,7 +273,11 @@ export default function Auth() {
                 <p className="text-muted-foreground">
                   Já tem conta?{' '}
                   <button
-                    onClick={() => setIsLogin(true)}
+                    onClick={() => {
+                      setIsLogin(true);
+                      setConfirmPassword('');
+                      setErrors({});
+                    }}
                     className="text-primary hover:underline"
                   >
                     Entrar
