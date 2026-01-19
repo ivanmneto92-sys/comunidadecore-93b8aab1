@@ -35,7 +35,7 @@ interface UserProfileData {
 }
 
 export function useUserProfile(): UserProfileData & { refetch: () => void } {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [membership, setMembership] = useState<MembershipTier>('free');
@@ -43,6 +43,11 @@ export function useUserProfile(): UserProfileData & { refetch: () => void } {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUserData = useCallback(async () => {
+    // Wait for auth to finish loading before checking user
+    if (authLoading) {
+      return;
+    }
+
     if (!user) {
       setProfile(null);
       setRoles([]);
@@ -88,7 +93,7 @@ export function useUserProfile(): UserProfileData & { refetch: () => void } {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     fetchUserData();
@@ -100,7 +105,7 @@ export function useUserProfile(): UserProfileData & { refetch: () => void } {
     membership,
     isAdmin: roles.includes('admin'),
     isModerator: roles.includes('moderator'),
-    loading,
+    loading: authLoading || loading,
     error,
     refetch: fetchUserData
   };
