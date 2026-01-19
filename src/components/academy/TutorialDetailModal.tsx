@@ -12,7 +12,7 @@ interface Tutorial {
   title: string;
   slug?: string;
   description: string | null;
-  category: string;
+  category_id?: string | null;
   tier_required: 'free' | 'plus' | 'elite';
   content: string | null;
   video_url: string | null;
@@ -29,12 +29,6 @@ interface TutorialDetailModalProps {
   hasPrevious?: boolean;
   hasNext?: boolean;
 }
-
-const categoryLabels: Record<string, string> = {
-  beginner: 'Iniciante',
-  intermediate: 'Intermediário',
-  advanced: 'Avançado',
-};
 
 function getYouTubeEmbedUrl(url: string | null): string | null {
   if (!url) return null;
@@ -96,8 +90,8 @@ export function TutorialDetailModal({
             <X className="h-5 w-5" />
           </button>
 
-          <span className="text-xs text-muted-foreground">
-            {categoryLabels[tutorial.category] || tutorial.category}
+          <span className="text-xs text-muted-foreground font-medium">
+            Tutorial
           </span>
 
           <div className="flex items-center gap-1">

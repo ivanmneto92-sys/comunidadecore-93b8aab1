@@ -21,7 +21,7 @@ const tutorialSchema = z.object({
   description: z.string().optional(),
   content: z.string().optional(),
   video_url: z.string().optional(),
-  category: z.string().min(1, 'Categoria é obrigatória'),
+  category_id: z.string().optional(),
   tier_required: z.enum(['free', 'plus', 'elite']),
   is_published: z.boolean(),
   sort_order: z.coerce.number(),
@@ -36,15 +36,23 @@ interface Tutorial {
   description: string | null;
   content: string | null;
   video_url: string | null;
-  category: string;
+  category_id: string | null;
   tier_required: 'free' | 'plus' | 'elite';
   is_published: boolean;
   sort_order: number;
+  category_name?: string;
+}
+
+interface TutorialCategory {
+  id: string;
+  name: string;
+  icon: string | null;
 }
 
 export function TutorialManager() {
   const { toast } = useToast();
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [categories, setCategories] = useState<TutorialCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -57,28 +65,49 @@ export function TutorialManager() {
       description: '',
       content: '',
       video_url: '',
-      category: 'beginner',
+      category_id: '',
       tier_required: 'free',
       is_published: false,
       sort_order: 0,
     },
   });
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('tutorial_categories')
+      .select('id, name, icon')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true });
+
+    if (!error && data) {
+      setCategories(data);
+    }
+  };
+
   const fetchTutorials = async () => {
     const { data, error } = await supabase
       .from('tutorials')
-      .select('*')
+      .select(`
+        id, title, slug, description, content, video_url, 
+        category_id, tier_required, is_published, sort_order,
+        tutorial_categories(name)
+      `)
       .order('sort_order', { ascending: true });
 
     if (error) {
       console.error('Error fetching tutorials:', error);
     } else {
-      setTutorials(data as Tutorial[]);
+      const tutorialsWithCategoryName = (data || []).map((t: any) => ({
+        ...t,
+        category_name: t.tutorial_categories?.name || null,
+      }));
+      setTutorials(tutorialsWithCategoryName);
     }
     setLoading(false);
   };
 
   useEffect(() => {
+    fetchCategories();
     fetchTutorials();
   }, []);
 
@@ -95,7 +124,7 @@ export function TutorialManager() {
             description: data.description || null,
             content: data.content || null,
             video_url: data.video_url || null,
-            category: data.category,
+            category_id: data.category_id || null,
             tier_required: data.tier_required,
             is_published: data.is_published,
             sort_order: data.sort_order,
@@ -114,7 +143,7 @@ export function TutorialManager() {
           description: data.description || null,
           content: data.content || null,
           video_url: data.video_url || null,
-          category: data.category,
+          category_id: data.category_id || null,
           tier_required: data.tier_required,
           is_published: data.is_published,
           sort_order: data.sort_order,
@@ -143,7 +172,7 @@ export function TutorialManager() {
       description: tutorial.description || '',
       content: tutorial.content || '',
       video_url: tutorial.video_url || '',
-      category: tutorial.category,
+      category_id: tutorial.category_id || '',
       tier_required: tutorial.tier_required,
       is_published: tutorial.is_published,
       sort_order: tutorial.sort_order,
@@ -158,7 +187,7 @@ export function TutorialManager() {
       description: '',
       content: '',
       video_url: '',
-      category: 'beginner',
+      category_id: '',
       tier_required: 'free',
       is_published: false,
       sort_order: 0,
@@ -335,20 +364,23 @@ export function TutorialManager() {
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="category_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ''}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="beginner">Iniciante</SelectItem>
-                          <SelectItem value="intermediate">Intermediário</SelectItem>
-                          <SelectItem value="advanced">Avançado</SelectItem>
+                          <SelectItem value="">Sem categoria</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.icon} {cat.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -451,7 +483,7 @@ export function TutorialManager() {
                     <TableCell className="font-medium">
                       <div>
                         {tutorial.title}
-                        <p className="text-xs text-muted-foreground">{tutorial.category}</p>
+                        <p className="text-xs text-muted-foreground">{tutorial.category_name || 'Sem categoria'}</p>
                       </div>
                     </TableCell>
                     <TableCell>

@@ -11,15 +11,24 @@ import { TutorialCard } from '@/components/academy/TutorialCard';
 import { TutorialDetailModal } from '@/components/academy/TutorialDetailModal';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface TutorialCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  sort_order: number;
+}
+
 interface Tutorial {
   id: string;
   title: string;
   slug: string;
   description: string | null;
-  category: string;
+  category_id: string | null;
   tier_required: 'free' | 'plus' | 'elite';
   content: string | null;
   video_url: string | null;
+  sort_order: number;
 }
 
 export default function Academy() {
@@ -27,12 +36,28 @@ export default function Academy() {
   const [selectedTutorial, setSelectedTutorial] = useState<Tutorial | null>(null);
   const { membership } = useUserProfile();
 
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['tutorial-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tutorial_categories')
+        .select('id, name, slug, icon, sort_order')
+        .eq('is_visible', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return (data || []) as TutorialCategory[];
+    },
+  });
+
+  // Fetch tutorials
   const { data: tutorials = [], isLoading } = useQuery({
     queryKey: ['tutorials'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tutorials')
-        .select('id, title, slug, description, category, tier_required, content, video_url')
+        .select('id, title, slug, description, category_id, tier_required, content, video_url, sort_order')
         .eq('is_published', true)
         .order('sort_order', { ascending: true });
 
@@ -54,7 +79,9 @@ export default function Academy() {
   // Count tutorials per category
   const tutorialCounts = useMemo(() => {
     return tutorials.reduce((acc, t) => {
-      acc[t.category] = (acc[t.category] || 0) + 1;
+      if (t.category_id) {
+        acc[t.category_id] = (acc[t.category_id] || 0) + 1;
+      }
       return acc;
     }, {} as Record<string, number>);
   }, [tutorials]);
@@ -62,16 +89,24 @@ export default function Academy() {
   // Filter tutorials by category
   const filteredTutorials = useMemo(() => {
     if (!activeCategory) return tutorials;
-    return tutorials.filter((t) => t.category === activeCategory);
+    return tutorials.filter((t) => t.category_id === activeCategory);
   }, [tutorials, activeCategory]);
 
   // Get stats
   const stats = getStats();
 
-  // Find next tutorial to continue
+  // Find next tutorial to continue (respecting category order)
   const nextTutorial = useMemo(() => {
-    return tutorials.find((t) => !isCompleted(t.id) && canAccess(t.tier_required));
-  }, [tutorials, isCompleted, membership]);
+    // Sort tutorials by category order, then by tutorial sort_order
+    const categoryOrder = new Map(categories.map((c, i) => [c.id, i]));
+    const sortedTutorials = [...tutorials].sort((a, b) => {
+      const catOrderA = a.category_id ? categoryOrder.get(a.category_id) ?? 999 : 999;
+      const catOrderB = b.category_id ? categoryOrder.get(b.category_id) ?? 999 : 999;
+      if (catOrderA !== catOrderB) return catOrderA - catOrderB;
+      return a.sort_order - b.sort_order;
+    });
+    return sortedTutorials.find((t) => !isCompleted(t.id) && canAccess(t.tier_required));
+  }, [tutorials, categories, isCompleted, membership]);
 
   // Navigation for modal
   const currentIndex = selectedTutorial
@@ -134,9 +169,9 @@ export default function Academy() {
             />
           )}
 
-          {/* Category Tabs - Static Segmented */}
+          {/* Category Tabs - Dynamic from DB */}
           <CategoryTabs
-            categories={Object.keys(tutorialCounts)}
+            categories={categories}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
             tutorialCounts={tutorialCounts}

@@ -6,7 +6,7 @@ interface Tutorial {
   id: string;
   title: string;
   description: string | null;
-  category: string;
+  category_id?: string | null;
   tier_required: 'free' | 'plus' | 'elite';
   video_url?: string | null;
 }
@@ -18,12 +18,6 @@ interface ContinueLearningCardProps {
   progress?: { completed: number; total: number };
   className?: string;
 }
-
-const categoryLabels: Record<string, string> = {
-  beginner: 'Iniciante',
-  intermediate: 'Intermediário',
-  advanced: 'Avançado',
-};
 
 function getYouTubeId(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -91,9 +85,11 @@ export function ContinueLearningCard({
         <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
           {tutorial.title}
         </h3>
-        <p className="text-xs text-muted-foreground mb-3">
-          {categoryLabels[tutorial.category] || tutorial.category}
-        </p>
+        {tutorial.description && (
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+            {tutorial.description}
+          </p>
+        )}
 
         {/* Progress bar */}
         {progress && (

@@ -1333,6 +1333,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tutorial_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_visible: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tutorial_progress: {
         Row: {
           completed_at: string | null
@@ -1368,6 +1404,7 @@ export type Database = {
       tutorials: {
         Row: {
           category: string
+          category_id: string | null
           content: string | null
           created_at: string
           description: string | null
@@ -1382,6 +1419,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          category_id?: string | null
           content?: string | null
           created_at?: string
           description?: string | null
@@ -1396,6 +1434,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          category_id?: string | null
           content?: string | null
           created_at?: string
           description?: string | null
@@ -1408,7 +1447,15 @@ export type Database = {
           updated_at?: string
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tutorials_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "tutorial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {
