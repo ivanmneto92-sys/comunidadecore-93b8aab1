@@ -9,8 +9,7 @@ import {
   LogOut,
   DollarSign,
   Trophy,
-  BookOpen,
-  GraduationCap
+  BookOpen
 } from 'lucide-react';
 import { ProfileMenuItem } from './ProfileMenuItem';
 import { Badge } from '@/components/ui/badge';
@@ -60,13 +59,6 @@ export function ProfileMenuList({
           label="Diário de Trading"
           subtitle="Registre suas operações"
           onClick={() => navigate('/journal')}
-        />
-        <ProfileMenuItem
-          icon={GraduationCap}
-          iconColor="text-purple-500"
-          label="Tutoriais"
-          subtitle="Aprenda com a Academia"
-          onClick={() => navigate('/academy')}
         />
         <ProfileMenuItem
           icon={Users}
