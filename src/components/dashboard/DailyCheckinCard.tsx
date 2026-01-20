@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -7,7 +7,7 @@ import { useCheckin } from '@/hooks/useCheckin';
 import { CheckinSuccessModal } from './CheckinSuccessModal';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function DailyCheckinCard() {
+export const DailyCheckinCard = memo(function DailyCheckinCard() {
   const {
     hasCheckedInToday,
     currentStreak,
@@ -125,4 +125,4 @@ export function DailyCheckinCard() {
       />
     </>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { TrendingUp, TrendingDown, Activity, BarChart3, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,7 +10,13 @@ interface MetricsGridProps {
   isRiskMode: boolean;
 }
 
-export function MetricsGrid({ pnlPercent, tradesCount, winRate, positiveDays, isRiskMode }: MetricsGridProps) {
+export const MetricsGrid = memo(function MetricsGrid({ 
+  pnlPercent, 
+  tradesCount, 
+  winRate, 
+  positiveDays, 
+  isRiskMode 
+}: MetricsGridProps) {
   const isPositive = pnlPercent >= 0;
 
   const metrics = [
@@ -67,4 +74,4 @@ export function MetricsGrid({ pnlPercent, tradesCount, winRate, positiveDays, is
       ))}
     </div>
   );
-}
+});
