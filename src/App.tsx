@@ -21,6 +21,7 @@ const Affiliates = lazy(() => import("./pages/Affiliates"));
 const StreakHistory = lazy(() => import("./pages/StreakHistory"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Journal = lazy(() => import("./pages/Journal"));
+const Seasons = lazy(() => import("./pages/Seasons"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
@@ -107,6 +108,11 @@ const App = () => (
               <Route path="/journal" element={
                 <ProtectedRoute>
                   <Journal />
+                </ProtectedRoute>
+              } />
+              <Route path="/seasons" element={
+                <ProtectedRoute>
+                  <Seasons />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
