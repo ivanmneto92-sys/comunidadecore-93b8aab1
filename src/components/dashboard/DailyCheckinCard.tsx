@@ -81,7 +81,7 @@ export const DailyCheckinCard = memo(function DailyCheckinCard() {
                 </div>
                 {!hasCheckedInToday ? (
                   <p className="text-sm text-muted-foreground">
-                    Ganhe <span className="text-primary font-semibold">+{todayXpReward} XP</span> hoje
+                    Ganhe <span className="text-primary font-semibold">+{todayXpReward} XP_S</span> hoje
                   </p>
                 ) : (
                   <div className="flex items-center gap-2 mt-1">
