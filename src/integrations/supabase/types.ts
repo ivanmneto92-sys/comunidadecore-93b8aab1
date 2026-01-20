@@ -1256,6 +1256,145 @@ export type Database = {
           },
         ]
       }
+      season_achievements: {
+        Row: {
+          category: string
+          code: string
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          name: string
+          rarity: string | null
+          requirement_type: string
+          requirement_value: number | null
+          season_id: string | null
+          sort_order: number | null
+          xp_reward: number | null
+        }
+        Insert: {
+          category: string
+          code: string
+          created_at?: string | null
+          description: string
+          icon: string
+          id?: string
+          name: string
+          rarity?: string | null
+          requirement_type: string
+          requirement_value?: number | null
+          season_id?: string | null
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          rarity?: string | null
+          requirement_type?: string
+          requirement_value?: number | null
+          season_id?: string | null
+          sort_order?: number | null
+          xp_reward?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_achievements_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      season_rankings: {
+        Row: {
+          archived_at: string | null
+          category: string
+          id: string
+          rank: number
+          score: number
+          season_id: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          category: string
+          id?: string
+          rank: number
+          score: number
+          season_id: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          category?: string
+          id?: string
+          rank?: number
+          score?: number
+          season_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_rankings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          name: string
+          number: number
+          quarter: number
+          start_date: string
+          theme: string
+          theme_emoji: string
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          number: number
+          quarter: number
+          start_date: string
+          theme: string
+          theme_emoji: string
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          number?: number
+          quarter?: number
+          start_date?: string
+          theme?: string
+          theme_emoji?: string
+          year?: number
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           content: string
@@ -1599,6 +1738,130 @@ export type Database = {
         }
         Relationships: []
       }
+      user_season_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          season_id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          season_id: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          season_id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_season_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "season_achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_season_achievements_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_season_progress: {
+        Row: {
+          created_at: string | null
+          id: string
+          prestige_level: number | null
+          season_id: string
+          season_level: number | null
+          season_xp: number | null
+          streak_penalty_until: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          prestige_level?: number | null
+          season_id: string
+          season_level?: number | null
+          season_xp?: number | null
+          streak_penalty_until?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          prestige_level?: number | null
+          season_id?: string
+          season_level?: number | null
+          season_xp?: number | null
+          streak_penalty_until?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_season_progress_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_titles: {
+        Row: {
+          earned_at: string | null
+          id: string
+          is_equipped: boolean | null
+          season_id: string | null
+          title_code: string
+          title_emoji: string | null
+          title_name: string
+          user_id: string
+        }
+        Insert: {
+          earned_at?: string | null
+          id?: string
+          is_equipped?: boolean | null
+          season_id?: string | null
+          title_code: string
+          title_emoji?: string | null
+          title_name: string
+          user_id: string
+        }
+        Update: {
+          earned_at?: string | null
+          id?: string
+          is_equipped?: boolean | null
+          season_id?: string | null
+          title_code?: string
+          title_emoji?: string | null
+          title_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_titles_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_trading_journal: {
         Row: {
           created_at: string | null
@@ -1648,7 +1911,10 @@ export type Database = {
         Row: {
           created_at: string
           current_level: number
+          current_title: string | null
           id: string
+          prestige_bonus: number | null
+          prestige_level: number | null
           total_xp: number
           updated_at: string
           user_id: string
@@ -1656,7 +1922,10 @@ export type Database = {
         Insert: {
           created_at?: string
           current_level?: number
+          current_title?: string | null
           id?: string
+          prestige_bonus?: number | null
+          prestige_level?: number | null
           total_xp?: number
           updated_at?: string
           user_id: string
@@ -1664,12 +1933,59 @@ export type Database = {
         Update: {
           created_at?: string
           current_level?: number
+          current_title?: string | null
           id?: string
+          prestige_bonus?: number | null
+          prestige_level?: number | null
           total_xp?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      xp_transactions: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          id: string
+          multiplier: number | null
+          season_id: string | null
+          source: string
+          user_id: string
+          xp_season: number
+          xp_total: number
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          multiplier?: number | null
+          season_id?: string | null
+          source: string
+          user_id: string
+          xp_season?: number
+          xp_total?: number
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          multiplier?: number | null
+          season_id?: string | null
+          source?: string
+          user_id?: string
+          xp_season?: number
+          xp_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_transactions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1687,7 +2003,33 @@ export type Database = {
           calc_status: string
         }[]
       }
+      calculate_season_level: { Args: { p_xp: number }; Returns: number }
       generate_affiliate_code: { Args: never; Returns: string }
+      get_active_season: {
+        Args: never
+        Returns: {
+          days_remaining: number
+          description: string
+          end_date: string
+          id: string
+          name: string
+          number: number
+          quarter: number
+          start_date: string
+          theme: string
+          theme_emoji: string
+          year: number
+        }[]
+      }
+      get_daily_xp_caps: {
+        Args: { p_date?: string; p_user_id: string }
+        Returns: {
+          cap: number
+          remaining: number
+          source: string
+          used: number
+        }[]
+      }
       get_unread_counts: {
         Args: { p_user_id: string }
         Returns: {
