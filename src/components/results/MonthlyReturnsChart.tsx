@@ -91,7 +91,7 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
                 position="top"
                 formatter={(value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`}
                 style={{ 
-                  fontSize: '8px', 
+                  fontSize: '10px', 
                   fontWeight: 400,
                   fill: 'hsl(var(--foreground))'
                 }}
