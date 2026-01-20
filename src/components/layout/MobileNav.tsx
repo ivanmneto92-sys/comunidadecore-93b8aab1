@@ -4,6 +4,15 @@ import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+// Prefetch map for lazy-loaded components
+const routePrefetchMap: Record<string, () => Promise<unknown>> = {
+  '/': () => import('@/pages/Dashboard'),
+  '/results': () => import('@/pages/Results'),
+  '/academy': () => import('@/pages/Academy'),
+  '/community': () => import('@/pages/Community'),
+  '/profile': () => import('@/pages/Profile'),
+};
+
 const navItems = [
   { to: '/', icon: Home, label: 'Home', prefetchKey: null },
   { to: '/results', icon: BarChart3, label: 'Resultados', prefetchKey: 'reports-prefetch' },
@@ -16,8 +25,15 @@ export function MobileNav() {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  // Prefetch data on hover/touch for faster navigation
+  // Prefetch component + data on hover/touch for instant navigation
   const handlePrefetch = useCallback((route: string) => {
+    // Prefetch the lazy-loaded component (JS module)
+    const prefetchComponent = routePrefetchMap[route];
+    if (prefetchComponent) {
+      prefetchComponent();
+    }
+
+    // Prefetch data queries
     if (route === '/results') {
       queryClient.prefetchQuery({
         queryKey: ['account-metrics', '30d'],
