@@ -91,16 +91,44 @@ export function DailyResultItem({ report }: DailyResultItemProps) {
         {/* Expanded content */}
         <div className={cn(
           'overflow-hidden transition-all duration-200',
-          expanded ? 'max-h-40 mt-3 pt-3 border-t border-border' : 'max-h-0'
+          expanded ? 'max-h-60 mt-3 pt-3 border-t border-border' : 'max-h-0'
         )}>
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {/* Métricas do dia */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-muted/50 rounded-lg p-2">
+                <p className="text-[10px] text-muted-foreground uppercase">Operações</p>
+                <p className="text-sm font-semibold">{report.trades_count}</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <p className="text-[10px] text-muted-foreground uppercase">Win Rate</p>
+                <p className="text-sm font-semibold">{Number(report.win_rate).toFixed(0)}%</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <p className="text-[10px] text-muted-foreground uppercase">Resultado</p>
+                <p className={cn(
+                  'text-sm font-semibold',
+                  isPositive ? 'text-emerald-500' : 'text-destructive'
+                )}>
+                  {isPositive ? '+' : ''}{Number(report.pnl_percent).toFixed(2)}%
+                </p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-2">
+                <p className="text-[10px] text-muted-foreground uppercase">Drawdown</p>
+                <p className="text-sm font-semibold">{Number(report.drawdown_percent).toFixed(2)}%</p>
+              </div>
+            </div>
+
+            {/* Profile badge */}
             {report.profile_type && (
               <Badge variant="secondary" className="text-xs">
-                {profileLabels[report.profile_type] || report.profile_type}
+                Perfil: {profileLabels[report.profile_type] || report.profile_type}
               </Badge>
             )}
+
+            {/* AI comment */}
             {report.ai_comment && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 bg-primary/5 rounded-lg p-2">
                 <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {report.ai_comment}
