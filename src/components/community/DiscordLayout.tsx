@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommunityPresence } from '@/hooks/useOnlinePresence';
@@ -12,6 +12,9 @@ import { NewsChannelView } from './NewsChannelView';
 import { CommunityNewsPanel } from './CommunityNewsPanel';
 import { SupportView } from '@/components/support/SupportView';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+
+// Memoize NewsPanel to prevent re-renders on parent state changes
+const MemoizedNewsPanel = memo(CommunityNewsPanel);
 
 interface Channel {
   id: string;
@@ -242,9 +245,9 @@ export function DiscordLayout() {
           </div>
         )}
 
-        {/* News Panel - Desktop */}
+        {/* News Panel - Desktop (Memoized) */}
         <div className="w-[280px] shrink-0 h-full border-l border-border">
-          <CommunityNewsPanel />
+          <MemoizedNewsPanel />
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { MobileNav } from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -9,7 +8,6 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { user } = useAuth();
-  const { isAdmin } = useUserProfile();
 
   return (
     <div className="flex min-h-screen flex-col bg-background scrollbar-hidden">
