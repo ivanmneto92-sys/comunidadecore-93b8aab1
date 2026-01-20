@@ -1,5 +1,6 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import { Shield, Activity, AlertTriangle, LucideIcon } from 'lucide-react';
+import { Shield, Activity, AlertTriangle } from 'lucide-react';
 
 interface AnimatedStatusCardProps {
   score: number;
@@ -89,7 +90,14 @@ function HorizontalStatusBar({ percentage, status }: { percentage: number; statu
   );
 }
 
-export function AnimatedStatusCard({ score, status, profileType, riskLevel, drawdownStatus, insightText }: AnimatedStatusCardProps) {
+export const AnimatedStatusCard = memo(function AnimatedStatusCard({ 
+  score, 
+  status, 
+  profileType, 
+  riskLevel, 
+  drawdownStatus, 
+  insightText 
+}: AnimatedStatusCardProps) {
   const config = statusConfig[status];
   const Icon = config.Icon;
 
@@ -137,4 +145,4 @@ export function AnimatedStatusCard({ score, status, profileType, riskLevel, draw
       )}
     </div>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -50,7 +51,12 @@ const drawdownLabels = {
   fora_do_padrao: 'Fora do padrão',
 };
 
-export function CoreStatusCard({ status, profileType, riskLevel, drawdownStatus }: CoreStatusCardProps) {
+export const CoreStatusCard = memo(function CoreStatusCard({ 
+  status, 
+  profileType, 
+  riskLevel, 
+  drawdownStatus 
+}: CoreStatusCardProps) {
   const config = statusConfig[status];
 
   return (
@@ -82,4 +88,4 @@ export function CoreStatusCard({ status, profileType, riskLevel, drawdownStatus 
       </CardContent>
     </Card>
   );
-}
+});
