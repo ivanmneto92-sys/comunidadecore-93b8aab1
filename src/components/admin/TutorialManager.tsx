@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff, Pencil, X, Video, VideoOff } from 'lucide-react';
+import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff, Pencil, X, Video, VideoOff, Link } from 'lucide-react';
 
 const tutorialSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório').max(100),
@@ -25,6 +25,8 @@ const tutorialSchema = z.object({
   tier_required: z.enum(['free', 'plus', 'elite']),
   is_published: z.boolean(),
   sort_order: z.coerce.number(),
+  cta_url: z.string().optional(),
+  cta_label: z.string().optional(),
 });
 
 type TutorialFormData = z.infer<typeof tutorialSchema>;
@@ -40,6 +42,8 @@ interface Tutorial {
   tier_required: 'free' | 'plus' | 'elite';
   is_published: boolean;
   sort_order: number;
+  cta_url: string | null;
+  cta_label: string | null;
   category_name?: string;
 }
 
@@ -69,6 +73,8 @@ export function TutorialManager() {
       tier_required: 'free',
       is_published: false,
       sort_order: 0,
+      cta_url: '',
+      cta_label: '',
     },
   });
 
@@ -90,6 +96,7 @@ export function TutorialManager() {
       .select(`
         id, title, slug, description, content, video_url, 
         category_id, tier_required, is_published, sort_order,
+        cta_url, cta_label,
         tutorial_categories(name)
       `)
       .order('sort_order', { ascending: true });
@@ -128,6 +135,8 @@ export function TutorialManager() {
             tier_required: data.tier_required,
             is_published: data.is_published,
             sort_order: data.sort_order,
+            cta_url: data.cta_url || null,
+            cta_label: data.cta_label || null,
           })
           .eq('id', editingId);
 
@@ -147,6 +156,8 @@ export function TutorialManager() {
           tier_required: data.tier_required,
           is_published: data.is_published,
           sort_order: data.sort_order,
+          cta_url: data.cta_url || null,
+          cta_label: data.cta_label || null,
         });
 
         if (error) throw error;
@@ -176,6 +187,8 @@ export function TutorialManager() {
       tier_required: tutorial.tier_required,
       is_published: tutorial.is_published,
       sort_order: tutorial.sort_order,
+      cta_url: tutorial.cta_url || '',
+      cta_label: tutorial.cta_label || '',
     });
   };
 
@@ -191,6 +204,8 @@ export function TutorialManager() {
       tier_required: 'free',
       is_published: false,
       sort_order: 0,
+      cta_url: '',
+      cta_label: '',
     });
   };
 
@@ -422,6 +437,42 @@ export function TutorialManager() {
                     </FormItem>
                   )}
                 />
+              </div>
+
+              {/* CTA Link Section */}
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Link className="h-4 w-4" />
+                  Link Externo (CTA) - Opcional
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cta_url"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL do Link</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com/..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cta_label"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Texto do Botão</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Abrir conta na corretora" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <FormField

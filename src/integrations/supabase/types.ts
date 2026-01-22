@@ -1573,6 +1573,8 @@ export type Database = {
           category_id: string | null
           content: string | null
           created_at: string
+          cta_label: string | null
+          cta_url: string | null
           description: string | null
           id: string
           is_published: boolean
@@ -1588,6 +1590,8 @@ export type Database = {
           category_id?: string | null
           content?: string | null
           created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
           description?: string | null
           id?: string
           is_published?: boolean
@@ -1603,6 +1607,8 @@ export type Database = {
           category_id?: string | null
           content?: string | null
           created_at?: string
+          cta_label?: string | null
+          cta_url?: string | null
           description?: string | null
           id?: string
           is_published?: boolean
