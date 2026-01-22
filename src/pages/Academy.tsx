@@ -28,6 +28,8 @@ interface Tutorial {
   tier_required: 'free' | 'plus' | 'elite';
   content: string | null;
   video_url: string | null;
+  cta_url: string | null;
+  cta_label: string | null;
   sort_order: number;
 }
 
@@ -57,12 +59,12 @@ export default function Academy() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('tutorials')
-        .select('id, title, slug, description, category_id, tier_required, content, video_url, sort_order')
+        .select('id, title, slug, description, category_id, tier_required, content, video_url, cta_url, cta_label, sort_order')
         .eq('is_published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return (data || []) as Tutorial[];
+      return (data || []) as unknown as Tutorial[];
     },
   });
 

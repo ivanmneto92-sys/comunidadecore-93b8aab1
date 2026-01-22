@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2, ExternalLink } from 'lucide-react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,6 +16,8 @@ interface Tutorial {
   tier_required: 'free' | 'plus' | 'elite';
   content: string | null;
   video_url: string | null;
+  cta_url?: string | null;
+  cta_label?: string | null;
 }
 
 interface TutorialDetailModalProps {
@@ -143,6 +145,19 @@ export function TutorialDetailModal({
                   className="prose prose-sm prose-invert max-w-none text-foreground/90"
                   dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                 />
+              )}
+
+              {/* CTA Button */}
+              {tutorial.cta_url && (
+                <a
+                  href={tutorial.cta_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-lg bg-primary/10 border border-primary/30 text-primary font-medium hover:bg-primary/20 transition-colors"
+                >
+                  {tutorial.cta_label || 'Acessar Link'}
+                  <ExternalLink className="h-4 w-4" />
+                </a>
               )}
             </div>
           </div>
