@@ -237,10 +237,14 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
 
     // Period return: sum of PnL% for the selected period
     // For 90d, use the sum of the last 3 months from monthly_returns
+    // For 12m, use the sum of the last 12 months from monthly_returns
     let periodReturn: number;
     if (filterPeriod === '90d') {
       const last3Months = [...combinedMonthlyReturns].slice(-3);
       periodReturn = last3Months.reduce((sum, m) => sum + m.returnPercent, 0);
+    } else if (filterPeriod === '12m') {
+      const last12Months = [...combinedMonthlyReturns].slice(-12);
+      periodReturn = last12Months.reduce((sum, m) => sum + m.returnPercent, 0);
     } else {
       periodReturn = filteredForPeriod.reduce((sum, r) => sum + (r.pnl_percent || 0), 0);
     }
