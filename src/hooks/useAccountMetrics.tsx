@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { subDays, startOfYear, startOfWeek, endOfWeek, format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-export type FilterPeriod = '7d' | '30d' | '90d' | 'ytd' | 'all';
+export type FilterPeriod = '7d' | '30d' | '90d' | '12m' | 'all';
 
 export interface AccountMetrics {
   totalReturn: number;
@@ -229,9 +229,10 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     } else if (filterPeriod === '90d') {
       // 90 dias = soma dos últimos 3 meses (não filtra reports, usa monthly_returns)
       filteredForPeriod = reports.filter(r => r.date >= quarterAgo);
-    } else if (filterPeriod === 'ytd') {
-      const yearStart = format(startOfYear(new Date()), 'yyyy-MM-dd');
-      filteredForPeriod = reports.filter(r => r.date >= yearStart);
+    } else if (filterPeriod === '12m') {
+      // 12 meses = últimos 365 dias
+      const yearAgo = format(subDays(new Date(), 365), 'yyyy-MM-dd');
+      filteredForPeriod = reports.filter(r => r.date >= yearAgo);
     }
 
     // Period return: sum of PnL% for the selected period
@@ -300,9 +301,9 @@ export function useAccountMetrics(filterPeriod: FilterPeriod = '30d') {
     } else if (filterPeriod === '90d') {
       const cutoff = format(subDays(today, 90), 'yyyy-MM-dd');
       filteredReports = reports.filter(r => r.date >= cutoff);
-    } else if (filterPeriod === 'ytd') {
-      const yearStart = format(startOfYear(today), 'yyyy-MM-dd');
-      filteredReports = reports.filter(r => r.date >= yearStart);
+    } else if (filterPeriod === '12m') {
+      const yearAgo = format(subDays(today, 365), 'yyyy-MM-dd');
+      filteredReports = reports.filter(r => r.date >= yearAgo);
     }
 
     // Calculate the starting balance (compound up to the first filtered date)

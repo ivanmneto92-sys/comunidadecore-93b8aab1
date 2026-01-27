@@ -75,8 +75,8 @@ export default function Results() {
       case '90d':
         startDate = subDays(now, 90);
         break;
-      case 'ytd':
-        startDate = startOfYear(now);
+      case '12m':
+        startDate = subDays(now, 365);
         break;
       default:
         startDate = subDays(now, 30);

@@ -10,7 +10,7 @@ const filters: { value: FilterPeriod; label: string }[] = [
   { value: '7d', label: '7 Dias' },
   { value: '30d', label: '30 Dias' },
   { value: '90d', label: '90 Dias' },
-  { value: 'ytd', label: 'Este Ano' },
+  { value: '12m', label: '12 Meses' },
 ];
 
 export function ResultsFilter({ value, onChange }: ResultsFilterProps) {
