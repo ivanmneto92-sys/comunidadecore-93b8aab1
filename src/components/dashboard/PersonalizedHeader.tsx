@@ -68,6 +68,7 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
         <button
           onClick={() => navigate('/community')}
           className="relative p-2 rounded-full bg-secondary/50 hover:bg-secondary/80 transition-colors"
+          aria-label="Ir para comunidade"
         >
           <Bell className="w-5 h-5 text-muted-foreground" />
         </button>
@@ -75,6 +76,7 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
         {/* Streak Badge */}
         <button
           onClick={() => navigate('/streaks')}
+          aria-label={`Sequência de ${streakDays} dias`}
           className={cn(
             'flex items-center gap-1.5 px-3 py-2 rounded-full',
             'bg-gradient-to-r from-primary/20 to-primary/10',
@@ -82,7 +84,7 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
             'transition-all duration-200'
           )}
         >
-          <Flame className="w-4 h-4 text-primary" />
+          <Flame className="w-4 h-4 text-primary" aria-hidden="true" />
           <span className="text-sm font-bold text-primary">{streakDays}</span>
         </button>
       </div>
