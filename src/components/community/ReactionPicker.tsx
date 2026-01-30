@@ -24,7 +24,7 @@ export function ReactionPicker({ onSelect }: ReactionPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7">
+        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Adicionar reação">
           <Smile className="h-3.5 w-3.5" />
         </Button>
       </PopoverTrigger>

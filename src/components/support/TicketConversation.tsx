@@ -64,7 +64,7 @@ export function TicketConversation({ ticket, onBack, isAdmin = false, onStatusCh
       {/* Header */}
       <div className="border-b border-border p-4 space-y-2">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0" aria-label="Voltar para lista de tickets">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1 min-w-0">

@@ -36,7 +36,7 @@ const CommunityNewsPanel = React.forwardRef<HTMLDivElement, CommunityNewsPanelPr
             <span className="font-semibold text-sm">Notícias Forex</span>
           </div>
           {showCloseButton && onClose && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose} aria-label="Fechar painel de notícias">
               <X className="h-4 w-4" />
             </Button>
           )}

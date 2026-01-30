@@ -193,7 +193,7 @@ export function ThreadView({ parentMessage, channelId, channelName, onClose }: T
             {replies.length} {replies.length === 1 ? 'resposta' : 'respostas'}
           </p>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fechar thread">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -233,7 +233,7 @@ export function ThreadView({ parentMessage, channelId, channelName, onClose }: T
             className="flex-1 h-9 text-sm"
             disabled={sending}
           />
-          <Button type="submit" size="icon" className="h-9 w-9" disabled={!newReply.trim() || sending}>
+          <Button type="submit" size="icon" className="h-9 w-9" disabled={!newReply.trim() || sending} aria-label="Enviar resposta">
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
