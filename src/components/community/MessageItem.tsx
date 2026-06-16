@@ -41,6 +41,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
 import { renderMarkdown } from '@/lib/markdownUtils';
+import { FileAttachmentCard } from './FileAttachmentCard';
 
 interface Reaction {
   emoji: string;
@@ -58,6 +59,10 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
   status?: 'sending' | 'sent' | 'failed';
   profiles?: {
     display_name: string | null;
