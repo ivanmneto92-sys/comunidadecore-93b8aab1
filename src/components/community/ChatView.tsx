@@ -643,6 +643,100 @@ export function ChatView({
     }
   }, [messages.length, loading, loadingMore]);
 
+  // ===== Optimistic message sending =====
+  const sendMessageOptimistic = useCallback(async (
+    content: string,
+    imageUrl: string | null,
+  ): Promise<{ id?: string; error?: unknown }> => {
+    if (!user) return { error: new Error('not authenticated') };
+
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const nowIso = new Date().toISOString();
+
+    const optimistic: Message = {
+      id: tempId,
+      content,
+      created_at: nowIso,
+      user_id: user.id,
+      is_bot_message: false,
+      is_pinned: false,
+      reply_count: 0,
+      image_url: imageUrl,
+      status: 'sending',
+      _retryPayload: { content, imageUrl },
+      profiles: profile
+        ? {
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url,
+            avatar_id: profile.avatar_id,
+          }
+        : null,
+      reactions: [],
+      author_role: null,
+    };
+
+    setMessages(prev => [...prev, optimistic]);
+    // Force scroll to bottom on own send
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        channel_id: channel.id,
+        user_id: user.id,
+        content,
+        image_url: imageUrl,
+      })
+      .select('id')
+      .single();
+
+    if (error || !data) {
+      console.error('Error sending message:', error);
+      setMessages(prev =>
+        prev.map(m => (m.id === tempId ? { ...m, status: 'failed' as const } : m)),
+      );
+      toast({ variant: 'destructive', title: 'Falha ao enviar mensagem' });
+      return { error };
+    }
+
+    // Register the real id so the realtime echo is ignored
+    recentlySentIds.current.add(data.id);
+    // Safety cleanup
+    setTimeout(() => recentlySentIds.current.delete(data.id), 10000);
+
+    // Promote optimistic entry to "sent" with the real id
+    setMessages(prev =>
+      prev.map(m =>
+        m.id === tempId
+          ? { ...m, id: data.id, status: 'sent' as const, _retryPayload: undefined }
+          : m,
+      ),
+    );
+
+    // Fade out the ✓ after 2s by clearing status
+    setTimeout(() => {
+      setMessages(prev =>
+        prev.map(m => (m.id === data.id && m.status === 'sent' ? { ...m, status: undefined } : m)),
+      );
+    }, 2000);
+
+    return { id: data.id };
+  }, [user, profile, channel.id, toast]);
+
+  const retryMessage = useCallback((tempId: string) => {
+    const target = messages.find(m => m.id === tempId);
+    if (!target?._retryPayload) return;
+    setMessages(prev => prev.filter(m => m.id !== tempId));
+    void sendMessageOptimistic(target._retryPayload.content, target._retryPayload.imageUrl);
+  }, [messages, sendMessageOptimistic]);
+
+  const discardMessage = useCallback((tempId: string) => {
+    setMessages(prev => prev.filter(m => m.id !== tempId));
+  }, []);
+
+
   const formatDate = (dateStr: string) => {
     try {
       return format(parseISO(dateStr), "dd 'de' MMMM", { locale: ptBR });
