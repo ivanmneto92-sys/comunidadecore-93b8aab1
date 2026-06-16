@@ -412,8 +412,8 @@ export function MessageItem({
         )}
       </div>
 
-      {/* Hover actions */}
-      {showActions && (isHovered || isDropdownOpen) && !isEditing && (
+      {/* Hover actions - hidden for optimistic/failed messages */}
+      {showActions && !isOptimistic && (isHovered || isDropdownOpen) && !isEditing && (
         <div className="absolute -top-3 right-2 flex items-center gap-0.5 bg-card border border-border rounded-md shadow-sm p-0.5">
           <ReactionPicker onSelect={handleReaction} />
           
