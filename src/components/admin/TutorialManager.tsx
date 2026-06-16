@@ -610,6 +610,15 @@ export function TutorialManager() {
           )}
         </CardContent>
       </Card>
+
+      {quizEditor && (
+        <QuizEditor
+          tutorialId={quizEditor.id}
+          tutorialTitle={quizEditor.title}
+          open={!!quizEditor}
+          onClose={() => setQuizEditor(null)}
+        />
+      )}
     </div>
   );
 }
