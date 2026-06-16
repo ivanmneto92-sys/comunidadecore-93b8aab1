@@ -61,6 +61,7 @@ export function TutorialManager() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [quizEditor, setQuizEditor] = useState<{ id: string; title: string } | null>(null);
 
   const form = useForm<TutorialFormData>({
     resolver: zodResolver(tutorialSchema),
