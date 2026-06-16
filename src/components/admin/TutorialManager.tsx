@@ -576,6 +576,14 @@ export function TutorialManager() {
                         <Button
                           size="icon"
                           variant="ghost"
+                          onClick={() => setQuizEditor({ id: tutorial.id, title: tutorial.title })}
+                          title="Quiz"
+                        >
+                          <Brain className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           onClick={() => togglePublish(tutorial.id, tutorial.is_published)}
                           title={tutorial.is_published ? 'Despublicar' : 'Publicar'}
                         >
