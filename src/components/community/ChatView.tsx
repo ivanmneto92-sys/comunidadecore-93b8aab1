@@ -40,6 +40,8 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  status?: 'sending' | 'sent' | 'failed';
+  _retryPayload?: { content: string; imageUrl: string | null };
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
