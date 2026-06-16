@@ -5,6 +5,7 @@ import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickAction
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
 import { MarketNewsCard } from '@/components/dashboard/MarketNewsCard';
+import { OnboardingCard } from '@/components/onboarding/OnboardingCard';
 import { useDailyStatus } from '@/hooks/useDailyStatus';
 import { useStreak } from '@/hooks/useStreak';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,6 +38,9 @@ export default function Dashboard() {
       <div className="px-4 py-6 space-y-6">
         {/* 1. Header Premium */}
         <PersonalizedHeader streakDays={streakDays} />
+
+        {/* Onboarding (visível só até concluir/dispensar) */}
+        <OnboardingCard />
 
         {/* 2. Check-in Diário */}
         <DailyCheckinCard />
