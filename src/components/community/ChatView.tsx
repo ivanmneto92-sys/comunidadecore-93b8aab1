@@ -941,6 +941,8 @@ export function ChatView({
                     authorRole={message.author_role}
                     onReply={() => onOpenThread?.(message)}
                     onOpenThread={() => onOpenThread?.(message)}
+                    onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
+                    onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
                   />
                 </div>
               );
@@ -974,6 +976,7 @@ export function ChatView({
           channelName={channel.name}
           onOpenPollModal={() => setShowPollModal(true)}
           onlineUserIds={onlineUsers.map(u => u.user_id)}
+          onSend={sendMessageOptimistic}
         />
       ) : (
         <div className="p-3 border-t border-border text-center text-xs text-muted-foreground shrink-0">
