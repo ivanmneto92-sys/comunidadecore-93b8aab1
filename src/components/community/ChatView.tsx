@@ -42,8 +42,16 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
   status?: 'sending' | 'sent' | 'failed';
-  _retryPayload?: { content: string; imageUrl: string | null };
+  _retryPayload?: {
+    content: string;
+    imageUrl: string | null;
+    attachment: { path: string; name: string; type: string; size: number } | null;
+  };
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -230,7 +238,7 @@ export function ChatView({
     try {
       let query = supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .order('created_at', { ascending: false })
@@ -389,7 +397,7 @@ export function ChatView({
       // Fetch messages around the target message
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .gte('created_at', targetMessage.created_at)
@@ -401,7 +409,7 @@ export function ChatView({
       // Also fetch some messages before the target
       const { data: beforeMessages } = await supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .lt('created_at', targetMessage.created_at)
@@ -647,6 +655,7 @@ export function ChatView({
   const sendMessageOptimistic = useCallback(async (
     content: string,
     imageUrl: string | null,
+    attachment: { path: string; name: string; type: string; size: number } | null,
   ): Promise<{ id?: string; error?: unknown }> => {
     if (!user) return { error: new Error('not authenticated') };
 
@@ -662,8 +671,12 @@ export function ChatView({
       is_pinned: false,
       reply_count: 0,
       image_url: imageUrl,
+      file_url: attachment?.path ?? null,
+      file_name: attachment?.name ?? null,
+      file_type: attachment?.type ?? null,
+      file_size: attachment?.size ?? null,
       status: 'sending',
-      _retryPayload: { content, imageUrl },
+      _retryPayload: { content, imageUrl, attachment },
       profiles: profile
         ? {
             display_name: profile.display_name,
@@ -676,7 +689,6 @@ export function ChatView({
     };
 
     setMessages(prev => [...prev, optimistic]);
-    // Force scroll to bottom on own send
     requestAnimationFrame(() => {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
@@ -688,6 +700,10 @@ export function ChatView({
         user_id: user.id,
         content,
         image_url: imageUrl,
+        file_url: attachment?.path ?? null,
+        file_name: attachment?.name ?? null,
+        file_type: attachment?.type ?? null,
+        file_size: attachment?.size ?? null,
       })
       .select('id')
       .single();
@@ -701,12 +717,9 @@ export function ChatView({
       return { error };
     }
 
-    // Register the real id so the realtime echo is ignored
     recentlySentIds.current.add(data.id);
-    // Safety cleanup
     setTimeout(() => recentlySentIds.current.delete(data.id), 10000);
 
-    // Promote optimistic entry to "sent" with the real id
     setMessages(prev =>
       prev.map(m =>
         m.id === tempId
@@ -715,7 +728,6 @@ export function ChatView({
       ),
     );
 
-    // Fade out the ✓ after 2s by clearing status
     setTimeout(() => {
       setMessages(prev =>
         prev.map(m => (m.id === data.id && m.status === 'sent' ? { ...m, status: undefined } : m)),
@@ -729,7 +741,11 @@ export function ChatView({
     const target = messages.find(m => m.id === tempId);
     if (!target?._retryPayload) return;
     setMessages(prev => prev.filter(m => m.id !== tempId));
-    void sendMessageOptimistic(target._retryPayload.content, target._retryPayload.imageUrl);
+    void sendMessageOptimistic(
+      target._retryPayload.content,
+      target._retryPayload.imageUrl,
+      target._retryPayload.attachment,
+    );
   }, [messages, sendMessageOptimistic]);
 
   const discardMessage = useCallback((tempId: string) => {

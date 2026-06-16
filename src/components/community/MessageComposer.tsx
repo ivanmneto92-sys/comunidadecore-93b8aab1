@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { ImageUpload } from './ImageUpload';
+import { FileUpload, AttachmentMeta } from './FileUpload';
 import { MentionPopover } from './MentionPopover';
 import { MentionUser } from '@/hooks/useMentions';
 import { createMentionNotifications } from '@/lib/mentionUtils';
@@ -16,7 +17,11 @@ interface MessageComposerProps {
   onOpenPollModal: () => void;
   disabled?: boolean;
   onlineUserIds?: string[];
-  onSend: (content: string, imageUrl: string | null) => Promise<{ id?: string; error?: unknown }>;
+  onSend: (
+    content: string,
+    imageUrl: string | null,
+    attachment: AttachmentMeta | null,
+  ) => Promise<{ id?: string; error?: unknown }>;
 }
 
 export function MessageComposer({
@@ -36,6 +41,7 @@ export function MessageComposer({
   const [showMentions, setShowMentions] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+  const [attachment, setAttachment] = useState<AttachmentMeta | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +98,7 @@ export function MessageComposer({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!message.trim() && !imageUrl) || !user) return;
+    if ((!message.trim() && !imageUrl && !attachment) || !user) return;
 
     stopTyping();
 
@@ -101,13 +107,15 @@ export function MessageComposer({
       content = content ? `${content}\n![image](${imageUrl})` : `![image](${imageUrl})`;
     }
     const currentImageUrl = imageUrl;
+    const currentAttachment = attachment;
 
     // Clear input immediately for instant feedback
     setMessage('');
     setImageUrl(null);
+    setAttachment(null);
 
     // Fire to parent (optimistic UI happens there)
-    const result = await onSend(content, currentImageUrl);
+    const result = await onSend(content, currentImageUrl, currentAttachment);
 
     // Notifications only if persisted successfully
     if (result.id && !result.error) {
@@ -146,8 +154,9 @@ export function MessageComposer({
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <ImageUpload onImageSelected={setImageUrl} disabled={false} />
+        <FileUpload attachment={attachment} onAttachmentChange={setAttachment} />
 
         <Tooltip>
           <TooltipTrigger asChild>
@@ -179,7 +188,7 @@ export function MessageComposer({
           type="submit"
           size="icon"
           className="h-9 w-9 shrink-0"
-          disabled={!message.trim() && !imageUrl}
+          disabled={!message.trim() && !imageUrl && !attachment}
           aria-label="Enviar mensagem"
         >
           <Send className="h-4 w-4" />
