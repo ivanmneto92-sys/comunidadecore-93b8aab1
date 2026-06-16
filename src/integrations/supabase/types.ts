@@ -470,6 +470,33 @@ export type Database = {
         }
         Relationships: []
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_scores: {
         Row: {
           created_at: string
@@ -1742,6 +1769,7 @@ export type Database = {
           muted_channels: string[] | null
           notify_mentions: boolean | null
           notify_replies: boolean | null
+          push_enabled: boolean
           sound_enabled: boolean | null
           updated_at: string | null
           user_id: string
@@ -1752,6 +1780,7 @@ export type Database = {
           muted_channels?: string[] | null
           notify_mentions?: boolean | null
           notify_replies?: boolean | null
+          push_enabled?: boolean
           sound_enabled?: boolean | null
           updated_at?: string | null
           user_id: string
@@ -1762,6 +1791,7 @@ export type Database = {
           muted_channels?: string[] | null
           notify_mentions?: boolean | null
           notify_replies?: boolean | null
+          push_enabled?: boolean
           sound_enabled?: boolean | null
           updated_at?: string | null
           user_id?: string
