@@ -297,6 +297,40 @@ export function MessageItem({
               (editado)
             </span>
           )}
+          {message.status === 'sending' && (
+            <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+              <Loader2 className="h-2.5 w-2.5 animate-spin" />
+              enviando…
+            </span>
+          )}
+          {message.status === 'sent' && (
+            <Check className="h-3 w-3 text-muted-foreground/60" aria-label="Enviada" />
+          )}
+          {message.status === 'failed' && (
+            <span className="text-[10px] text-destructive flex items-center gap-1.5">
+              <AlertCircle className="h-2.5 w-2.5" />
+              Falhou
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="underline hover:text-destructive/80 inline-flex items-center gap-0.5"
+                >
+                  <RotateCw className="h-2.5 w-2.5" /> Reenviar
+                </button>
+              )}
+              {onDiscard && (
+                <button
+                  type="button"
+                  onClick={onDiscard}
+                  className="underline hover:text-destructive/80"
+                >
+                  Descartar
+                </button>
+              )}
+            </span>
+          )}
+
         </div>
         
         {isEditing ? (
