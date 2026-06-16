@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useToast } from '@/hooks/use-toast';
 import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
@@ -93,6 +95,8 @@ export function ChatView({
   onlineUsers = []
 }: ChatViewProps) {
   const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const { toast } = useToast();
   const { markAsRead } = useUnreadMessages();
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -109,6 +113,8 @@ export function ChatView({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialLoad = useRef(true);
+  // Track IDs we just inserted ourselves so we can ignore the realtime echo
+  const recentlySentIds = useRef<Set<string>>(new Set());
 
   // Admins podem postar em canais admin-only, mas não em bot-only
   const canSendMessages = isAdmin 
