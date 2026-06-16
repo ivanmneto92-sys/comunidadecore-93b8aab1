@@ -506,6 +506,36 @@ export type Database = {
         }
         Relationships: []
       }
+      link_previews: {
+        Row: {
+          created_at: string
+          description: string | null
+          fetched_at: string
+          image_url: string | null
+          site_name: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          fetched_at?: string
+          image_url?: string | null
+          site_name?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          fetched_at?: string
+          image_url?: string | null
+          site_name?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           created_at: string
@@ -583,6 +613,7 @@ export type Database = {
           is_bot_message: boolean
           is_highlight: boolean | null
           is_pinned: boolean
+          link_preview_url: string | null
           parent_id: string | null
           updated_at: string
           user_id: string | null
@@ -601,6 +632,7 @@ export type Database = {
           is_bot_message?: boolean
           is_highlight?: boolean | null
           is_pinned?: boolean
+          link_preview_url?: string | null
           parent_id?: string | null
           updated_at?: string
           user_id?: string | null
@@ -619,6 +651,7 @@ export type Database = {
           is_bot_message?: boolean
           is_highlight?: boolean | null
           is_pinned?: boolean
+          link_preview_url?: string | null
           parent_id?: string | null
           updated_at?: string
           user_id?: string | null
