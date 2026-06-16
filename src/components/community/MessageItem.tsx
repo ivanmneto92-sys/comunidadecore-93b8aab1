@@ -385,6 +385,18 @@ export function MessageItem({
           </div>
         )}
 
+        {/* File attachment (PDF, audio, etc.) */}
+        {message.file_url && !isEditing && (
+          <FileAttachmentCard
+            path={message.file_url}
+            name={message.file_name || 'Arquivo'}
+            type={message.file_type || 'application/octet-stream'}
+            size={message.file_size}
+          />
+        )}
+
+
+
         {/* Reactions & Reply count */}
         {!isEditing && (
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
