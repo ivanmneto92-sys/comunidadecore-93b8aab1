@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { useToast } from '@/hooks/use-toast';
 import { Loader2, Pin, ChevronLeft, Hash, Users, ChevronUp, ChevronDown, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
@@ -40,6 +42,8 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  status?: 'sending' | 'sent' | 'failed';
+  _retryPayload?: { content: string; imageUrl: string | null };
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -91,6 +95,8 @@ export function ChatView({
   onlineUsers = []
 }: ChatViewProps) {
   const { user } = useAuth();
+  const { profile } = useUserProfile();
+  const { toast } = useToast();
   const { markAsRead } = useUnreadMessages();
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
@@ -107,6 +113,8 @@ export function ChatView({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialLoad = useRef(true);
+  // Track IDs we just inserted ourselves so we can ignore the realtime echo
+  const recentlySentIds = useRef<Set<string>>(new Set());
 
   // Admins podem postar em canais admin-only, mas não em bot-only
   const canSendMessages = isAdmin 
@@ -472,15 +480,19 @@ export function ChatView({
         async (payload) => {
           // Only handle new root messages
           if (payload.new && !payload.new.parent_id) {
+            // Skip if this is the echo of a message we just sent optimistically
+            if (recentlySentIds.current.has(payload.new.id)) {
+              recentlySentIds.current.delete(payload.new.id);
+              return;
+            }
             const enriched = await enrichMessages([payload.new]);
             if (enriched.length > 0) {
               setMessages(prev => [...prev, enriched[0]]);
-              
+
               // Increment new messages count if not near bottom and not own message
               const isOwnMessage = payload.new.user_id === user?.id;
               if (!isOwnMessage) {
                 setNewMessagesCount(prev => {
-                  // Check if near bottom at the time of receiving the message
                   const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
                   if (scrollContainer) {
                     const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
@@ -630,6 +642,100 @@ export function ChatView({
       }
     }
   }, [messages.length, loading, loadingMore]);
+
+  // ===== Optimistic message sending =====
+  const sendMessageOptimistic = useCallback(async (
+    content: string,
+    imageUrl: string | null,
+  ): Promise<{ id?: string; error?: unknown }> => {
+    if (!user) return { error: new Error('not authenticated') };
+
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const nowIso = new Date().toISOString();
+
+    const optimistic: Message = {
+      id: tempId,
+      content,
+      created_at: nowIso,
+      user_id: user.id,
+      is_bot_message: false,
+      is_pinned: false,
+      reply_count: 0,
+      image_url: imageUrl,
+      status: 'sending',
+      _retryPayload: { content, imageUrl },
+      profiles: profile
+        ? {
+            display_name: profile.display_name,
+            avatar_url: profile.avatar_url,
+            avatar_id: profile.avatar_id,
+          }
+        : null,
+      reactions: [],
+      author_role: null,
+    };
+
+    setMessages(prev => [...prev, optimistic]);
+    // Force scroll to bottom on own send
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        channel_id: channel.id,
+        user_id: user.id,
+        content,
+        image_url: imageUrl,
+      })
+      .select('id')
+      .single();
+
+    if (error || !data) {
+      console.error('Error sending message:', error);
+      setMessages(prev =>
+        prev.map(m => (m.id === tempId ? { ...m, status: 'failed' as const } : m)),
+      );
+      toast({ variant: 'destructive', title: 'Falha ao enviar mensagem' });
+      return { error };
+    }
+
+    // Register the real id so the realtime echo is ignored
+    recentlySentIds.current.add(data.id);
+    // Safety cleanup
+    setTimeout(() => recentlySentIds.current.delete(data.id), 10000);
+
+    // Promote optimistic entry to "sent" with the real id
+    setMessages(prev =>
+      prev.map(m =>
+        m.id === tempId
+          ? { ...m, id: data.id, status: 'sent' as const, _retryPayload: undefined }
+          : m,
+      ),
+    );
+
+    // Fade out the ✓ after 2s by clearing status
+    setTimeout(() => {
+      setMessages(prev =>
+        prev.map(m => (m.id === data.id && m.status === 'sent' ? { ...m, status: undefined } : m)),
+      );
+    }, 2000);
+
+    return { id: data.id };
+  }, [user, profile, channel.id, toast]);
+
+  const retryMessage = useCallback((tempId: string) => {
+    const target = messages.find(m => m.id === tempId);
+    if (!target?._retryPayload) return;
+    setMessages(prev => prev.filter(m => m.id !== tempId));
+    void sendMessageOptimistic(target._retryPayload.content, target._retryPayload.imageUrl);
+  }, [messages, sendMessageOptimistic]);
+
+  const discardMessage = useCallback((tempId: string) => {
+    setMessages(prev => prev.filter(m => m.id !== tempId));
+  }, []);
+
 
   const formatDate = (dateStr: string) => {
     try {
@@ -835,6 +941,8 @@ export function ChatView({
                     authorRole={message.author_role}
                     onReply={() => onOpenThread?.(message)}
                     onOpenThread={() => onOpenThread?.(message)}
+                    onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
+                    onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
                   />
                 </div>
               );
@@ -868,6 +976,7 @@ export function ChatView({
           channelName={channel.name}
           onOpenPollModal={() => setShowPollModal(true)}
           onlineUserIds={onlineUsers.map(u => u.user_id)}
+          onSend={sendMessageOptimistic}
         />
       ) : (
         <div className="p-3 border-t border-border text-center text-xs text-muted-foreground shrink-0">

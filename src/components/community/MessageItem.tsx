@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { 
-  MessageCircle, 
-  MoreHorizontal, 
-  Pin, 
+import {
+  MessageCircle,
+  MoreHorizontal,
+  Pin,
   Trash2,
   Reply,
   Shield,
   ShieldCheck,
   Pencil,
   X,
-  Check
+  Check,
+  Loader2,
+  AlertCircle,
+  RotateCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +58,7 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  status?: 'sending' | 'sent' | 'failed';
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -70,16 +74,22 @@ interface MessageItemProps {
   isAdmin?: boolean;
   showActions?: boolean;
   authorRole?: 'admin' | 'moderator' | null;
+  onRetry?: () => void;
+  onDiscard?: () => void;
 }
 
-export function MessageItem({ 
-  message, 
-  onReply, 
+export function MessageItem({
+  message,
+  onReply,
   onOpenThread,
   isAdmin = false,
   showActions = true,
-  authorRole
+  authorRole,
+  onRetry,
+  onDiscard,
 }: MessageItemProps) {
+  const isOptimistic = message.status === 'sending' || message.status === 'failed';
+
   const { user } = useAuth();
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
@@ -287,6 +297,40 @@ export function MessageItem({
               (editado)
             </span>
           )}
+          {message.status === 'sending' && (
+            <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+              <Loader2 className="h-2.5 w-2.5 animate-spin" />
+              enviando…
+            </span>
+          )}
+          {message.status === 'sent' && (
+            <Check className="h-3 w-3 text-muted-foreground/60" aria-label="Enviada" />
+          )}
+          {message.status === 'failed' && (
+            <span className="text-[10px] text-destructive flex items-center gap-1.5">
+              <AlertCircle className="h-2.5 w-2.5" />
+              Falhou
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  className="underline hover:text-destructive/80 inline-flex items-center gap-0.5"
+                >
+                  <RotateCw className="h-2.5 w-2.5" /> Reenviar
+                </button>
+              )}
+              {onDiscard && (
+                <button
+                  type="button"
+                  onClick={onDiscard}
+                  className="underline hover:text-destructive/80"
+                >
+                  Descartar
+                </button>
+              )}
+            </span>
+          )}
+
         </div>
         
         {isEditing ? (
@@ -368,8 +412,8 @@ export function MessageItem({
         )}
       </div>
 
-      {/* Hover actions */}
-      {showActions && (isHovered || isDropdownOpen) && !isEditing && (
+      {/* Hover actions - hidden for optimistic/failed messages */}
+      {showActions && !isOptimistic && (isHovered || isDropdownOpen) && !isEditing && (
         <div className="absolute -top-3 right-2 flex items-center gap-0.5 bg-card border border-border rounded-md shadow-sm p-0.5">
           <ReactionPicker onSelect={handleReaction} />
           
