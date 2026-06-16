@@ -46,6 +46,7 @@ interface Message {
   file_name?: string | null;
   file_type?: string | null;
   file_size?: number | null;
+  link_preview_url?: string | null;
   status?: 'sending' | 'sent' | 'failed';
   _retryPayload?: {
     content: string;
@@ -675,6 +676,7 @@ export function ChatView({
       file_name: attachment?.name ?? null,
       file_type: attachment?.type ?? null,
       file_size: attachment?.size ?? null,
+      link_preview_url: extractFirstUrl(content),
       status: 'sending',
       _retryPayload: { content, imageUrl, attachment },
       profiles: profile
@@ -704,6 +706,7 @@ export function ChatView({
         file_name: attachment?.name ?? null,
         file_type: attachment?.type ?? null,
         file_size: attachment?.size ?? null,
+        link_preview_url: extractFirstUrl(content),
       })
       .select('id')
       .single();
