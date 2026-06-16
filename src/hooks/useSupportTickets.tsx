@@ -193,16 +193,16 @@ export function useAdminSupportTickets() {
   }, [fetchTickets]);
 
   const updateTicketStatus = async (ticketId: string, status: string) => {
-    const updates: Record<string, unknown> = { status };
+    const updates: { status: string; closed_at?: string } = { status };
     if (status === 'resolved') {
       updates.closed_at = new Date().toISOString();
     }
-    
+
     await supabase
       .from('support_tickets')
       .update(updates)
       .eq('id', ticketId);
-    
+
     await fetchTickets();
   };
 
