@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { MobileNav } from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
+import { useDevicePushRegistration } from '@/hooks/useDevicePushRegistration';
 import { SkipLink } from '@/components/ui/skip-link';
 
 interface AppLayoutProps {
@@ -9,6 +10,8 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { user } = useAuth();
+  // Register native push token (no-op on web)
+  useDevicePushRegistration();
 
   return (
     <div className="flex min-h-screen flex-col bg-background scrollbar-hidden">
