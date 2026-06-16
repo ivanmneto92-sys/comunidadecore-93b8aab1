@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2, ExternalLink } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2, ExternalLink, Brain, Trophy } from 'lucide-react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import DOMPurify from 'dompurify';
+import { useTutorialQuiz } from '@/hooks/useTutorialQuiz';
+import { QuizRunner } from './QuizRunner';
 
 interface Tutorial {
   id: string;
