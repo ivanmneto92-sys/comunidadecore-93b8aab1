@@ -397,6 +397,10 @@ export function MessageItem({
           />
         )}
 
+        {/* Link preview (OG tags) */}
+        {message.link_preview_url && !isEditing && !message.image_url && !message.file_url && (
+          <LinkPreviewCard url={message.link_preview_url} />
+        )}
 
 
         {/* Reactions & Reply count */}
