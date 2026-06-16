@@ -18,6 +18,7 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { MessageSearch } from './MessageSearch';
 import { OnlineMembersList } from './OnlineMembersList';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { extractFirstUrl } from '@/lib/urlUtils';
 
 interface Channel {
   id: string;
