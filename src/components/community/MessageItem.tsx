@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { 
-  MessageCircle, 
-  MoreHorizontal, 
-  Pin, 
+import {
+  MessageCircle,
+  MoreHorizontal,
+  Pin,
   Trash2,
   Reply,
   Shield,
   ShieldCheck,
   Pencil,
   X,
-  Check
+  Check,
+  Loader2,
+  AlertCircle,
+  RotateCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +58,7 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  status?: 'sending' | 'sent' | 'failed';
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
@@ -70,16 +74,22 @@ interface MessageItemProps {
   isAdmin?: boolean;
   showActions?: boolean;
   authorRole?: 'admin' | 'moderator' | null;
+  onRetry?: () => void;
+  onDiscard?: () => void;
 }
 
-export function MessageItem({ 
-  message, 
-  onReply, 
+export function MessageItem({
+  message,
+  onReply,
   onOpenThread,
   isAdmin = false,
   showActions = true,
-  authorRole
+  authorRole,
+  onRetry,
+  onDiscard,
 }: MessageItemProps) {
+  const isOptimistic = message.status === 'sending' || message.status === 'failed';
+
   const { user } = useAuth();
   const { toast } = useToast();
   const [isHovered, setIsHovered] = useState(false);
