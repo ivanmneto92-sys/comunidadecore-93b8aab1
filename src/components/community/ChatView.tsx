@@ -480,15 +480,19 @@ export function ChatView({
         async (payload) => {
           // Only handle new root messages
           if (payload.new && !payload.new.parent_id) {
+            // Skip if this is the echo of a message we just sent optimistically
+            if (recentlySentIds.current.has(payload.new.id)) {
+              recentlySentIds.current.delete(payload.new.id);
+              return;
+            }
             const enriched = await enrichMessages([payload.new]);
             if (enriched.length > 0) {
               setMessages(prev => [...prev, enriched[0]]);
-              
+
               // Increment new messages count if not near bottom and not own message
               const isOwnMessage = payload.new.user_id === user?.id;
               if (!isOwnMessage) {
                 setNewMessagesCount(prev => {
-                  // Check if near bottom at the time of receiving the message
                   const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
                   if (scrollContainer) {
                     const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
