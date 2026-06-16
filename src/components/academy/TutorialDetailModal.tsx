@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2, ExternalLink } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, CheckCircle2, Loader2, ExternalLink, Brain, Trophy } from 'lucide-react';
 import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import DOMPurify from 'dompurify';
+import { useTutorialQuiz } from '@/hooks/useTutorialQuiz';
+import { QuizRunner } from './QuizRunner';
 
 interface Tutorial {
   id: string;
@@ -52,7 +54,9 @@ export function TutorialDetailModal({
   hasNext,
 }: TutorialDetailModalProps) {
   const [isMarking, setIsMarking] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
   const { toast } = useToast();
+  const { quiz, bestAttempt, hasPassed } = useTutorialQuiz(tutorial?.id);
 
   if (!tutorial) return null;
 
@@ -159,9 +163,40 @@ export function TutorialDetailModal({
                   <ExternalLink className="h-4 w-4" />
                 </a>
               )}
+
+              {/* Quiz CTA */}
+              {quiz && quiz.quiz_questions.length > 0 && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    {hasPassed ? (
+                      <Trophy className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Brain className="h-5 w-5 text-primary" />
+                    )}
+                    <h3 className="font-semibold">
+                      {hasPassed ? 'Quiz aprovado' : 'Teste seu conhecimento'}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {quiz.quiz_questions.length} pergunta(s) • Nota mínima {quiz.passing_score}% •
+                    +{quiz.xp_reward} XP
+                    {bestAttempt && ` • Melhor: ${bestAttempt.score}%`}
+                  </p>
+                  <Button onClick={() => setQuizOpen(true)} className="w-full" size="sm">
+                    {hasPassed ? 'Refazer quiz' : 'Iniciar quiz'}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </ScrollArea>
+
+        <QuizRunner
+          tutorialId={tutorial.id}
+          open={quizOpen}
+          onClose={() => setQuizOpen(false)}
+        />
+
 
         {/* Footer - Mark Complete */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">

@@ -13,7 +13,8 @@ import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff, Pencil, X, Video, VideoOff, Link } from 'lucide-react';
+import { Loader2, Plus, Trash2, GraduationCap, Eye, EyeOff, Pencil, X, Video, VideoOff, Link, Brain } from 'lucide-react';
+import { QuizEditor } from './QuizEditor';
 
 const tutorialSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório').max(100),
@@ -60,6 +61,7 @@ export function TutorialManager() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [quizEditor, setQuizEditor] = useState<{ id: string; title: string } | null>(null);
 
   const form = useForm<TutorialFormData>({
     resolver: zodResolver(tutorialSchema),
@@ -574,6 +576,14 @@ export function TutorialManager() {
                         <Button
                           size="icon"
                           variant="ghost"
+                          onClick={() => setQuizEditor({ id: tutorial.id, title: tutorial.title })}
+                          title="Quiz"
+                        >
+                          <Brain className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           onClick={() => togglePublish(tutorial.id, tutorial.is_published)}
                           title={tutorial.is_published ? 'Despublicar' : 'Publicar'}
                         >
@@ -600,6 +610,15 @@ export function TutorialManager() {
           )}
         </CardContent>
       </Card>
+
+      {quizEditor && (
+        <QuizEditor
+          tutorialId={quizEditor.id}
+          tutorialTitle={quizEditor.title}
+          open={!!quizEditor}
+          onClose={() => setQuizEditor(null)}
+        />
+      )}
     </div>
   );
 }
