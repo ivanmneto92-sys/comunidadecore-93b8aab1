@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useAuth } from '@/hooks/useAuth';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { ImageUpload } from './ImageUpload';
+import { FileUpload, AttachmentMeta } from './FileUpload';
 import { MentionPopover } from './MentionPopover';
 import { MentionUser } from '@/hooks/useMentions';
 import { createMentionNotifications } from '@/lib/mentionUtils';
@@ -16,7 +17,11 @@ interface MessageComposerProps {
   onOpenPollModal: () => void;
   disabled?: boolean;
   onlineUserIds?: string[];
-  onSend: (content: string, imageUrl: string | null) => Promise<{ id?: string; error?: unknown }>;
+  onSend: (
+    content: string,
+    imageUrl: string | null,
+    attachment: AttachmentMeta | null,
+  ) => Promise<{ id?: string; error?: unknown }>;
 }
 
 export function MessageComposer({
