@@ -54,7 +54,9 @@ export function TutorialDetailModal({
   hasNext,
 }: TutorialDetailModalProps) {
   const [isMarking, setIsMarking] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
   const { toast } = useToast();
+  const { quiz, bestAttempt, hasPassed } = useTutorialQuiz(tutorial?.id);
 
   if (!tutorial) return null;
 
