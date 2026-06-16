@@ -42,8 +42,16 @@ interface Message {
   is_pinned: boolean;
   reply_count?: number;
   image_url?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
   status?: 'sending' | 'sent' | 'failed';
-  _retryPayload?: { content: string; imageUrl: string | null };
+  _retryPayload?: {
+    content: string;
+    imageUrl: string | null;
+    attachment: { path: string; name: string; type: string; size: number } | null;
+  };
   profiles?: {
     display_name: string | null;
     avatar_url: string | null;
