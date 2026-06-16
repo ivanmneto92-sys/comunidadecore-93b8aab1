@@ -18,6 +18,7 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { MessageSearch } from './MessageSearch';
 import { OnlineMembersList } from './OnlineMembersList';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { extractFirstUrl } from '@/lib/urlUtils';
 
 interface Channel {
   id: string;
@@ -46,6 +47,7 @@ interface Message {
   file_name?: string | null;
   file_type?: string | null;
   file_size?: number | null;
+  link_preview_url?: string | null;
   status?: 'sending' | 'sent' | 'failed';
   _retryPayload?: {
     content: string;
@@ -238,7 +240,7 @@ export function ChatView({
     try {
       let query = supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size, link_preview_url')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .order('created_at', { ascending: false })
@@ -397,7 +399,7 @@ export function ChatView({
       // Fetch messages around the target message
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size, link_preview_url')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .gte('created_at', targetMessage.created_at)
@@ -409,7 +411,7 @@ export function ChatView({
       // Also fetch some messages before the target
       const { data: beforeMessages } = await supabase
         .from('messages')
-        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size')
+        .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size, link_preview_url')
         .eq('channel_id', channel.id)
         .is('parent_id', null)
         .lt('created_at', targetMessage.created_at)
@@ -675,6 +677,7 @@ export function ChatView({
       file_name: attachment?.name ?? null,
       file_type: attachment?.type ?? null,
       file_size: attachment?.size ?? null,
+      link_preview_url: extractFirstUrl(content),
       status: 'sending',
       _retryPayload: { content, imageUrl, attachment },
       profiles: profile
@@ -704,6 +707,7 @@ export function ChatView({
         file_name: attachment?.name ?? null,
         file_type: attachment?.type ?? null,
         file_size: attachment?.size ?? null,
+        link_preview_url: extractFirstUrl(content),
       })
       .select('id')
       .single();
