@@ -42,6 +42,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
 import { renderMarkdown } from '@/lib/markdownUtils';
 import { FileAttachmentCard } from './FileAttachmentCard';
+import { LinkPreviewCard } from './LinkPreviewCard';
 
 interface Reaction {
   emoji: string;
@@ -63,6 +64,7 @@ interface Message {
   file_name?: string | null;
   file_type?: string | null;
   file_size?: number | null;
+  link_preview_url?: string | null;
   status?: 'sending' | 'sent' | 'failed';
   profiles?: {
     display_name: string | null;
