@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.add_xp(text, integer, numeric, jsonb) TO authenticated;
