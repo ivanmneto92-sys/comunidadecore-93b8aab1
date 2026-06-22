@@ -560,7 +560,7 @@ export function ChatView({
       .subscribe();
 
     const reactionsChannel = supabase
-      .channel(`reactions-${channel.id}`)
+      .channel(`reactions-${rtSuffix}`)
       .on(
         'postgres_changes',
         {
