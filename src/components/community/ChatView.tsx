@@ -448,13 +448,17 @@ export function ChatView({
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
 
-    // Load more when scrolled to top (within 100px threshold)
-    if (target.scrollTop < 100 && !loadingMore && hasMore) {
+    const metrics = {
+      scrollTop: target.scrollTop,
+      scrollHeight: target.scrollHeight,
+      clientHeight: target.clientHeight,
+    };
+
+    if (isNearTop(metrics) && !loadingMore && hasMore) {
       loadMoreMessages();
     }
 
-    // Track if user is near bottom (within 200px)
-    const nearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+    const nearBottom = checkNearBottom(metrics);
     setIsNearBottom(nearBottom);
 
     // Clear new messages count when scrolled to bottom
