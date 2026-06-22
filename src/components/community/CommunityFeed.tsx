@@ -151,10 +151,9 @@ export function CommunityFeed({ onOpenDiscussion }: CommunityFeedProps) {
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-4 max-w-3xl mx-auto">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
+            <FeedSkeleton count={3} />
           ) : posts.length === 0 ? (
+
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-sm">Nenhuma publicação encontrada.</p>
               <p className="text-xs mt-1">O CORE publicará conteúdo em breve.</p>
