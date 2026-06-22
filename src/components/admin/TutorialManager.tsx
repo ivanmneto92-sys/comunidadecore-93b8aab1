@@ -26,7 +26,16 @@ const tutorialSchema = z.object({
   tier_required: z.enum(['free', 'plus', 'elite']),
   is_published: z.boolean(),
   sort_order: z.coerce.number(),
-  cta_url: z.string().optional(),
+  cta_url: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((v) => v === '' || /^https:\/\//i.test(v), {
+      message: 'URL deve começar com https://',
+    })
+    .optional()
+    .or(z.literal('')),
+
   cta_label: z.string().optional(),
 });
 

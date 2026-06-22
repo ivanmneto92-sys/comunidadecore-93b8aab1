@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -23,7 +23,11 @@ export function QuizRunner({ tutorialId, open, onClose }: QuizRunnerProps) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null);
+  const [result, setResult] = useState<{
+    score: number;
+    passed: boolean;
+    perQuestion: Record<string, boolean>;
+  } | null>(null);
 
   const questions = quiz?.quiz_questions || [];
   const current = questions[step];
@@ -42,43 +46,33 @@ export function QuizRunner({ tutorialId, open, onClose }: QuizRunnerProps) {
     onClose();
   };
 
-  const score = useMemo(() => {
-    if (!questions.length) return 0;
-    let correct = 0;
-    questions.forEach((q) => {
-      const chosen = answers[q.id];
-      if (chosen && q.quiz_options.find((o) => o.id === chosen)?.is_correct) correct++;
-    });
-    return Math.round((correct / questions.length) * 100);
-  }, [answers, questions]);
-
   const handleSubmit = async () => {
     if (!user || !quiz) return;
     setSubmitting(true);
-    const finalScore = score;
-    const passed = finalScore >= quiz.passing_score;
-    const answersPayload = questions.map((q) => {
-      const optionId = answers[q.id] || null;
-      const opt = q.quiz_options.find((o) => o.id === optionId);
-      return { question_id: q.id, option_id: optionId, correct: !!opt?.is_correct };
-    });
-    const { error } = await supabase.from('quiz_attempts').insert({
-      user_id: user.id,
-      quiz_id: quiz.id,
-      tutorial_id: tutorialId,
-      score: finalScore,
-      passed,
-      answers: answersPayload,
-    });
+    const answersPayload = questions.map((q) => ({
+      question_id: q.id,
+      option_id: answers[q.id] || null,
+    }));
+    const { data, error } = await supabase.rpc('submit_quiz_attempt' as never, {
+      p_quiz_id: quiz.id,
+      p_tutorial_id: tutorialId,
+      p_answers: answersPayload,
+    } as never);
     setSubmitting(false);
     if (error) {
       toast({ variant: 'destructive', title: 'Erro ao enviar', description: error.message });
       return;
     }
-    setResult({ score: finalScore, passed });
+    const res = data as { score: number; passed: boolean; per_question: Array<{ question_id: string; correct: boolean }> };
+    const perQ: Record<string, boolean> = {};
+    (res.per_question || []).forEach((p) => {
+      perQ[p.question_id] = !!p.correct;
+    });
+    setResult({ score: res.score, passed: res.passed, perQuestion: perQ });
     refetchAttempts();
-    if (passed) toast({ title: 'Aprovado! 🎉', description: `+${quiz.xp_reward} XP` });
+    if (res.passed) toast({ title: 'Aprovado! 🎉', description: `+${quiz.xp_reward} XP` });
   };
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -108,8 +102,8 @@ export function QuizRunner({ tutorialId, open, onClose }: QuizRunnerProps) {
             </div>
             <div className="space-y-2 text-left">
               {questions.map((q, i) => {
-                const chosen = answers[q.id];
-                const correct = q.quiz_options.find((o) => o.id === chosen)?.is_correct;
+                const correct = result.perQuestion[q.id];
+
                 return (
                   <div key={q.id} className="rounded-lg border border-border p-3 text-sm">
                     <div className="flex items-start gap-2">

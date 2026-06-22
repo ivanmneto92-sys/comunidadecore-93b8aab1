@@ -2537,7 +2537,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      quiz_options_public: {
+        Row: {
+          id: string | null
+          order_index: number | null
+          question_id: string | null
+          text: string | null
+        }
+        Insert: {
+          id?: string | null
+          order_index?: number | null
+          question_id?: string | null
+          text?: string | null
+        }
+        Update: {
+          id?: string | null
+          order_index?: number | null
+          question_id?: string | null
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_options_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_xp: {
@@ -2631,6 +2659,10 @@ export type Database = {
           _target_user_id: string
         }
         Returns: undefined
+      }
+      submit_quiz_attempt: {
+        Args: { p_answers: Json; p_quiz_id: string; p_tutorial_id: string }
+        Returns: Json
       }
     }
     Enums: {
