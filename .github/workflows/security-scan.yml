@@ -1,0 +1,83 @@
+name: Security Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Audit npm dependencies (fail on high/critical)
+        run: bun audit --audit-level=high
+
+  security-diff:
+    runs-on: ubuntu-latest
+    needs: dependency-audit
+    env:
+      AIKIDO_API_TOKEN: ${{ secrets.AIKIDO_API_TOKEN }}
+      SECURITY_FAIL_LEVEL: warn
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
+      - name: Fetch current security findings
+        run: bunx tsx scripts/security-fetch.ts > security-current.json
+
+      - name: Diff against baseline
+        id: diff
+        run: bunx tsx scripts/security-diff.ts security-current.json
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: |
+            security-current.json
+            security-new.json
+          retention-days: 30
+
+      - name: Comment on PR with new findings
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('security-new.json')) return;
+            const findings = JSON.parse(fs.readFileSync('security-new.json', 'utf8'));
+            if (!findings.length) return;
+            const rows = findings.map(f =>
+              `| \`${f.scanner_name}\` | \`${f.internal_id}\` | ${f.level} | ${f.name} |`
+            ).join('\n');
+            const body = [
+              '### 🚨 New security findings detected',
+              '',
+              '| Scanner | ID | Level | Name |',
+              '| --- | --- | --- | --- |',
+              rows,
+              '',
+              'Fix the findings or update `.security/baseline.json` / `.security/allowlist.json` with justification.',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
