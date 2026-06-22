@@ -151,8 +151,8 @@ export function TutorialDetailModal({
                 />
               )}
 
-              {/* CTA Button */}
-              {tutorial.cta_url && (
+              {/* CTA Button — only render with safe http(s) URL */}
+              {tutorial.cta_url && /^https?:\/\//i.test(tutorial.cta_url) && (
                 <a
                   href={tutorial.cta_url}
                   target="_blank"
@@ -163,6 +163,7 @@ export function TutorialDetailModal({
                   <ExternalLink className="h-4 w-4" />
                 </a>
               )}
+
 
               {/* Quiz CTA */}
               {quiz && quiz.quiz_questions.length > 0 && (
