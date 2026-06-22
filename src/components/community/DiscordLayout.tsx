@@ -64,6 +64,8 @@ export function DiscordLayout() {
   
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<MobileView>('channels');
+  // Desktop: collapse channel list panel
+  const [channelListCollapsed, setChannelListCollapsed] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
