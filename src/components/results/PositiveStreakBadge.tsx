@@ -13,6 +13,7 @@ const PERIOD_LABEL: Record<FilterPeriod, string> = {
   '30d': '30 dias',
   '90d': '90 dias',
   '12m': '12 meses',
+  all: 'período total',
 };
 
 export function PositiveStreakBadge({ currentStreak, bestStreak, period }: PositiveStreakBadgeProps) {
