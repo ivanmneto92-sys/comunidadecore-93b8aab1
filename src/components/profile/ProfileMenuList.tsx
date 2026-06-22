@@ -12,8 +12,10 @@ import {
   BookOpen
 } from 'lucide-react';
 import { ProfileMenuItem } from './ProfileMenuItem';
+import { ThemeToggleItem } from './ThemeToggleItem';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+
 
 interface ProfileMenuListProps {
   affiliateBalance?: number;
