@@ -61,11 +61,9 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
       if (success) {
         toast({ title: 'Dados de pagamento salvos com segurança!' });
       } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao salvar dados',
-          description: 'Tente novamente.',
-        });
+        toast(buildErrorToast(new Error('Não foi possível criptografar os dados de pagamento'), {
+          action: 'salvar dados de pagamento',
+        }));
       }
     } finally {
       setSavingPaymentInfo(false);
