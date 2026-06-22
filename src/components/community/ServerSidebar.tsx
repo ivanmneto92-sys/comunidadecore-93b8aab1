@@ -92,7 +92,7 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
           </button>
         </TooltipTrigger>
         <TooltipContent side="right">
-          INSTITUTO TRADER Community
+          Club
         </TooltipContent>
       </Tooltip>
 
