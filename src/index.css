@@ -141,9 +141,13 @@
   }
 
   html {
-    /* Default to dark mode */
     color-scheme: dark;
   }
+
+  html.light {
+    color-scheme: light;
+  }
+
 
   body {
     @apply bg-background text-foreground antialiased;
