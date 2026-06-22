@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
-import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { ImageUpload } from './ImageUpload';
 import { FileUpload, AttachmentMeta } from './FileUpload';
 import { MentionPopover } from './MentionPopover';
@@ -17,6 +16,8 @@ interface MessageComposerProps {
   onOpenPollModal: () => void;
   disabled?: boolean;
   onlineUserIds?: string[];
+  onStartTyping?: () => void;
+  onStopTyping?: () => void;
   onSend: (
     content: string,
     imageUrl: string | null,
@@ -30,10 +31,11 @@ export function MessageComposer({
   onOpenPollModal,
   disabled = false,
   onlineUserIds = [],
+  onStartTyping,
+  onStopTyping,
   onSend,
 }: MessageComposerProps) {
   const { user } = useAuth();
-  const { startTyping, stopTyping } = useTypingIndicator(channelId);
   const [message, setMessage] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
@@ -50,7 +52,7 @@ export function MessageComposer({
     setMessage(value);
 
     if (value.length > 0) {
-      startTyping();
+      onStartTyping?.();
     }
 
     const textBeforeCursor = value.slice(0, cursorPos);
@@ -65,7 +67,7 @@ export function MessageComposer({
       setMentionQuery('');
       setMentionStartIndex(-1);
     }
-  }, [startTyping]);
+  }, [onStartTyping]);
 
   const handleMentionSelect = useCallback((selectedUser: MentionUser) => {
     if (mentionStartIndex === -1) return;
@@ -100,7 +102,7 @@ export function MessageComposer({
     e.preventDefault();
     if ((!message.trim() && !imageUrl && !attachment) || !user) return;
 
-    stopTyping();
+    onStopTyping?.();
 
     let content = message.trim();
     if (imageUrl) {
@@ -178,7 +180,7 @@ export function MessageComposer({
           ref={inputRef}
           value={message}
           onChange={handleInputChange}
-          onBlur={stopTyping}
+          onBlur={onStopTyping}
           onKeyDown={handleKeyDown}
           placeholder={`Mensagem em #${channelName.toLowerCase()}`}
           className="flex-1 h-9 text-sm"
