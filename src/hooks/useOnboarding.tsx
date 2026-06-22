@@ -40,9 +40,9 @@ export function useOnboarding() {
     const next: OnboardingStep[] = [
       {
         key: 'avatar',
-        label: 'Escolha seu avatar',
-        description: 'Personalize sua presença na comunidade.',
-        done: !!profile?.avatar_id,
+        label: 'Escolha seu avatar ou envie uma foto',
+        description: 'Personalize sua presença na comunidade com um avatar ou foto sua.',
+        done: !!profile?.avatar_id || !!profile?.avatar_url,
         href: '/profile',
       },
       {
