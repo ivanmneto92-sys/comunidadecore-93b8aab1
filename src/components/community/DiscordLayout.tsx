@@ -64,6 +64,7 @@ export function DiscordLayout() {
   
   // Mobile navigation state
   const [mobileView, setMobileView] = useState<MobileView>('channels');
+  const [mobileSidebarCollapsed, setMobileSidebarCollapsed] = useState(false);
   // Desktop: collapse channel list panel
   const [channelListCollapsed, setChannelListCollapsed] = useState(false);
 
@@ -133,15 +134,31 @@ export function DiscordLayout() {
       {/* ===== MOBILE LAYOUT ===== */}
       <div className="flex h-full w-full md:hidden">
         {/* ServerSidebar - ALWAYS visible, compact */}
-        <div className="w-[52px] shrink-0 h-full">
-          <ServerSidebar
-            channels={channels}
-            selectedChannel={selectedChannel}
-            onSelectChannel={handleSelectChannel}
-            compact={true}
-            onOpenNews={() => setShowNews(true)}
-          />
-        </div>
+        {!mobileSidebarCollapsed ? (
+          <div className="w-[52px] shrink-0 h-full">
+            <ServerSidebar
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={handleSelectChannel}
+              compact={true}
+              onOpenNews={() => setShowNews(true)}
+              onCollapse={() => setMobileSidebarCollapsed(true)}
+            />
+          </div>
+        ) : (
+          <div className="w-10 shrink-0 h-full border-r border-border bg-background flex justify-center pt-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileSidebarCollapsed(false)}
+              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              aria-label="Mostrar menu lateral"
+              title="Mostrar menu"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
         
         {/* Main content area - switches between channels and chat */}
         <div className="flex-1 h-full overflow-hidden">
