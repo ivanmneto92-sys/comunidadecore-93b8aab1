@@ -27,7 +27,7 @@ export function useOnboarding() {
     setLoading(true);
 
     const [profileRes, channelRes, msgRes, tutRes, progressRes] = await Promise.all([
-      supabase.from('profiles').select('display_name, avatar_id').eq('id', user.id).maybeSingle(),
+      supabase.from('profiles').select('display_name, avatar_id, avatar_url').eq('id', user.id).maybeSingle(),
       supabase.from('user_channel_read_status').select('user_id').eq('user_id', user.id).limit(1),
       supabase.from('messages').select('id').eq('user_id', user.id).limit(1),
       supabase.from('tutorial_progress').select('id').eq('user_id', user.id).limit(1),
