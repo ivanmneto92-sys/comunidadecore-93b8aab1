@@ -174,29 +174,18 @@ export function useSeasonAchievements() {
     };
   });
 
-  // Mutation para desbloquear conquista
+  // Mutation para desbloquear conquista (via RPC SECURITY DEFINER)
   const unlockMutation = useMutation({
     mutationFn: async (achievementId: string) => {
       if (!user?.id || !currentSeason?.id) throw new Error('Missing data');
-      
+
       const achievement = achievements?.find(a => a.id === achievementId);
       if (!achievement) throw new Error('Achievement not found');
 
-      // Inserir conquista desbloqueada
-      const { error } = await supabase
-        .from('user_season_achievements')
-        .insert({
-          user_id: user.id,
-          achievement_id: achievementId,
-          season_id: currentSeason.id,
-        });
-
-      if (error) throw error;
-
-      // Adicionar XP da conquista
-      await addXp('achievement', achievement.xp_reward, {
-        details: { achievement_id: achievementId, achievement_name: achievement.name },
+      const { error } = await supabase.rpc('claim_season_achievement', {
+        _achievement_id: achievementId,
       });
+      if (error) throw error;
 
       return achievement;
     },
@@ -205,6 +194,7 @@ export function useSeasonAchievements() {
       queryClient.invalidateQueries({ queryKey: ['user-season-progress'] });
     },
   });
+
 
   // Estatísticas
   const stats = {

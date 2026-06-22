@@ -6,8 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   calculateCheckinXp, 
   getStreakMultiplier,
-  XP_CAPS,
 } from '@/lib/seasonXpCalculator';
+
 import { useSeason } from './useSeason';
 
 // Get local date string in YYYY-MM-DD format (user's timezone)
@@ -94,7 +94,7 @@ export function useCheckin() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentSeason, userProgress, refetchProgress } = useSeason();
+  const { refetchProgress } = useSeason();
 
   const { data, isLoading } = useQuery({
     queryKey: ['checkin-data', user?.id],
@@ -140,96 +140,20 @@ export function useCheckin() {
 
       if (checkinError) throw checkinError;
 
-      // === SEASON XP INTEGRATION ===
-      // Add season XP if there's an active season and user progress
+      // === SEASON XP INTEGRATION (via SECURITY DEFINER RPC) ===
       let seasonXpAdded = 0;
-      let seasonXpTotal = 0;
 
-      if (currentSeason?.id && userProgress) {
-        // Check daily cap for checkin source
-        const { data: capsData } = await supabase
-          .rpc('get_daily_xp_caps', { p_user_id: user.id });
-        
-        const checkinCap = capsData?.find((c: { source: string }) => c.source === 'checkin');
-        const remaining = checkinCap?.remaining ?? XP_CAPS.daily.checkin;
-        
-        // Apply cap
-        const cappedXp = Math.min(xpEarned, remaining);
-        
-        if (cappedXp > 0) {
-          // Calculate total XP (20% of season XP goes to permanent)
-          seasonXpTotal = Math.round(cappedXp * 0.2);
+      const { data: xpResult, error: xpError } = await supabase.rpc('add_xp', {
+        _source: 'checkin',
+        _amount: xpEarned,
+        _multiplier: streakMultiplier,
+        _details: { streak: newStreak, base_xp: 10 } as never,
+      });
 
-          // Register XP transaction
-          await supabase
-            .from('xp_transactions')
-            .insert([{
-              user_id: user.id,
-              season_id: currentSeason.id,
-              source: 'checkin',
-              xp_season: cappedXp,
-              xp_total: seasonXpTotal,
-              multiplier: streakMultiplier,
-              details: { streak: newStreak, base_xp: 10 },
-            }]);
+      if (xpError) throw xpError;
+      const r = (xpResult ?? {}) as { xp_added?: number };
+      seasonXpAdded = r.xp_added ?? 0;
 
-          // Update season progress
-          const newSeasonXp = (userProgress.season_xp || 0) + cappedXp;
-          
-          // Calculate new level using the same formula as the DB function
-          let level = 1;
-          let remainingXp = newSeasonXp;
-          while (level < 50) {
-            let xpNeeded: number;
-            if (level <= 10) xpNeeded = level * 50;
-            else if (level <= 25) xpNeeded = 500 + (level - 10) * 100;
-            else if (level <= 40) xpNeeded = 2000 + (level - 25) * 200;
-            else xpNeeded = 5000 + (level - 40) * 400;
-            
-            if (remainingXp >= xpNeeded) {
-              remainingXp -= xpNeeded;
-              level++;
-            } else break;
-          }
-          level = Math.min(level, 50);
-
-          await supabase
-            .from('user_season_progress')
-            .update({
-              season_xp: newSeasonXp,
-              season_level: level,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', userProgress.id);
-
-          seasonXpAdded = cappedXp;
-        }
-      }
-
-      // Update or insert user XP (permanent) with error handling
-      const { data: existingXp } = await supabase
-        .from('user_xp')
-        .select('total_xp')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      // Total XP is the season contribution (20% of season XP)
-      const permanentXpGain = seasonXpTotal > 0 ? seasonXpTotal : xpEarned;
-
-      if (existingXp) {
-        const { error: updateError } = await supabase
-          .from('user_xp')
-          .update({ total_xp: existingXp.total_xp + permanentXpGain })
-          .eq('user_id', user.id);
-        
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from('user_xp')
-          .insert({ user_id: user.id, total_xp: permanentXpGain });
-        
-        if (insertError) throw insertError;
-      }
 
       return { 
         xpEarned: seasonXpAdded > 0 ? seasonXpAdded : xpEarned, 
