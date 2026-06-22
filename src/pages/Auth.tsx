@@ -10,7 +10,7 @@ import { buildErrorToast } from '@/lib/toastError';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
-import logoCore from '@/assets/logo-core.png';
+import logoCore from '@/assets/logo-instituto-trader.png';
 import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
 
 const emailSchema = z.string().email('Email inválido');

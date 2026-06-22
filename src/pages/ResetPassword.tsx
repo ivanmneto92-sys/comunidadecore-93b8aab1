@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, KeyRound, CheckCircle } from 'lucide-react';
 import { z } from 'zod';
-import logoCore from '@/assets/logo-core.png';
+import logoCore from '@/assets/logo-instituto-trader.png';
 
 const passwordSchema = z.string().min(6, 'Senha deve ter no mínimo 6 caracteres');
 
