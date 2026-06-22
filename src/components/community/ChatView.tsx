@@ -502,7 +502,7 @@ export function ChatView({
               const isOwnMessage = payload.new.user_id === user?.id;
               if (!isOwnMessage) {
                 setNewMessagesCount(prev => {
-                  const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+                  const scrollContainer = parentRef.current;
                   if (scrollContainer) {
                     const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
                     if (!nearBottom) {
