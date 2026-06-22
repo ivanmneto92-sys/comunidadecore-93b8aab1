@@ -694,7 +694,8 @@ export function ChatView({
 
     setMessages(prev => [...prev, optimistic]);
     requestAnimationFrame(() => {
-      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const el = parentRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     });
 
     const { data, error } = await supabase
