@@ -1,4 +1,4 @@
-import { Settings2, Volume2, VolumeX, AtSign, Reply, Loader2 } from 'lucide-react';
+import { Settings2, Volume2, VolumeX, AtSign, Reply, Loader2, Bell, BellOff, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { useNotificationSettings } from '@/hooks/useNotificationSettings';
 import { useToast } from '@/hooks/use-toast';
+import { useWebPushRegistration } from '@/hooks/useWebPushRegistration';
 
 export function NotificationSettings() {
   const { settings, loading, updateSettings } = useNotificationSettings();
