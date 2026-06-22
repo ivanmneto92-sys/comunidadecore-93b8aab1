@@ -212,11 +212,7 @@ export function MessageItem({
           },
         };
       });
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao reagir',
-        description: 'Não foi possível adicionar sua reação.',
-      });
+      toast(buildErrorToast(error, { action: 'reagir à mensagem' }));
     }
   };
 
