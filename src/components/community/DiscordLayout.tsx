@@ -244,16 +244,16 @@ export function DiscordLayout() {
         )}
 
         {channelListCollapsed && (
-          <div className="w-11 shrink-0 h-full border-r border-border bg-background flex justify-center pt-3">
+          <div className="w-6 shrink-0 h-full border-r border-border bg-background flex justify-center pt-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setChannelListCollapsed(false)}
-              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="h-5 w-5 text-muted-foreground hover:text-primary hover:bg-primary/10"
               aria-label="Mostrar menu de canais"
               title="Mostrar menu"
             >
-              <PanelLeftOpen className="h-4 w-4" />
+              <PanelLeftOpen className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
