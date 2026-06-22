@@ -768,6 +768,290 @@ export type Database = {
         }
         Relationships: []
       }
+      mt5_account_snapshots: {
+        Row: {
+          balance: number | null
+          captured_at: string
+          created_at: string
+          credit: number | null
+          daily_pnl: number | null
+          daily_trades: number | null
+          daily_volume: number | null
+          equity: number | null
+          floating_profit: number | null
+          free_margin: number | null
+          id: string
+          margin: number | null
+          margin_level: number | null
+          mt5_account_id: string
+          open_positions: number | null
+        }
+        Insert: {
+          balance?: number | null
+          captured_at?: string
+          created_at?: string
+          credit?: number | null
+          daily_pnl?: number | null
+          daily_trades?: number | null
+          daily_volume?: number | null
+          equity?: number | null
+          floating_profit?: number | null
+          free_margin?: number | null
+          id?: string
+          margin?: number | null
+          margin_level?: number | null
+          mt5_account_id: string
+          open_positions?: number | null
+        }
+        Update: {
+          balance?: number | null
+          captured_at?: string
+          created_at?: string
+          credit?: number | null
+          daily_pnl?: number | null
+          daily_trades?: number | null
+          daily_volume?: number | null
+          equity?: number | null
+          floating_profit?: number | null
+          free_margin?: number | null
+          id?: string
+          margin?: number | null
+          margin_level?: number | null
+          mt5_account_id?: string
+          open_positions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mt5_account_snapshots_mt5_account_id_fkey"
+            columns: ["mt5_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mt5_accounts: {
+        Row: {
+          account_login: number
+          api_token_hash: string
+          broker: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          last_seen_at: string | null
+          leverage: number | null
+          server: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_login: number
+          api_token_hash: string
+          broker?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string | null
+          leverage?: number | null
+          server: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_login?: number
+          api_token_hash?: string
+          broker?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          last_seen_at?: string | null
+          leverage?: number | null
+          server?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mt5_cashflows: {
+        Row: {
+          amount: number
+          comment: string | null
+          created_at: string
+          deal_ticket: number
+          id: string
+          mt5_account_id: string
+          time: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          comment?: string | null
+          created_at?: string
+          deal_ticket: number
+          id?: string
+          mt5_account_id: string
+          time: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          comment?: string | null
+          created_at?: string
+          deal_ticket?: number
+          id?: string
+          mt5_account_id?: string
+          time?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mt5_cashflows_mt5_account_id_fkey"
+            columns: ["mt5_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mt5_daily_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          deposits: number
+          end_balance: number | null
+          gross_profit: number
+          id: string
+          losses: number
+          max_drawdown: number
+          mt5_account_id: string
+          net_profit: number
+          operational_return: number
+          start_balance: number | null
+          trades: number
+          updated_at: string
+          volume: number
+          wins: number
+          withdrawals: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          deposits?: number
+          end_balance?: number | null
+          gross_profit?: number
+          id?: string
+          losses?: number
+          max_drawdown?: number
+          mt5_account_id: string
+          net_profit?: number
+          operational_return?: number
+          start_balance?: number | null
+          trades?: number
+          updated_at?: string
+          volume?: number
+          wins?: number
+          withdrawals?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          deposits?: number
+          end_balance?: number | null
+          gross_profit?: number
+          id?: string
+          losses?: number
+          max_drawdown?: number
+          mt5_account_id?: string
+          net_profit?: number
+          operational_return?: number
+          start_balance?: number | null
+          trades?: number
+          updated_at?: string
+          volume?: number
+          wins?: number
+          withdrawals?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mt5_daily_metrics_mt5_account_id_fkey"
+            columns: ["mt5_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mt5_deals: {
+        Row: {
+          comment: string | null
+          commission: number | null
+          created_at: string
+          deal_ticket: number
+          entry: string | null
+          fee: number | null
+          id: string
+          magic: number | null
+          mt5_account_id: string
+          position_id: number | null
+          price: number | null
+          profit: number | null
+          swap: number | null
+          symbol: string | null
+          time: string
+          type: string | null
+          volume: number | null
+        }
+        Insert: {
+          comment?: string | null
+          commission?: number | null
+          created_at?: string
+          deal_ticket: number
+          entry?: string | null
+          fee?: number | null
+          id?: string
+          magic?: number | null
+          mt5_account_id: string
+          position_id?: number | null
+          price?: number | null
+          profit?: number | null
+          swap?: number | null
+          symbol?: string | null
+          time: string
+          type?: string | null
+          volume?: number | null
+        }
+        Update: {
+          comment?: string | null
+          commission?: number | null
+          created_at?: string
+          deal_ticket?: number
+          entry?: string | null
+          fee?: number | null
+          id?: string
+          magic?: number | null
+          mt5_account_id?: string
+          position_id?: number | null
+          price?: number | null
+          profit?: number | null
+          swap?: number | null
+          symbol?: string | null
+          time?: string
+          type?: string | null
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mt5_deals_mt5_account_id_fkey"
+            columns: ["mt5_account_id"]
+            isOneToOne: false
+            referencedRelation: "mt5_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -2309,6 +2593,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_mod: { Args: { _user_id: string }; Returns: boolean }
+      recompute_mt5_daily_metrics: {
+        Args: { p_account: string; p_date: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
