@@ -71,12 +71,8 @@ export default function Academy() {
   const tutorialIds = useMemo(() => tutorials.map((t) => t.id), [tutorials]);
   const { isCompleted, markAsCompleted, getStats, loading: progressLoading } = useTutorialProgress(tutorialIds);
 
-  const canAccess = (tierRequired: string) => {
-    if (tierRequired === 'free') return true;
-    if (membership === 'elite') return true;
-    if (membership === 'plus' && (tierRequired === 'free' || tierRequired === 'plus')) return true;
-    return false;
-  };
+  const canAccess = (tierRequired: string) =>
+    hasTierAccess(membership, tierRequired as 'free' | 'plus' | 'elite');
 
   // Count tutorials per category
   const tutorialCounts = useMemo(() => {
