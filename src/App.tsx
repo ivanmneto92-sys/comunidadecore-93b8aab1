@@ -11,6 +11,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Lazy load all pages for code splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Landing = lazy(() => import("./pages/Landing"));
 const Results = lazy(() => import("./pages/Results"));
 const Community = lazy(() => import("./pages/Community"));
 const Academy = lazy(() => import("./pages/Academy"));
@@ -67,7 +68,9 @@ const App = () => (
               <Route path="/termos" element={<Terms />} />
               <Route path="/privacidade" element={<Privacy />} />
               <Route path="/install" element={<Install />} />
-              <Route path="/" element={
+              <Route path="/" element={<HomeRoute />} />
+              <Route path="/landing" element={<Landing />} />
+              <Route path="/app" element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
