@@ -25,6 +25,7 @@ const Seasons = lazy(() => import("./pages/Seasons"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
+const MT5 = lazy(() => import("./pages/MT5"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -113,6 +114,11 @@ const App = () => (
               <Route path="/seasons" element={
                 <ProtectedRoute>
                   <Seasons />
+                </ProtectedRoute>
+              } />
+              <Route path="/mt5" element={
+                <ProtectedRoute>
+                  <MT5 />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
