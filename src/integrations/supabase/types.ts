@@ -533,6 +533,66 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_profiles: {
+        Row: {
+          age_range: string
+          created_at: string
+          email: string
+          full_name: string
+          gender: string
+          id: string
+          income_range: string
+          initial_investment: string
+          investment_experience: string
+          investor_profile: string
+          is_trader: string
+          prop_firm_status: string
+          updated_at: string
+          user_id: string
+          whatsapp: string
+          work_area: string
+          work_area_other: string | null
+        }
+        Insert: {
+          age_range: string
+          created_at?: string
+          email: string
+          full_name: string
+          gender: string
+          id?: string
+          income_range: string
+          initial_investment: string
+          investment_experience: string
+          investor_profile: string
+          is_trader: string
+          prop_firm_status: string
+          updated_at?: string
+          user_id: string
+          whatsapp: string
+          work_area: string
+          work_area_other?: string | null
+        }
+        Update: {
+          age_range?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          gender?: string
+          id?: string
+          income_range?: string
+          initial_investment?: string
+          investment_experience?: string
+          investor_profile?: string
+          is_trader?: string
+          prop_firm_status?: string
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string
+          work_area?: string
+          work_area_other?: string | null
+        }
+        Relationships: []
+      }
       link_previews: {
         Row: {
           created_at: string
