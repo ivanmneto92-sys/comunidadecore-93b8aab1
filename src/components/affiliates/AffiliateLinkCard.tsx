@@ -37,8 +37,8 @@ export function AffiliateLinkCard({ affiliateCode }: AffiliateLinkCardProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'CORE HUB - Indicação',
-          text: 'Venha fazer parte do CORE HUB! Use meu link de indicação:',
+          title: 'Instituto Trader - Indicação',
+          text: 'Venha fazer parte do Instituto Trader! Use meu link de indicação:',
           url: affiliateLink,
         });
       } catch (err) {

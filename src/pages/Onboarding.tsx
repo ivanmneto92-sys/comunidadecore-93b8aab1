@@ -7,7 +7,7 @@ import { TrendingUp, Shield, Users, BarChart3, ChevronRight, Check } from 'lucid
 const steps = [
   {
     icon: TrendingUp,
-    title: 'Bem-vindo ao CORE HUB',
+    title: 'Bem-vindo ao Instituto Trader',
     description: 'Sua comunidade de copy trading inteligente. Acompanhe resultados, aprenda sobre gestão de risco e conecte-se com outros membros.',
   },
   {
@@ -58,7 +58,7 @@ export default function Onboarding() {
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">CORE HUB</h1>
+          <h1 className="text-2xl font-bold">Instituto Trader</h1>
         </div>
 
         {/* Progress dots */}

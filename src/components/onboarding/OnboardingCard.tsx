@@ -26,7 +26,7 @@ export function OnboardingCard() {
 
       <div className="flex items-center gap-2 mb-1">
         <Sparkles className="h-4 w-4 text-primary" />
-        <h3 className="font-semibold text-sm">Primeiros passos no CORE HUB</h3>
+        <h3 className="font-semibold text-sm">Primeiros passos no Instituto Trader</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
         Complete os 5 passos e ganhe a badge <span className="text-primary font-medium">Primeiros Passos</span> + 50 XP.

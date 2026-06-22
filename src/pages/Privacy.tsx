@@ -31,7 +31,7 @@ export default function Privacy() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              A privacidade dos nossos usuários é uma prioridade para o CORE HUB. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+              A privacidade dos nossos usuários é uma prioridade para o Instituto Trader. Esta Política de Privacidade descreve como coletamos, usamos, armazenamos e protegemos suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
             </p>
           </CardContent>
         </Card>

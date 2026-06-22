@@ -3,35 +3,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CORE HUB Design System - Dark Mode Premium (Discord-inspired) */
+/* Instituto Trader — Design System (Dark Premium Institucional) */
 
 @layer base {
   :root {
-    /* CORE HUB Brand Colors - exact requested palette */
-    /* #0b1f3a - Azul-marinho (Main background) */
+    /* Instituto Trader — paleta oficial */
+    /* #0B1F3A — Azul-marinho (background) */
     --background: 214 68% 14%;
-    /* #f4f6f8 - Cinza (Foreground/Text) */
+    /* #F4F6F8 — Cinza claro (foreground) */
     --foreground: 210 22% 96%;
 
-    /* #1f2937 - Grafite (Cards) */
+    /* #1F2937 — Grafite (cards) */
     --card: 215 28% 17%;
     --card-foreground: 210 22% 96%;
 
     --popover: 215 28% 17%;
     --popover-foreground: 210 22% 96%;
 
-    /* #cca268 - Dourado-escuro (Primary) */
-    --primary: 35 50% 60%;
+    /* #C9A227 — Dourado oficial (primary) */
+    --primary: 46 68% 47%;
     --primary-foreground: 214 68% 14%;
 
-    /* #1f2937 - Grafite (Secondary) */
+    /* #1F2937 — Grafite (secondary) */
     --secondary: 215 28% 17%;
     --secondary-foreground: 210 22% 96%;
 
     --muted: 215 28% 17%;
-    --muted-foreground: 33 30% 75%;
+    --muted-foreground: 46 25% 72%;
 
-    /* #ebd7be - Dourado-claro (Accent) */
+    /* #EBD7BE — Dourado claro de apoio (accent) */
     --accent: 33 53% 83%;
     --accent-foreground: 214 68% 14%;
 
@@ -40,27 +40,27 @@
 
     --border: 33 53% 83%;
     --input: 215 28% 17%;
-    --ring: 35 50% 60%;
+    --ring: 46 68% 47%;
 
     --radius: 0.625rem;
 
     /* Status colors */
     --status-success: 142 71% 45%;
-    --status-warning: 35 50% 60%;
+    --status-warning: 46 68% 47%;
     --status-danger: 0 72% 50%;
 
     /* Sidebar - Graphite */
     --sidebar-background: 214 68% 14%;
     --sidebar-foreground: 210 22% 96%;
-    --sidebar-primary: 35 50% 60%;
+    --sidebar-primary: 46 68% 47%;
     --sidebar-primary-foreground: 214 68% 14%;
     --sidebar-accent: 215 28% 17%;
     --sidebar-accent-foreground: 210 22% 96%;
     --sidebar-border: 33 53% 83%;
-    --sidebar-ring: 35 50% 60%;
+    --sidebar-ring: 46 68% 47%;
 
     /* Chart colors */
-    --chart-1: 35 50% 60%;
+    --chart-1: 46 68% 47%;
     --chart-2: 33 53% 83%;
     --chart-3: 142 71% 45%;
     --chart-4: 0 72% 50%;
@@ -94,8 +94,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 214 68% 14%;
 
-    /* #cca268 - Dourado-escuro (Primary) */
-    --primary: 35 50% 50%;
+    /* #C9A227 — Dourado oficial (Primary) */
+    --primary: 46 68% 42%;
     --primary-foreground: 0 0% 100%;
 
     /* Soft graphite-tinted surface */
@@ -114,16 +114,16 @@
 
     --border: 214 20% 85%;
     --input: 0 0% 100%;
-    --ring: 35 50% 50%;
+    --ring: 46 68% 42%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 214 68% 14%;
-    --sidebar-primary: 35 50% 50%;
+    --sidebar-primary: 46 68% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 22% 92%;
     --sidebar-accent-foreground: 214 68% 14%;
     --sidebar-border: 214 20% 85%;
-    --sidebar-ring: 35 50% 50%;
+    --sidebar-ring: 46 68% 42%;
     --sidebar: 0 0% 100%;
 
     --shadow-sm: 0 1px 2px 0 hsl(214 68% 14% / 0.05);
@@ -217,6 +217,13 @@
 
   .font-body {
     font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Instituto Trader — serif institucional para landing/headlines */
+  .font-serif-display {
+    font-family: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
   }
 
   .editorial-divider {
