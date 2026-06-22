@@ -291,6 +291,8 @@ export default function Results() {
             );
           })()}
         </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Compliance disclaimer */}
         <p className="text-center text-[10px] text-muted-foreground/60 pt-4 pb-2">
