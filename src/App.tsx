@@ -8,19 +8,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { CommandPalette } from "@/components/CommandPalette";
+import { PageSkeleton } from "@/components/skeletons";
 
 // Smart home: visitante vê a landing, logado vai pro Dashboard
 const HomeRoute = () => {
   const { user, loading } = useAuth();
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
   return user ? <Navigate to="/app" replace /> : <Landing />;
 };
+
 
 
 // Lazy load all pages for code splitting
@@ -59,12 +57,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Minimal loading fallback that doesn't affect UX
-const PageLoader = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-  </div>
-);
+// Skeleton fallback padronizado para qualquer rota lazy
+const PageLoader = () => <PageSkeleton />;
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
