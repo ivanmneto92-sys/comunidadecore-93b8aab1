@@ -46,7 +46,7 @@ export function useSeasonXp() {
     staleTime: 30 * 1000, // 30 segundos
   });
 
-  // Mutation para adicionar XP
+  // Mutation para adicionar XP (via RPC SECURITY DEFINER)
   const addXpMutation = useMutation({
     mutationFn: async ({ source, amount, multiplier = 1.0, details }: {
       source: XpSource;
@@ -54,84 +54,31 @@ export function useSeasonXp() {
       multiplier?: number;
       details?: Record<string, unknown>;
     }) => {
-      if (!user?.id || !currentSeason?.id || !userProgress) {
-        throw new Error('Missing user, season, or progress data');
-      }
+      if (!user?.id) throw new Error('Not authenticated');
 
-      // Verificar cap da fonte
-      const sourceCap = dailyCaps?.find(c => c.source === source);
-      const remaining = sourceCap?.remaining ?? XP_CAPS.daily[source] ?? 50;
-      
-      // Aplicar cap
-      const cappedAmount = Math.min(amount, remaining);
-      if (cappedAmount <= 0) {
-        return { xpAdded: 0, capped: true };
-      }
+      const { data, error } = await supabase.rpc('add_xp', {
+        _source: source,
+        _amount: amount,
+        _multiplier: multiplier,
+        _details: details ? (JSON.parse(JSON.stringify(details)) as never) : null,
+      });
 
-      // Calcular XP com multiplicador
-      const xpSeason = Math.round(cappedAmount * multiplier);
-      const xpTotal = calculateTotalXp(xpSeason);
+      if (error) throw error;
 
-      // Registrar transação
-      const { error: txError } = await supabase
-        .from('xp_transactions')
-        .insert([{
-          user_id: user.id,
-          season_id: currentSeason.id,
-          source,
-          xp_season: xpSeason,
-          xp_total: xpTotal,
-          multiplier,
-          details: details ? JSON.parse(JSON.stringify(details)) : null,
-        }]);
+      const result = (data ?? {}) as {
+        xp_added?: number;
+        xp_total_added?: number;
+        new_season_xp?: number;
+        new_season_level?: number;
+        capped?: boolean;
+      };
 
-      if (txError) throw txError;
-
-      // Atualizar progresso da temporada
-      const newSeasonXp = userProgress.season_xp + xpSeason;
-      const newLevel = calculateLevelFromXp(newSeasonXp);
-
-      const { error: progressError } = await supabase
-        .from('user_season_progress')
-        .update({
-          season_xp: newSeasonXp,
-          season_level: newLevel,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', userProgress.id);
-
-      if (progressError) throw progressError;
-
-      // Atualizar XP total (permanente)
-      const { data: existingXp } = await supabase
-        .from('user_xp')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (existingXp) {
-        await supabase
-          .from('user_xp')
-          .update({
-            total_xp: existingXp.total_xp + xpTotal,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('user_id', user.id);
-      } else {
-        await supabase
-          .from('user_xp')
-          .insert({
-            user_id: user.id,
-            total_xp: xpTotal,
-          });
-      }
-
-      return { 
-        xpAdded: xpSeason, 
-        xpTotal: xpTotal,
-        newSeasonXp,
-        newLevel,
-        capped: cappedAmount < amount,
+      return {
+        xpAdded: result.xp_added ?? 0,
+        xpTotal: result.xp_total_added ?? 0,
+        newSeasonXp: result.new_season_xp ?? 0,
+        newLevel: result.new_season_level ?? 0,
+        capped: !!result.capped,
       };
     },
     onSuccess: () => {
@@ -140,6 +87,7 @@ export function useSeasonXp() {
       queryClient.invalidateQueries({ queryKey: ['user-xp'] });
     },
   });
+
 
   // Função helper para adicionar XP com tipo
   const addXp = async (
