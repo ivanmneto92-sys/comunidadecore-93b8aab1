@@ -70,12 +70,7 @@ export function TutorialDetailModal({
       await onMarkComplete();
       toast({ title: 'Tutorial concluído! 🎉' });
     } catch (error) {
-      console.error('Error marking tutorial complete:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao marcar como concluído',
-        description: 'Tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: 'marcar tutorial como concluído', resource: 'tutorial' }));
     } finally {
       setIsMarking(false);
     }
