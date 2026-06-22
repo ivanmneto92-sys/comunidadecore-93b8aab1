@@ -42,7 +42,10 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
 const MT5 = lazy(() => import("./pages/MT5"));
+const Robots = lazy(() => import("./pages/Robots"));
+const RobotDetail = lazy(() => import("./pages/RobotDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
 
 
 
@@ -143,8 +146,19 @@ const App = () => (
                   <MT5 />
                 </ProtectedRoute>
               } />
+              <Route path="/robots" element={
+                <ProtectedRoute>
+                  <Robots />
+                </ProtectedRoute>
+              } />
+              <Route path="/robots/:slug" element={
+                <ProtectedRoute>
+                  <RobotDetail />
+                </ProtectedRoute>
+              } />
               
               <Route path="*" element={<NotFound />} />
+
 
             </Routes>
           </Suspense>

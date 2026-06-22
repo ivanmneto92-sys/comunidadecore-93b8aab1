@@ -9,8 +9,10 @@ import {
   LogOut,
   DollarSign,
   Trophy,
-  BookOpen
+  BookOpen,
+  Bot
 } from 'lucide-react';
+
 import { ProfileMenuItem } from './ProfileMenuItem';
 import { ThemeToggleItem } from './ThemeToggleItem';
 import { Badge } from '@/components/ui/badge';
@@ -62,6 +64,14 @@ export function ProfileMenuList({
           subtitle="Registre suas operações"
           onClick={() => navigate('/journal')}
         />
+        <ProfileMenuItem
+          icon={Bot}
+          iconColor="text-primary"
+          label="Marketplace de Robôs"
+          subtitle="EAs e automações curados"
+          onClick={() => navigate('/robots')}
+        />
+
         <ProfileMenuItem
           icon={Users}
           iconColor="text-emerald-500"
