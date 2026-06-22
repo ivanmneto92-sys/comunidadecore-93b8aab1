@@ -135,15 +135,56 @@ export function MessageItem({
     }
   };
 
+  // Optimistic reaction overlay: { emoji: { delta, hasReacted } }
+  // Cleared whenever upstream reactions arrive (via realtime).
+  const [optimistic, setOptimistic] = useState<
+    Record<string, { delta: number; hasReacted: boolean }>
+  >({});
+
+  useEffect(() => {
+    // Real data refreshed → drop optimistic overlay
+    setOptimistic({});
+  }, [message.reactions]);
+
+  const displayReactions: Reaction[] = (() => {
+    const base = new Map<string, Reaction>();
+    (message.reactions ?? []).forEach((r) => base.set(r.emoji, { ...r }));
+    Object.entries(optimistic).forEach(([emoji, o]) => {
+      const cur = base.get(emoji) ?? { emoji, count: 0, hasReacted: false };
+      base.set(emoji, {
+        emoji,
+        count: Math.max(0, cur.count + o.delta),
+        hasReacted: o.hasReacted,
+      });
+    });
+    return Array.from(base.values());
+  })();
+
   const handleReaction = async (emoji: string) => {
     if (!user) return;
 
-    try {
-      const existingReaction = message.reactions?.find(
-        r => r.emoji === emoji && r.hasReacted
-      );
+    const current =
+      displayReactions.find((r) => r.emoji === emoji) ?? {
+        emoji,
+        count: 0,
+        hasReacted: false,
+      };
+    const wasReacted = current.hasReacted;
 
-      if (existingReaction) {
+    // Optimistic toggle
+    setOptimistic((prev) => {
+      const prevDelta = prev[emoji]?.delta ?? 0;
+      return {
+        ...prev,
+        [emoji]: {
+          delta: prevDelta + (wasReacted ? -1 : 1),
+          hasReacted: !wasReacted,
+        },
+      };
+    });
+
+    try {
+      if (wasReacted) {
         await supabase
           .from('message_reactions')
           .delete()
@@ -159,6 +200,17 @@ export function MessageItem({
       }
     } catch (error) {
       console.error('Error toggling reaction:', error);
+      // Rollback optimistic change
+      setOptimistic((prev) => {
+        const prevDelta = prev[emoji]?.delta ?? 0;
+        return {
+          ...prev,
+          [emoji]: {
+            delta: prevDelta - (wasReacted ? -1 : 1),
+            hasReacted: wasReacted,
+          },
+        };
+      });
       toast({
         variant: 'destructive',
         title: 'Erro ao reagir',
@@ -166,6 +218,7 @@ export function MessageItem({
       });
     }
   };
+
 
   const handlePin = async () => {
     try {
@@ -408,12 +461,14 @@ export function MessageItem({
         {/* Reactions & Reply count */}
         {!isEditing && (
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            {message.reactions?.filter(r => r.count > 0).map((reaction) => (
+            {displayReactions.filter(r => r.count > 0).map((reaction) => (
               <button
                 key={reaction.emoji}
                 onClick={() => handleReaction(reaction.emoji)}
+                aria-label={`Reagir com ${reaction.emoji}`}
+                aria-pressed={reaction.hasReacted}
                 className={cn(
-                  'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors',
+                  'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all active:scale-95',
                   reaction.hasReacted 
                     ? 'bg-primary/20 text-primary border border-primary/30' 
                     : 'bg-muted hover:bg-muted/80 text-muted-foreground'
@@ -423,6 +478,7 @@ export function MessageItem({
                 <span>{reaction.count}</span>
               </button>
             ))}
+
             
             {(message.reply_count ?? 0) > 0 && (
               <button
