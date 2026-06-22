@@ -885,11 +885,11 @@ export function ChatView({
         </div>
       )}
 
-      {/* Content area */}
-      <ScrollArea 
-        className="flex-1" 
-        ref={scrollAreaRef}
-        onScrollCapture={handleScroll}
+      {/* Content area — virtualized scroll container */}
+      <div
+        ref={parentRef}
+        className="flex-1 overflow-y-auto"
+        onScroll={handleScroll}
       >
         <div className="py-3 px-1">
           {/* Load more indicator */}
@@ -899,7 +899,7 @@ export function ChatView({
               <span className="text-xs text-muted-foreground">Carregando mensagens...</span>
             </div>
           )}
-          
+
           {/* Load more button (fallback) */}
           {hasMore && !loadingMore && messages.length > 0 && (
             <div className="flex justify-center py-2">
@@ -919,66 +919,81 @@ export function ChatView({
           {polls.length > 0 && (
             <div className="px-2 mb-4 space-y-3">
               {polls.slice(0, 2).map((poll) => (
-                <PollCard 
-                  key={poll.id} 
-                  poll={poll} 
+                <PollCard
+                  key={poll.id}
+                  poll={poll}
                   onVoteUpdate={fetchPolls}
                 />
               ))}
             </div>
           )}
 
-          {/* Messages */}
+          {/* Messages — virtualized */}
           {messages.length === 0 && polls.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground py-6">
               Nenhuma mensagem ainda. Seja o primeiro a enviar!
             </p>
           ) : (
-            messages.map((message, index) => {
-              const showDate = index === 0 ||
-                formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const index = virtualRow.index;
+                const message = messages[index];
+                if (!message) return null;
+                const showDate = index === 0 ||
+                  formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
 
-              return (
-                <div 
-                  key={message.id}
-                  ref={(el) => {
-                    if (el) messageRefs.current.set(message.id, el);
-                    else messageRefs.current.delete(message.id);
-                  }}
-                  className={highlightedMessageId === message.id ? 'animate-pulse bg-primary/10 rounded-lg transition-colors duration-300' : ''}
-                >
-                  {showDate && (
-                    <div className="flex items-center gap-2 my-3 px-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatDate(message.created_at)}
-                      </span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                  )}
+                return (
+                  <div
+                    key={virtualRow.key}
+                    data-index={index}
+                    ref={rowVirtualizer.measureElement}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className={highlightedMessageId === message.id ? 'animate-pulse bg-primary/10 rounded-lg transition-colors duration-300' : ''}
+                  >
+                    {showDate && (
+                      <div className="flex items-center gap-2 my-3 px-2">
+                        <div className="flex-1 h-px bg-border" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatDate(message.created_at)}
+                        </span>
+                        <div className="flex-1 h-px bg-border" />
+                      </div>
+                    )}
 
-                  <MessageItem
-                    message={message}
-                    isAdmin={isAdmin}
-                    authorRole={message.author_role}
-                    onReply={() => onOpenThread?.(message)}
-                    onOpenThread={() => onOpenThread?.(message)}
-                    onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
-                    onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
-                  />
-                </div>
-              );
-            })
+                    <MessageItem
+                      message={message}
+                      isAdmin={isAdmin}
+                      authorRole={message.author_role}
+                      onReply={() => onOpenThread?.(message)}
+                      onOpenThread={() => onOpenThread?.(message)}
+                      onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
+                      onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           )}
-          <div ref={scrollRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* New messages indicator */}
       {newMessagesCount > 0 && !isNearBottom && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
           <Button
-            onClick={scrollToBottom}
+            onClick={() => scrollToBottom('smooth')}
             size="sm"
             className="rounded-full shadow-lg gap-1.5 px-4 animate-in slide-in-from-bottom-2"
           >
@@ -987,6 +1002,7 @@ export function ChatView({
           </Button>
         </div>
       )}
+
 
       {/* Typing indicator */}
       {canSendMessages && <TypingIndicator channelId={channel.id} />}
