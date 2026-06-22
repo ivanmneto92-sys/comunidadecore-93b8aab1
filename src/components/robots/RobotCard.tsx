@@ -42,7 +42,7 @@ export function RobotCard({ robot }: { robot: Robot }) {
           </Badge>
         </div>
 
-        <div className="p-4 space-y-2">
+        <div className="p-4 space-y-3">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-base leading-tight line-clamp-1">{robot.name}</h3>
           </div>
@@ -51,13 +51,30 @@ export function RobotCard({ robot }: { robot: Robot }) {
               {robot.tagline}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-1 text-[11px]">
-            <span className={`flex items-center gap-1 ${risk.className}`}>
+
+          {/* Sparkline de performance */}
+          <div className="-mx-1">
+            <RobotPerformanceChart data={robot.monthly_returns} height={60} showAxes={false} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <TrendingUp className="w-3 h-3" />
+              <span className="truncate">{robot.pairs.join(', ') || '—'}</span>
+            </div>
+            <div className="flex items-center gap-1 text-muted-foreground justify-end">
+              <Wallet className="w-3 h-3" />
+              <span>Mín. ${robot.min_deposit ?? '—'}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-1 text-[11px] border-t border-border/40">
+            <span className={`flex items-center gap-1 pt-2 ${risk.className}`}>
               <RiskIcon className="w-3 h-3" />
               {risk.label}
             </span>
             {robot.timeframe && (
-              <span className="text-muted-foreground">{robot.timeframe}</span>
+              <span className="text-muted-foreground pt-2">{robot.timeframe}</span>
             )}
           </div>
         </div>
