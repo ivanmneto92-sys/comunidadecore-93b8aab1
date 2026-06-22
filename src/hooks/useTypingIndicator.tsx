@@ -9,24 +9,41 @@ interface TypingUser {
 
 export function useTypingIndicator(channelId: string) {
   const { user } = useAuth();
+  const userId = user?.id;
+  const displayName = user?.user_metadata?.display_name || 'Usuário';
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
-    if (!channelId || !user) return;
+    if (!channelId || !userId) return;
 
-    const channel = supabase.channel(`typing:${channelId}`);
-    channelRef.current = channel;
+    let isActive = true;
+    const topic = `typing:${channelId}`;
 
-    channel
-      .on('presence', { event: 'sync' }, () => {
+    const setupChannel = async () => {
+      // Supabase reuses channels by topic. Remove stale instances first so StrictMode/HMR
+      // cannot return a channel that's already joining/subscribed before we add listeners.
+      const staleChannels = supabase.getChannels().filter((channel) => channel.topic === `realtime:${topic}`);
+      if (staleChannels.length > 0) {
+        await Promise.all(staleChannels.map((channel) => supabase.removeChannel(channel)));
+      }
+
+      if (!isActive) return;
+
+      const channel = supabase.channel(topic, {
+        config: { presence: { key: userId } },
+      });
+      channelRef.current = channel;
+
+      channel.on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
         const users: TypingUser[] = [];
         
         Object.values(state).forEach((presences: any[]) => {
           presences.forEach((presence) => {
-            if (presence.userId !== user.id && presence.isTyping) {
+            if (presence.userId !== userId && presence.isTyping) {
               users.push({
                 userId: presence.userId,
                 displayName: presence.displayName,
@@ -36,27 +53,40 @@ export function useTypingIndicator(channelId: string) {
         });
         
         setTypingUsers(users);
-      })
-      .subscribe(async (status) => {
+      });
+
+      channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
           // Track initial presence
           await channel.track({
-            userId: user.id,
-            displayName: user.user_metadata?.display_name || 'Usuário',
+            userId,
+            displayName,
             isTyping: false,
           });
         }
       });
+    };
+
+    setupChannel();
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+      isActive = false;
+      isSubscribedRef.current = false;
+      setTypingUsers([]);
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
+
+      const channel = channelRef.current;
+      channelRef.current = null;
+      if (channel) supabase.removeChannel(channel);
     };
-  }, [channelId, user]);
+  }, [channelId, userId, displayName]);
 
   const startTyping = useCallback(async () => {
-    if (!channelRef.current || !user) return;
+    if (!channelRef.current || !isSubscribedRef.current || !userId) return;
 
     // Limpar timeout anterior
     if (typingTimeoutRef.current) {
@@ -65,8 +95,8 @@ export function useTypingIndicator(channelId: string) {
 
     // Atualizar presença para "digitando"
     await channelRef.current.track({
-      userId: user.id,
-      displayName: user.user_metadata?.display_name || 'Usuário',
+      userId,
+      displayName,
       isTyping: true,
     });
 
@@ -74,21 +104,21 @@ export function useTypingIndicator(channelId: string) {
     typingTimeoutRef.current = setTimeout(() => {
       stopTyping();
     }, 3000);
-  }, [user]);
+  }, [userId, displayName]);
 
   const stopTyping = useCallback(async () => {
-    if (!channelRef.current || !user) return;
+    if (!channelRef.current || !isSubscribedRef.current || !userId) return;
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     await channelRef.current.track({
-      userId: user.id,
-      displayName: user.user_metadata?.display_name || 'Usuário',
+      userId,
+      displayName,
       isTyping: false,
     });
-  }, [user]);
+  }, [userId, displayName]);
 
   return {
     typingUsers,

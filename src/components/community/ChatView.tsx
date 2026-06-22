@@ -14,6 +14,7 @@ import { PollCard } from './PollCard';
 import { CreatePollModal } from './CreatePollModal';
 import { TypingIndicator } from './TypingIndicator';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { MessageSearch } from './MessageSearch';
 import { OnlineMembersList } from './OnlineMembersList';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -128,6 +129,7 @@ export function ChatView({
   const canSendMessages = isAdmin 
     ? !channel.is_bot_only 
     : (!channel.is_admin_only && !channel.is_bot_only);
+  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(canSendMessages ? channel.id : '');
 
   // Marcar canal como lido ao abrir
   useEffect(() => {
@@ -1010,7 +1012,7 @@ export function ChatView({
 
 
       {/* Typing indicator */}
-      {canSendMessages && <TypingIndicator channelId={channel.id} />}
+      {canSendMessages && <TypingIndicator typingUsers={typingUsers} />}
 
       {/* Composer */}
       {canSendMessages ? (
@@ -1019,6 +1021,8 @@ export function ChatView({
           channelName={channel.name}
           onOpenPollModal={() => setShowPollModal(true)}
           onlineUserIds={onlineUsers.map(u => u.user_id)}
+          onStartTyping={startTyping}
+          onStopTyping={stopTyping}
           onSend={sendMessageOptimistic}
         />
       ) : (

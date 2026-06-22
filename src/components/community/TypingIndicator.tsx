@@ -1,12 +1,11 @@
-import { useTypingIndicator } from '@/hooks/useTypingIndicator';
-
 interface TypingIndicatorProps {
-  channelId: string;
+  typingUsers: Array<{
+    userId: string;
+    displayName: string;
+  }>;
 }
 
-export function TypingIndicator({ channelId }: TypingIndicatorProps) {
-  const { typingUsers } = useTypingIndicator(channelId);
-
+export function TypingIndicator({ typingUsers }: TypingIndicatorProps) {
   if (typingUsers.length === 0) return null;
 
   const getTypingText = () => {
