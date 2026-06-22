@@ -209,6 +209,20 @@
     @apply bg-card/80 backdrop-blur-sm border border-border/50;
   }
 
+  /* Editorial display typography (Direção A) */
+  .font-display {
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-body {
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .editorial-divider {
+    border-top: 1px solid hsl(var(--accent) / 0.13);
+  }
+
   /* Safe area utilities for iOS/Android */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);

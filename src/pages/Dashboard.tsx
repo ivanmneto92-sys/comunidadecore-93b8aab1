@@ -1,7 +1,7 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { AnimatedStatusCard } from '@/components/dashboard/AnimatedStatusCard';
-import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
-import { EnhancedQuickActions } from '@/components/dashboard/EnhancedQuickActions';
+import { EditorialHero } from '@/components/dashboard/editorial/EditorialHero';
+import { EditorialPerformance } from '@/components/dashboard/editorial/EditorialPerformance';
+import { EditorialShortcuts } from '@/components/dashboard/editorial/EditorialShortcuts';
 import { PersonalizedHeader } from '@/components/dashboard/PersonalizedHeader';
 import { DailyCheckinCard } from '@/components/dashboard/DailyCheckinCard';
 import { MarketNewsCard } from '@/components/dashboard/MarketNewsCard';
@@ -16,13 +16,8 @@ export default function Dashboard() {
 
   const isRiskMode = dailyStatus?.status === 'danger';
 
-  // Default values for demo/fallback
   const defaultStatus = {
     score: 85,
-    status: 'success' as const,
-    profileType: 'normal' as const,
-    riskLevel: 'baixo' as const,
-    drawdownStatus: 'controlado' as const,
     insightText: 'O comportamento atual segue o padrão saudável do sistema.',
   };
 
@@ -35,40 +30,33 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6 space-y-6">
-        {/* 1. Header Premium */}
+      <div className="px-4 py-6 space-y-6 font-body">
+        {/* Header com avatar + saudação + sino + streak */}
         <PersonalizedHeader streakDays={streakDays} />
 
-        {/* Onboarding (visível só até concluir/dispensar) */}
+        {/* Onboarding (até concluir/dispensar) */}
         <OnboardingCard />
 
-        {/* 2. Check-in Diário */}
+        {/* Check-in diário */}
         <DailyCheckinCard />
 
         {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-52 w-full rounded-2xl" />
-            <div className="grid grid-cols-2 gap-3">
-              <Skeleton className="h-24 w-full rounded-xl" />
-              <Skeleton className="h-24 w-full rounded-xl" />
-              <Skeleton className="h-24 w-full rounded-xl" />
-              <Skeleton className="h-24 w-full rounded-xl" />
-            </div>
+          <div className="space-y-6">
+            <Skeleton className="h-56 w-full rounded-md" />
+            <Skeleton className="h-44 w-full rounded-md" />
+            <Skeleton className="h-40 w-full rounded-md" />
           </div>
         ) : (
           <>
-            {/* 3. Hero Status Card */}
-            <AnimatedStatusCard
+            {/* Hero editorial — Health Score */}
+            <EditorialHero
               score={dailyStatus?.score ?? defaultStatus.score}
-              status={dailyStatus?.status || defaultStatus.status}
-              profileType={dailyStatus?.profileType || defaultStatus.profileType}
-              riskLevel={dailyStatus?.riskLevel || defaultStatus.riskLevel}
-              drawdownStatus={dailyStatus?.drawdownStatus || defaultStatus.drawdownStatus}
               insightText={dailyStatus?.insightText || defaultStatus.insightText}
+              streakDays={streakDays}
             />
 
-            {/* 4. Metrics Grid 2x2 */}
-            <MetricsGrid
+            {/* Performance editorial */}
+            <EditorialPerformance
               pnlPercent={dailyResult?.pnlPercent ?? defaultResult.pnlPercent}
               tradesCount={dailyResult?.tradesCount ?? defaultResult.tradesCount}
               winRate={dailyResult?.winRate ?? defaultResult.winRate}
@@ -76,17 +64,22 @@ export default function Dashboard() {
               isRiskMode={isRiskMode}
             />
 
-            {/* 5. Quick Actions Grid */}
-            <EnhancedQuickActions />
+            {/* Mercado hoje */}
+            <section className="-mx-4 px-6 py-7 border-b border-accent/15">
+              <h2 className="font-display text-xl font-medium tracking-tight mb-4">
+                Mercado hoje
+              </h2>
+              <MarketNewsCard />
+            </section>
 
-            {/* 6. Market News Feed */}
-            <MarketNewsCard />
+            {/* Atalhos editorial */}
+            <EditorialShortcuts />
           </>
         )}
 
-        {/* Compliance disclaimer */}
-        <p className="text-center text-xs text-muted-foreground pt-2 pb-2">
-          Conteúdo educacional e informativo. Não é recomendação de investimento.
+        {/* Compliance */}
+        <p className="text-center text-[10px] text-foreground/40 pt-2 pb-2 leading-relaxed">
+          Conteúdo educacional e informativo. Não constitui recomendação de investimento.
         </p>
       </div>
     </AppLayout>
