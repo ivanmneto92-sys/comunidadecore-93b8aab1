@@ -95,18 +95,9 @@ export function useOnboarding() {
       { onConflict: 'user_id' },
     );
 
-    // Award badge (idempotent)
-    const { data: ach } = await supabase
-      .from('achievements')
-      .select('id')
-      .eq('code', 'onboarding_complete')
-      .maybeSingle();
-    if (ach) {
-      await supabase.from('user_achievements').upsert(
-        { user_id: user.id, achievement_id: ach.id, unlocked_at: nowIso },
-        { onConflict: 'user_id,achievement_id' },
-      );
-    }
+    // Award badge via SECURITY DEFINER RPC (idempotent, server-validated)
+    await supabase.rpc('claim_achievement_by_code', { _code: 'onboarding_complete' });
+
 
     toast({ title: '🎯 Primeiros Passos desbloqueado!', description: '+50 XP — bem-vindo ao CORE HUB.' });
     setCompletedAt(nowIso);

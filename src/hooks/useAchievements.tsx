@@ -209,27 +209,17 @@ export function useAchievements() {
     .filter((a) => a.isUnlocked)
     .reduce((sum, a) => sum + a.xp_reward, 0);
 
-  // Unlock achievement function
+  // Unlock achievement via SECURITY DEFINER RPC (server-side validation + XP)
   const unlockAchievement = async (achievementId: string): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
-        .from('user_achievements')
-        .insert({
-          user_id: user.id,
-          achievement_id: achievementId,
-        });
-
-      if (error) {
-        if (error.code === '23505') {
-          // Already unlocked
-          return false;
-        }
-        throw error;
-      }
-
-      return true;
+      const { data, error } = await supabase.rpc('claim_achievement', {
+        _achievement_id: achievementId,
+      });
+      if (error) throw error;
+      const result = (data ?? {}) as { claimed?: boolean; already?: boolean };
+      return result.claimed === true && !result.already;
     } catch (error) {
       console.error('Error unlocking achievement:', error);
       toast({
@@ -240,6 +230,7 @@ export function useAchievements() {
       return false;
     }
   };
+
 
   return {
     achievements: achievementsWithProgress,

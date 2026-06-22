@@ -20,19 +20,19 @@ export function extractMentions(content: string): ExtractedMention[] {
     });
   }
 
-  // Remove duplicates
-  return mentions.filter((mention, index, self) => 
+  return mentions.filter((mention, index, self) =>
     index === self.findIndex(m => m.userId === mention.userId)
   );
 }
 
 /**
- * Cria notificações para usuários mencionados em uma mensagem
+ * Cria notificações para usuários mencionados em uma mensagem.
+ * Usa a função SECURITY DEFINER `send_mention_notification`, que valida
+ * server-side que o remetente é dono da mensagem.
  */
 export async function createMentionNotifications({
   content,
   senderId,
-  senderName,
   channelId,
   channelName,
   messageId,
@@ -44,59 +44,31 @@ export async function createMentionNotifications({
   channelName: string;
   messageId?: string;
 }) {
-  const mentions = extractMentions(content);
-  
+  if (!messageId) return;
+  const mentions = extractMentions(content).filter(m => m.userId !== senderId);
   if (mentions.length === 0) return;
 
-  // Filter out self-mentions
-  const validMentions = mentions.filter(m => m.userId !== senderId);
-  
-  if (validMentions.length === 0) return;
-
-  // Check notification settings for each mentioned user
-  const { data: settingsData } = await supabase
-    .from('user_notification_settings')
-    .select('user_id, notify_mentions, muted_channels')
-    .in('user_id', validMentions.map(m => m.userId));
-
-  const settingsMap = new Map(
-    (settingsData || []).map(s => [s.user_id, s])
+  await Promise.all(
+    mentions.map(m =>
+      supabase.rpc('send_mention_notification', {
+        _target_user_id: m.userId,
+        _message_id: messageId,
+        _channel_id: channelId,
+        _channel_name: channelName,
+        _content: content,
+      })
+    )
   );
-
-  // Create notifications for users who have mentions enabled
-  const notificationsToCreate = validMentions
-    .filter(mention => {
-      const settings = settingsMap.get(mention.userId);
-      // If no settings, default to enabled
-      if (!settings) return true;
-      // Check if mentions are enabled and channel is not muted
-      if (!settings.notify_mentions) return false;
-      if (settings.muted_channels?.includes(channelId)) return false;
-      return true;
-    })
-    .map(mention => ({
-      user_id: mention.userId,
-      type: 'mention',
-      title: `${senderName} mencionou você`,
-      message: content.slice(0, 100) + (content.length > 100 ? '...' : ''),
-      link: `/community?channel=${channelName}`,
-      related_message_id: messageId || null,
-      related_channel_id: channelId,
-    }));
-
-  if (notificationsToCreate.length > 0) {
-    await supabase.from('notifications').insert(notificationsToCreate);
-  }
 }
 
 /**
- * Cria uma notificação quando alguém responde à mensagem de um usuário
+ * Cria uma notificação quando alguém responde à mensagem de um usuário.
+ * Usa a função SECURITY DEFINER `send_reply_notification`.
  */
 export async function createReplyNotification({
   parentMessageUserId,
   replyContent,
   replierId,
-  replierName,
   channelId,
   channelName,
   replyMessageId,
@@ -109,30 +81,13 @@ export async function createReplyNotification({
   channelName: string;
   replyMessageId?: string;
 }) {
-  // Don't notify if replying to own message
-  if (parentMessageUserId === replierId) return;
+  if (!replyMessageId || parentMessageUserId === replierId) return;
 
-  // Check user notification settings
-  const { data: settings } = await supabase
-    .from('user_notification_settings')
-    .select('notify_replies, muted_channels')
-    .eq('user_id', parentMessageUserId)
-    .maybeSingle();
-
-  // Default to enabled if no settings
-  if (settings) {
-    if (!settings.notify_replies) return;
-    if (settings.muted_channels?.includes(channelId)) return;
-  }
-
-  // Create the notification
-  await supabase.from('notifications').insert({
-    user_id: parentMessageUserId,
-    type: 'reply',
-    title: `${replierName} respondeu sua mensagem`,
-    message: replyContent.slice(0, 100) + (replyContent.length > 100 ? '...' : ''),
-    link: `/community?channel=${channelName}`,
-    related_message_id: replyMessageId || null,
-    related_channel_id: channelId,
+  await supabase.rpc('send_reply_notification', {
+    _target_user_id: parentMessageUserId,
+    _reply_message_id: replyMessageId,
+    _channel_id: channelId,
+    _channel_name: channelName,
+    _content: replyContent,
   });
 }
