@@ -503,20 +503,20 @@ export function ChatView({
             if (enriched.length > 0) {
               setMessages(prev => [...prev, enriched[0]]);
 
-              // Increment new messages count if not near bottom and not own message
-              const isOwnMessage = payload.new.user_id === user?.id;
-              if (!isOwnMessage) {
-                setNewMessagesCount(prev => {
-                  const scrollContainer = parentRef.current;
-                  if (scrollContainer) {
-                    const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
-                    if (!nearBottom) {
-                      return prev + 1;
-                    }
-                  }
-                  return prev;
+              setNewMessagesCount(prev => {
+                const sc = parentRef.current;
+                if (!sc) return prev;
+                const bump = shouldBumpNewMessages({
+                  metrics: {
+                    scrollTop: sc.scrollTop,
+                    scrollHeight: sc.scrollHeight,
+                    clientHeight: sc.clientHeight,
+                  },
+                  incomingUserId: payload.new.user_id,
+                  currentUserId: user?.id,
                 });
-              }
+                return bump ? prev + 1 : prev;
+              });
             }
           }
         }
