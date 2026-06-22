@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock, Sparkles } from 'lucide-react';
+import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock, Sparkles, PanelLeftClose } from 'lucide-react';
 import { openCommunityTour } from './CommunityWelcomeTour';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,7 @@ interface ChannelListPanelProps {
   selectedChannel: Channel | null;
   onSelectChannel: (channel: Channel) => void;
   unreadCounts?: Record<string, number>;
+  onCollapse?: () => void;
 }
 
 const getChannelIcon = (channel: Channel) => {
@@ -55,7 +56,8 @@ export function ChannelListPanel({
   channels, 
   selectedChannel, 
   onSelectChannel,
-  unreadCounts = {}
+  unreadCounts = {},
+  onCollapse
 }: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const { hasAccess: hasProAccess } = usePlanAccess('elite');
@@ -98,6 +100,17 @@ export function ChannelListPanel({
             >
               <Sparkles className="h-4 w-4" />
             </button>
+            {onCollapse && (
+              <button
+                type="button"
+                onClick={onCollapse}
+                className="hidden md:inline-flex p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                aria-label="Recolher menu de canais"
+                title="Recolher menu"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
+            )}
             <ChevronRight className="h-5 w-5 text-muted-foreground md:hidden" />
           </div>
         </div>

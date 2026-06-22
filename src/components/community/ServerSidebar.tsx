@@ -1,4 +1,4 @@
-import { Newspaper, Megaphone, BarChart3, HelpCircle, Hash, MessageCircle, Wrench } from 'lucide-react';
+import { Newspaper, Megaphone, BarChart3, HelpCircle, Hash, MessageCircle, Wrench, PanelLeftClose } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import logoCoreImage from '@/assets/logo-core.png';
@@ -21,6 +21,7 @@ interface ServerSidebarProps {
   onSelectChannel: (channel: Channel) => void;
   compact?: boolean;
   onOpenNews?: () => void;
+  onCollapse?: () => void;
 }
 
 const getChannelIconComponent = (channel: Channel, className: string) => {
@@ -55,7 +56,7 @@ const getChannelIconComponent = (channel: Channel, className: string) => {
   }
 };
 
-export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false, onOpenNews }: ServerSidebarProps) {
+export function ServerSidebar({ channels, selectedChannel, onSelectChannel, compact = false, onOpenNews, onCollapse }: ServerSidebarProps) {
   // Group channels by category
   const groupedChannels = channels.reduce((acc, channel) => {
     if (!acc[channel.category]) {
@@ -94,6 +95,25 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
           CORE Community
         </TooltipContent>
       </Tooltip>
+
+      {onCollapse && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={onCollapse}
+              className={cn(
+                'mx-auto rounded-xl bg-muted/50 text-muted-foreground hover:bg-primary/80 hover:text-primary-foreground transition-all flex items-center justify-center',
+                compact ? 'w-8 h-8 mb-1.5' : 'w-10 h-10 mb-2'
+              )}
+              aria-label="Recolher menu lateral"
+            >
+              <PanelLeftClose className={compact ? 'h-4 w-4' : 'h-5 w-5'} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Recolher menu</TooltipContent>
+        </Tooltip>
+      )}
 
       <div className={cn('h-px bg-border mx-auto my-1.5', dividerWidth)} />
 
