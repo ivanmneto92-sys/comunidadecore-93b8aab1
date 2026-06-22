@@ -36,6 +36,7 @@ interface Message {
   user_id: string | null;
   is_bot_message: boolean;
   is_pinned: boolean;
+  parent_id?: string | null;
   reply_count?: number;
   profiles?: {
     display_name: string | null;
