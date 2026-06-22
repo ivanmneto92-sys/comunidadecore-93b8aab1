@@ -67,7 +67,7 @@ const PageLoader = () => <PageSkeleton />;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="instituto-trader-theme">
+    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false} storageKey="instituto-trader-theme">
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
