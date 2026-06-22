@@ -7,6 +7,7 @@ import { TodayResultCard } from '@/components/results/TodayResultCard';
 import { PerformanceOverview } from '@/components/results/PerformanceOverview';
 import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
 import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
+import { PositiveStreakBadge } from '@/components/results/PositiveStreakBadge';
 import { useAccountMetrics, FilterPeriod } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, TrendingUp } from 'lucide-react';
@@ -120,6 +121,33 @@ export default function Results() {
     });
   }, [filteredReports]);
 
+  const streakStats = useMemo(() => {
+    // Ordena ascendente para varrer e detectar sequências
+    const ascending = [...filteredReports].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    let bestStreak = 0;
+    let running = 0;
+    for (const r of ascending) {
+      if (Number(r.pnl_percent) > 0) {
+        running += 1;
+        if (running > bestStreak) bestStreak = running;
+      } else {
+        running = 0;
+      }
+    }
+
+    // Streak atual: do mais recente para trás
+    let currentStreak = 0;
+    for (let i = ascending.length - 1; i >= 0; i--) {
+      if (Number(ascending[i].pnl_percent) > 0) currentStreak += 1;
+      else break;
+    }
+
+    return { currentStreak, bestStreak };
+  }, [filteredReports]);
+
   if (loading) {
     return (
       <AppLayout>
@@ -147,6 +175,15 @@ export default function Results() {
         {/* Filters */}
         <div className="animate-fade-in" style={{ animationDelay: '50ms' }}>
           <ResultsFilter value={filter} onChange={setFilter} />
+        </div>
+
+        {/* Positive Days Streak Badge */}
+        <div className="animate-fade-in" style={{ animationDelay: '75ms' }}>
+          <PositiveStreakBadge
+            currentStreak={streakStats.currentStreak}
+            bestStreak={streakStats.bestStreak}
+            period={filter}
+          />
         </div>
 
         {/* Today's Result */}
