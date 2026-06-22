@@ -3,35 +3,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CORE HUB Design System - Dark Mode Premium (Discord-inspired) */
+/* Instituto Trader — Design System (Dark Premium Institucional) */
 
 @layer base {
   :root {
-    /* CORE HUB Brand Colors - exact requested palette */
-    /* #0b1f3a - Azul-marinho (Main background) */
+    /* Instituto Trader — paleta oficial */
+    /* #0B1F3A — Azul-marinho (background) */
     --background: 214 68% 14%;
-    /* #f4f6f8 - Cinza (Foreground/Text) */
+    /* #F4F6F8 — Cinza claro (foreground) */
     --foreground: 210 22% 96%;
 
-    /* #1f2937 - Grafite (Cards) */
+    /* #1F2937 — Grafite (cards) */
     --card: 215 28% 17%;
     --card-foreground: 210 22% 96%;
 
     --popover: 215 28% 17%;
     --popover-foreground: 210 22% 96%;
 
-    /* #cca268 - Dourado-escuro (Primary) */
-    --primary: 35 50% 60%;
+    /* #C9A227 — Dourado oficial (primary) */
+    --primary: 46 68% 47%;
     --primary-foreground: 214 68% 14%;
 
-    /* #1f2937 - Grafite (Secondary) */
+    /* #1F2937 — Grafite (secondary) */
     --secondary: 215 28% 17%;
     --secondary-foreground: 210 22% 96%;
 
     --muted: 215 28% 17%;
-    --muted-foreground: 33 30% 75%;
+    --muted-foreground: 46 25% 72%;
 
-    /* #ebd7be - Dourado-claro (Accent) */
+    /* #EBD7BE — Dourado claro de apoio (accent) */
     --accent: 33 53% 83%;
     --accent-foreground: 214 68% 14%;
 
@@ -40,13 +40,13 @@
 
     --border: 33 53% 83%;
     --input: 215 28% 17%;
-    --ring: 35 50% 60%;
+    --ring: 46 68% 47%;
 
     --radius: 0.625rem;
 
     /* Status colors */
     --status-success: 142 71% 45%;
-    --status-warning: 35 50% 60%;
+    --status-warning: 46 68% 47%;
     --status-danger: 0 72% 50%;
 
     /* Sidebar - Graphite */
