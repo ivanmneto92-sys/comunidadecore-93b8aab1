@@ -113,7 +113,9 @@ export default function Admin() {
             <TabsContent value="affiliates" className="mt-4"><AffiliateManager /></TabsContent>
             <TabsContent value="logs" className="mt-4"><ActivityLogs /></TabsContent>
             <TabsContent value="support" className="mt-4"><SupportManager /></TabsContent>
+            <TabsContent value="robots" className="mt-4"><RobotManager /></TabsContent>
           </Suspense>
+
         </Tabs>
       </div>
     </AppLayout>
