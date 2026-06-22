@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot, FolderOpen } from 'lucide-react';
+import { Loader2, Shield, BarChart3, Heart, GraduationCap, MessageSquare, Users, LayoutDashboard, AlertTriangle, Megaphone, History, Headphones, Bot, FolderOpen, ClipboardList } from 'lucide-react';
 
 // Lazy-load all admin sub-managers so each tab only ships its own JS
 const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
@@ -23,6 +23,7 @@ const AffiliateManager = lazy(() => import('@/components/admin/AffiliateManager'
 const ActivityLogs = lazy(() => import('@/components/admin/ActivityLogs').then(m => ({ default: m.ActivityLogs })));
 const SupportManager = lazy(() => import('@/components/admin/SupportManager').then(m => ({ default: m.SupportManager })));
 const RobotManager = lazy(() => import('@/components/admin/RobotManager').then(m => ({ default: m.RobotManager })));
+const LeadProfilesManager = lazy(() => import('@/components/admin/LeadProfilesManager').then(m => ({ default: m.LeadProfilesManager })));
 
 
 const TabFallback = () => (
@@ -91,6 +92,7 @@ export default function Admin() {
             <TabsTrigger value="logs" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><History className="h-4 w-4" /><span>Logs</span></TabsTrigger>
             <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Headphones className="h-4 w-4" /><span>Suporte</span></TabsTrigger>
             <TabsTrigger value="robots" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Bot className="h-4 w-4" /><span>Robôs</span></TabsTrigger>
+            <TabsTrigger value="leads" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><ClipboardList className="h-4 w-4" /><span>Leads</span></TabsTrigger>
           </TabsList>
 
 
@@ -114,6 +116,7 @@ export default function Admin() {
             <TabsContent value="logs" className="mt-4"><ActivityLogs /></TabsContent>
             <TabsContent value="support" className="mt-4"><SupportManager /></TabsContent>
             <TabsContent value="robots" className="mt-4"><RobotManager /></TabsContent>
+            <TabsContent value="leads" className="mt-4"><LeadProfilesManager /></TabsContent>
           </Suspense>
 
         </Tabs>
