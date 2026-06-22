@@ -45,14 +45,15 @@ export function AccountGrowthChart({ data }: AccountGrowthChartProps) {
   const tickInterval = data.length > 10 ? Math.ceil(data.length / 5) : 0;
 
   return (
-    <Card className="p-4 min-w-0">
+    <Card className="p-4 min-w-0 overflow-hidden">
       <h3 className="text-sm font-semibold mb-3">Crescimento da Conta</h3>
-      <div className="h-[180px] w-full min-w-0">
+      <div className="h-[240px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+            margin={{ top: 10, right: 12, left: 0, bottom: 5 }}
           >
+
             <defs>
               <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
