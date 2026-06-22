@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,36 +87,12 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast({
-              variant: 'destructive',
-              title: 'Erro no login',
-              description: 'Email ou senha incorretos'
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Erro no login',
-              description: error.message
-            });
-          }
+          toast(buildErrorToast(error, { action: 'entrar', field: 'E-mail/Senha' }));
         }
       } else {
         const { error } = await signUp(email, password, displayName);
         if (error) {
-          if (error.message.includes('already registered')) {
-            toast({
-              variant: 'destructive',
-              title: 'Erro no cadastro',
-              description: 'Este email já está cadastrado'
-            });
-          } else {
-            toast({
-              variant: 'destructive',
-              title: 'Erro no cadastro',
-              description: error.message
-            });
-          }
+          toast(buildErrorToast(error, { action: 'criar conta', field: 'E-mail' }));
         } else {
           // Handle referral after successful signup
           const referralCode = localStorage.getItem('referral_code');

@@ -7,6 +7,7 @@ import { MessageItem } from './MessageItem';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { createReplyNotification, createMentionNotifications } from '@/lib/mentionUtils';
 import { cn } from '@/lib/utils';
 
@@ -198,8 +199,7 @@ export function ThreadView({ parentMessage, channelId, channelName, onClose }: T
       setNewReply('');
       setReplyingTo(null);
     } catch (err) {
-      console.error('Error sending reply:', err);
-      toast({ variant: 'destructive', title: 'Erro ao enviar resposta' });
+      toast(buildErrorToast(err, { action: 'enviar a resposta' }));
     } finally {
       setSending(false);
     }

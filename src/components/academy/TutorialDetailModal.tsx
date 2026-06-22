@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import DOMPurify from 'dompurify';
 import { useTutorialQuiz } from '@/hooks/useTutorialQuiz';
 import { QuizRunner } from './QuizRunner';
@@ -69,12 +70,7 @@ export function TutorialDetailModal({
       await onMarkComplete();
       toast({ title: 'Tutorial concluído! 🎉' });
     } catch (error) {
-      console.error('Error marking tutorial complete:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao marcar como concluído',
-        description: 'Tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: 'marcar tutorial como concluído', resource: 'tutorial' }));
     } finally {
       setIsMarking(false);
     }

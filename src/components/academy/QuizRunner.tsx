@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { useTutorialQuiz } from '@/hooks/useTutorialQuiz';
 
 interface QuizRunnerProps {
@@ -60,7 +61,7 @@ export function QuizRunner({ tutorialId, open, onClose }: QuizRunnerProps) {
     } as never);
     setSubmitting(false);
     if (error) {
-      toast({ variant: 'destructive', title: 'Erro ao enviar', description: error.message });
+      toast(buildErrorToast(error, { action: 'enviar respostas do quiz' }));
       return;
     }
     const res = data as { score: number; passed: boolean; per_question: Array<{ question_id: string; correct: boolean }> };

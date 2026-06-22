@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { decryptPaymentInfo, updatePaymentInfoSecure } from '@/lib/affiliateCrypto';
 import type { Affiliate } from '@/hooks/useAffiliate';
 
@@ -61,11 +62,9 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
       if (success) {
         toast({ title: 'Dados de pagamento salvos com segurança!' });
       } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao salvar dados',
-          description: 'Tente novamente.',
-        });
+        toast(buildErrorToast(new Error('Não foi possível criptografar os dados de pagamento'), {
+          action: 'salvar dados de pagamento',
+        }));
       }
     } finally {
       setSavingPaymentInfo(false);
@@ -86,11 +85,10 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
       );
 
       if (!saveSuccess) {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao processar dados de pagamento',
-          description: 'Verifique seus dados e tente novamente.',
-        });
+        toast(buildErrorToast(new Error('Não foi possível processar seus dados de pagamento'), {
+          action: 'solicitar saque',
+          field: method === 'pix' ? 'Chave PIX' : 'E-mail PayPal',
+        }));
         return;
       }
 
@@ -105,12 +103,7 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
         toast({ title: 'Solicitação enviada com sucesso!' });
       }
     } catch (error) {
-      console.error('Error requesting payout:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao solicitar saque',
-        description: 'Verifique seus dados e tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: 'solicitar saque' }));
     } finally {
       setLoading(false);
     }

@@ -39,6 +39,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
 import { renderMarkdown } from '@/lib/markdownUtils';
 import { FileAttachmentCard } from './FileAttachmentCard';
@@ -211,11 +212,7 @@ export function MessageItem({
           },
         };
       });
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao reagir',
-        description: 'Não foi possível adicionar sua reação.',
-      });
+      toast(buildErrorToast(error, { action: 'reagir à mensagem' }));
     }
   };
 
@@ -231,12 +228,7 @@ export function MessageItem({
         title: message.is_pinned ? 'Mensagem desafixada' : 'Mensagem fixada',
       });
     } catch (error) {
-      console.error('Error pinning message:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao fixar mensagem',
-        description: 'Tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: message.is_pinned ? 'desafixar mensagem' : 'fixar mensagem' }));
     }
   };
 
@@ -245,8 +237,7 @@ export function MessageItem({
       await supabase.from('messages').delete().eq('id', message.id);
       toast({ title: 'Mensagem apagada' });
     } catch (error) {
-      console.error('Error deleting message:', error);
-      toast({ variant: 'destructive', title: 'Erro ao apagar mensagem' });
+      toast(buildErrorToast(error, { action: 'apagar a mensagem' }));
     }
   };
 
@@ -281,8 +272,7 @@ export function MessageItem({
       toast({ title: 'Mensagem editada' });
       setIsEditing(false);
     } catch (error) {
-      console.error('Error editing message:', error);
-      toast({ variant: 'destructive', title: 'Erro ao editar mensagem' });
+      toast(buildErrorToast(error, { action: 'editar a mensagem' }));
     } finally {
       setIsSaving(false);
     }

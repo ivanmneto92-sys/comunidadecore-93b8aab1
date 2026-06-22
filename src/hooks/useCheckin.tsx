@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   calculateCheckinXp, 
@@ -170,12 +171,7 @@ export function useCheckin() {
       refetchProgress();
     },
     onError: (error) => {
-      console.error('Error performing checkin:', error);
-      toast({
-        title: 'Erro ao fazer check-in',
-        description: 'Tente novamente em alguns instantes.',
-        variant: 'destructive',
-      });
+      toast(buildErrorToast(error, { action: 'fazer check-in' }));
     },
   });
 

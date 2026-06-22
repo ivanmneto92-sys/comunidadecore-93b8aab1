@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 
 interface ImageUploadProps {
   onImageSelected: (imageUrl: string | null) => void;
@@ -54,7 +55,7 @@ export function ImageUpload({ onImageSelected, disabled }: ImageUploadProps) {
       onImageSelected(publicUrl);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast({ variant: 'destructive', title: 'Erro ao enviar imagem' });
+      toast(buildErrorToast(error, { action: 'enviar a imagem', field: 'Imagem' }));
       setPreviewUrl(null);
       onImageSelected(null);
     } finally {

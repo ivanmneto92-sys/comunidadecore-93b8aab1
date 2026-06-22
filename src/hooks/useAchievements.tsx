@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { achievementDefinitions, AchievementCheckData } from '@/lib/achievementDefinitions';
 
 interface Achievement {
@@ -221,12 +222,7 @@ export function useAchievements() {
       const result = (data ?? {}) as { claimed?: boolean; already?: boolean };
       return result.claimed === true && !result.already;
     } catch (error) {
-      console.error('Error unlocking achievement:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao desbloquear conquista',
-        description: 'Tente novamente mais tarde.',
-      });
+      toast(buildErrorToast(error, { action: 'desbloquear a conquista', resource: 'conquista' }));
       return false;
     }
   };
