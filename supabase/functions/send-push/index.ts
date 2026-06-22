@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
 
     const { data: tokens } = await supabase
       .from('device_tokens')
-      .select('token, user_id')
+      .select('token, user_id, platform')
       .in('user_id', Array.from(allowedIds));
 
     if (!tokens || tokens.length === 0) {
