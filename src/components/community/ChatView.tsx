@@ -18,6 +18,7 @@ import { MessageSearch } from './MessageSearch';
 import { OnlineMembersList } from './OnlineMembersList';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { extractFirstUrl } from '@/lib/urlUtils';
+import { isNearBottom as checkNearBottom, isNearTop, shouldBumpNewMessages, computeAnchorIndexAfterPrepend } from '@/lib/chatScroll';
 
 interface Channel {
   id: string;
@@ -361,7 +362,7 @@ export function ChatView({
       setMessages(prev => [...olderMessages, ...prev]);
       // Anchor to the previously-first message after prepend
       requestAnimationFrame(() => {
-        rowVirtualizer.scrollToIndex(olderMessages.length, { align: 'start' });
+        rowVirtualizer.scrollToIndex(computeAnchorIndexAfterPrepend(olderMessages.length), { align: 'start' });
       });
     }
 
@@ -447,13 +448,17 @@ export function ChatView({
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
 
-    // Load more when scrolled to top (within 100px threshold)
-    if (target.scrollTop < 100 && !loadingMore && hasMore) {
+    const metrics = {
+      scrollTop: target.scrollTop,
+      scrollHeight: target.scrollHeight,
+      clientHeight: target.clientHeight,
+    };
+
+    if (isNearTop(metrics) && !loadingMore && hasMore) {
       loadMoreMessages();
     }
 
-    // Track if user is near bottom (within 200px)
-    const nearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
+    const nearBottom = checkNearBottom(metrics);
     setIsNearBottom(nearBottom);
 
     // Clear new messages count when scrolled to bottom
@@ -498,20 +503,20 @@ export function ChatView({
             if (enriched.length > 0) {
               setMessages(prev => [...prev, enriched[0]]);
 
-              // Increment new messages count if not near bottom and not own message
-              const isOwnMessage = payload.new.user_id === user?.id;
-              if (!isOwnMessage) {
-                setNewMessagesCount(prev => {
-                  const scrollContainer = parentRef.current;
-                  if (scrollContainer) {
-                    const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
-                    if (!nearBottom) {
-                      return prev + 1;
-                    }
-                  }
-                  return prev;
+              setNewMessagesCount(prev => {
+                const sc = parentRef.current;
+                if (!sc) return prev;
+                const bump = shouldBumpNewMessages({
+                  metrics: {
+                    scrollTop: sc.scrollTop,
+                    scrollHeight: sc.scrollHeight,
+                    clientHeight: sc.clientHeight,
+                  },
+                  incomingUserId: payload.new.user_id,
+                  currentUserId: user?.id,
                 });
-              }
+                return bump ? prev + 1 : prev;
+              });
             }
           }
         }
@@ -644,7 +649,7 @@ export function ChatView({
     if (!loading && !loadingMore && messages.length > 0) {
       const scrollContainer = parentRef.current;
       if (scrollContainer) {
-        const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+        const nearBottom = checkNearBottom({ scrollTop: scrollContainer.scrollTop, scrollHeight: scrollContainer.scrollHeight, clientHeight: scrollContainer.clientHeight });
         if (nearBottom) {
           requestAnimationFrame(() => {
             scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
