@@ -649,7 +649,7 @@ export function ChatView({
     if (!loading && !loadingMore && messages.length > 0) {
       const scrollContainer = parentRef.current;
       if (scrollContainer) {
-        const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+        const nearBottom = checkNearBottom({ scrollTop: scrollContainer.scrollTop, scrollHeight: scrollContainer.scrollHeight, clientHeight: scrollContainer.clientHeight });
         if (nearBottom) {
           requestAnimationFrame(() => {
             scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
