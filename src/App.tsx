@@ -42,7 +42,10 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
 const MT5 = lazy(() => import("./pages/MT5"));
+const Robots = lazy(() => import("./pages/Robots"));
+const RobotDetail = lazy(() => import("./pages/RobotDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
 
 
 
