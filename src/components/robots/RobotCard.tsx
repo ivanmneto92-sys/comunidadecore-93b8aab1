@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Star, ShieldAlert, ShieldCheck, Shield } from 'lucide-react';
+import { Bot, Star, ShieldAlert, ShieldCheck, Shield, Wallet, TrendingUp } from 'lucide-react';
 import type { Robot } from '@/hooks/useRobots';
+import { RobotPerformanceChart } from './RobotPerformanceChart';
 
 const riskConfig: Record<string, { label: string; icon: typeof Shield; className: string }> = {
   baixo: { label: 'Risco Baixo', icon: ShieldCheck, className: 'text-emerald-500' },
