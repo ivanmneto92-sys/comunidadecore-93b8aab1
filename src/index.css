@@ -52,15 +52,15 @@
     /* Sidebar - Graphite */
     --sidebar-background: 214 68% 14%;
     --sidebar-foreground: 210 22% 96%;
-    --sidebar-primary: 35 50% 60%;
+    --sidebar-primary: 46 68% 47%;
     --sidebar-primary-foreground: 214 68% 14%;
     --sidebar-accent: 215 28% 17%;
     --sidebar-accent-foreground: 210 22% 96%;
     --sidebar-border: 33 53% 83%;
-    --sidebar-ring: 35 50% 60%;
+    --sidebar-ring: 46 68% 47%;
 
     /* Chart colors */
-    --chart-1: 35 50% 60%;
+    --chart-1: 46 68% 47%;
     --chart-2: 33 53% 83%;
     --chart-3: 142 71% 45%;
     --chart-4: 0 72% 50%;
@@ -94,8 +94,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 214 68% 14%;
 
-    /* #cca268 - Dourado-escuro (Primary) */
-    --primary: 35 50% 50%;
+    /* #C9A227 — Dourado oficial (Primary) */
+    --primary: 46 68% 42%;
     --primary-foreground: 0 0% 100%;
 
     /* Soft graphite-tinted surface */
