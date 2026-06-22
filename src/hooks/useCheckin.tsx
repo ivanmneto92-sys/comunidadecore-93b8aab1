@@ -170,12 +170,7 @@ export function useCheckin() {
       refetchProgress();
     },
     onError: (error) => {
-      console.error('Error performing checkin:', error);
-      toast({
-        title: 'Erro ao fazer check-in',
-        description: 'Tente novamente em alguns instantes.',
-        variant: 'destructive',
-      });
+      toast(buildErrorToast(error, { action: 'fazer check-in' }));
     },
   });
 
