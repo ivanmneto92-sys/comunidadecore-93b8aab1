@@ -17,6 +17,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useRobot } from '@/hooks/useRobots';
+import { RobotPerformanceChart } from '@/components/robots/RobotPerformanceChart';
 
 const riskConfig: Record<string, { label: string; icon: typeof Shield; className: string }> = {
   baixo: { label: 'Risco Baixo', icon: ShieldCheck, className: 'text-emerald-500' },
