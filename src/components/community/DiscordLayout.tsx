@@ -209,22 +209,46 @@ export function DiscordLayout() {
           />
         </div>
 
-        {/* Channel List Panel */}
-        <div className="w-[240px] shrink-0 h-full border-r border-border">
-          <ChannelListPanel
-            channels={channels}
-            selectedChannel={selectedChannel}
-            onSelectChannel={(channel) => {
-              setSelectedChannel(channel);
-              setThreadMessage(null);
-              setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
-            }}
-            unreadCounts={unreadCounts}
-          />
-        </div>
+        {/* Channel List Panel (collapsible) */}
+        {!channelListCollapsed && (
+          <div className="w-[240px] shrink-0 h-full border-r border-border relative">
+            <ChannelListPanel
+              channels={channels}
+              selectedChannel={selectedChannel}
+              onSelectChannel={(channel) => {
+                setSelectedChannel(channel);
+                setThreadMessage(null);
+                setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
+              }}
+              unreadCounts={unreadCounts}
+            />
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => setChannelListCollapsed(true)}
+              className="absolute top-3 right-2 h-7 w-7 z-10"
+              aria-label="Recolher menu de canais"
+              title="Recolher menu"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+          {channelListCollapsed && (
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => setChannelListCollapsed(false)}
+              className="absolute top-3 left-2 h-7 w-7 z-20 shadow-md"
+              aria-label="Expandir menu de canais"
+              title="Mostrar menu"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          )}
           {showSupport ? (
             <SupportView />
           ) : selectedChannel?.slug === 'noticias-mercado' ? (
