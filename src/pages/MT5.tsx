@@ -7,6 +7,7 @@ import { useMT5Accounts } from "@/hooks/useMT5Accounts";
 import { MT5AccountCard } from "@/components/mt5/MT5AccountCard";
 import { MT5Dashboard } from "@/components/mt5/MT5Dashboard";
 import { AddMT5AccountModal } from "@/components/mt5/AddMT5AccountModal";
+import { PlanGate } from "@/components/plans/PlanGate";
 
 export default function MT5Page() {
   const { data: accounts, isLoading } = useMT5Accounts();
