@@ -139,16 +139,24 @@ Deno.serve(async (req) => {
     let sent = 0;
     const invalid: string[] = [];
 
-    await Promise.all(tokens.map(async ({ token }) => {
-      const payload = {
-        message: {
-          token,
-          notification: { title, body },
-          data: data ?? {},
-          android: { priority: 'HIGH' as const },
-          apns: { headers: { 'apns-priority': '10' }, payload: { aps: { sound: 'default' } } },
-        },
+    await Promise.all(tokens.map(async ({ token, platform }) => {
+      const isWeb = platform === 'web';
+      const message: Record<string, unknown> = {
+        token,
+        notification: { title, body },
+        data: data ?? {},
       };
+      if (!isWeb) {
+        message.android = { priority: 'HIGH' as const };
+        message.apns = { headers: { 'apns-priority': '10' }, payload: { aps: { sound: 'default' } } };
+      } else {
+        message.webpush = {
+          headers: { Urgency: 'high' },
+          notification: { title, body, icon: '/app-icon.png', badge: '/app-icon.png' },
+          fcm_options: { link: data?.url ?? '/' },
+        };
+      }
+      const payload = { message };
       const r = await fetch(fcmUrl, {
         method: 'POST',
         headers: {
