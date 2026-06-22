@@ -112,7 +112,7 @@ export function FileUpload({ attachment, onAttachmentChange, disabled }: FileUpl
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button aria-label="Ação"
+          <Button
             type="button"
             variant="ghost"
             size="icon"
