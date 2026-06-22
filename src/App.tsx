@@ -146,8 +146,19 @@ const App = () => (
                   <MT5 />
                 </ProtectedRoute>
               } />
+              <Route path="/robots" element={
+                <ProtectedRoute>
+                  <Robots />
+                </ProtectedRoute>
+              } />
+              <Route path="/robots/:slug" element={
+                <ProtectedRoute>
+                  <RobotDetail />
+                </ProtectedRoute>
+              } />
               
               <Route path="*" element={<NotFound />} />
+
 
             </Routes>
           </Suspense>
