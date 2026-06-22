@@ -70,12 +70,12 @@ export function EditProfileModal({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
-        <SheetHeader className="pb-4">
+      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl flex flex-col p-0">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
           <SheetTitle>Editar Perfil</SheetTitle>
         </SheetHeader>
 
-        <div className="space-y-6 pb-8">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="displayName">Nome de Exibição</Label>
             <Input
@@ -124,11 +124,22 @@ export function EditProfileModal({
             />
             <p className="text-xs text-muted-foreground">O e-mail não pode ser alterado</p>
           </div>
+        </div>
 
-          <Button 
-            onClick={handleSave} 
+        <div className="px-6 py-4 border-t border-border bg-background flex gap-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
             disabled={saving}
-            className="w-full"
+            className="flex-1"
+            size="lg"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1"
             size="lg"
           >
             {saving ? (
@@ -137,7 +148,7 @@ export function EditProfileModal({
                 Salvando...
               </>
             ) : (
-              'Salvar Alterações'
+              'Salvar'
             )}
           </Button>
         </div>
