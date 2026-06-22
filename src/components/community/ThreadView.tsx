@@ -15,7 +15,7 @@ interface Message {
   content: string;
   created_at: string;
   user_id: string | null;
-  parent_id: string | null;
+  parent_id?: string | null;
   is_bot_message: boolean;
   is_pinned: boolean;
   profiles?: {
