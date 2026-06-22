@@ -146,7 +146,7 @@ export function DiscordLayout() {
             />
           </div>
         ) : (
-          <div className="w-10 shrink-0 h-full border-r border-border bg-background flex justify-center pt-2">
+          <div className="w-6 shrink-0 h-full border-r border-border bg-background flex justify-center pt-2">
             <Button
               variant="ghost"
               size="icon"
