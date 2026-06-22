@@ -47,9 +47,9 @@ export default function Plans() {
         <div className="max-w-6xl mx-auto px-5 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {PLANS.map((plan) => {
-              const isCurrent = !loading && hasTierAccess(membership, plan.tier) &&
-                // mostra "Atual" no maior tier que o usuário tem
-                PLANS.filter((p) => hasTierAccess(membership, p.tier)).at(-1)?.id === plan.id;
+              const eligible = !loading ? PLANS.filter((p) => hasTierAccess(membership, p.tier)) : [];
+              const topPlan = eligible[eligible.length - 1];
+              const isCurrent = !loading && topPlan?.id === plan.id;
 
               return (
                 <article

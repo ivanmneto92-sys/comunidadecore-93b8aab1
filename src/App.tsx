@@ -38,6 +38,7 @@ const StreakHistory = lazy(() => import("./pages/StreakHistory"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Journal = lazy(() => import("./pages/Journal"));
 const Seasons = lazy(() => import("./pages/Seasons"));
+const Plans = lazy(() => import("./pages/Plans"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
