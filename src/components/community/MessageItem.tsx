@@ -381,6 +381,8 @@ export function MessageItem({
             <img 
               src={message.image_url} 
               alt="Imagem anexada" 
+              loading="lazy"
+              decoding="async"
               className="max-w-xs max-h-64 rounded-lg border border-border object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => window.open(message.image_url!, '_blank')}
             />

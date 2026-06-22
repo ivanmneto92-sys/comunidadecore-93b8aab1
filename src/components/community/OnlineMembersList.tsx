@@ -1,5 +1,6 @@
+import { useRef, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { StatusIndicator } from './StatusSelector';
 import { cn } from '@/lib/utils';
 import type { PresenceStatus } from '@/hooks/useUserStatus';
@@ -18,18 +19,17 @@ interface OnlineMembersListProps {
   className?: string;
 }
 
-function OnlineMemberItem({ 
-  user, 
-  onClick 
-}: { 
-  user: OnlineUser; 
+const ROW_HEIGHT = 40; // px — matches py-1.5 + h-7 avatar row
+
+function OnlineMemberItem({
+  user,
+  onClick,
+}: {
+  user: OnlineUser;
   onClick?: () => void;
 }) {
   const { svg: avatarSvg } = useAvatar(user.avatarId, user.displayName);
   const status = user.presenceStatus || 'online';
-
-  // Don't show invisible users
-  if (status === 'invisible') return null;
 
   return (
     <button
@@ -55,61 +55,69 @@ function OnlineMemberItem({
 }
 
 export function OnlineMembersList({ users, onUserClick, className }: OnlineMembersListProps) {
-  // Filter out invisible users from the count
-  const visibleUsers = users.filter(u => u.presenceStatus !== 'invisible');
-  
-  if (visibleUsers.length === 0) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // Sort: online → idle → dnd, drop invisible
+  const sorted = useMemo(() => {
+    const order: Record<string, number> = { online: 0, idle: 1, dnd: 2 };
+    return users
+      .filter(u => u.presenceStatus !== 'invisible')
+      .sort((a, b) => (order[a.presenceStatus || 'online'] ?? 0) - (order[b.presenceStatus || 'online'] ?? 0));
+  }, [users]);
+
+  const virtualizer = useVirtualizer({
+    count: sorted.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
+  });
+
+  if (sorted.length === 0) {
     return (
       <div className={cn('p-4 text-center', className)}>
-        <p className="text-xs text-muted-foreground">
-          Nenhum membro online
-        </p>
+        <p className="text-xs text-muted-foreground">Nenhum membro online</p>
       </div>
     );
   }
 
-  // Group users by status
-  const groupedUsers = {
-    online: visibleUsers.filter(u => !u.presenceStatus || u.presenceStatus === 'online'),
-    idle: visibleUsers.filter(u => u.presenceStatus === 'idle'),
-    dnd: visibleUsers.filter(u => u.presenceStatus === 'dnd'),
-  };
-
   return (
-    <div className={className}>
+    <div className={cn('flex flex-col min-h-0', className)}>
       <div className="px-3 py-2 border-b border-border">
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Online — {visibleUsers.length}
+          Online — {sorted.length}
         </h3>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-0.5">
-          {/* Online users first */}
-          {groupedUsers.online.map((user) => (
-            <OnlineMemberItem
-              key={user.id}
-              user={user}
-              onClick={() => onUserClick?.(user.id, user.displayName)}
-            />
-          ))}
-          {/* Idle users */}
-          {groupedUsers.idle.map((user) => (
-            <OnlineMemberItem
-              key={user.id}
-              user={user}
-              onClick={() => onUserClick?.(user.id, user.displayName)}
-            />
-          ))}
-          {/* DND users */}
-          {groupedUsers.dnd.map((user) => (
-            <OnlineMemberItem
-              key={user.id}
-              user={user}
-              onClick={() => onUserClick?.(user.id, user.displayName)}
-            />
-          ))}
+      <div ref={parentRef} className="flex-1 overflow-y-auto p-2">
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((vi) => {
+            const user = sorted[vi.index];
+            return (
+              <div
+                key={user.id}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${vi.size}px`,
+                  transform: `translateY(${vi.start}px)`,
+                }}
+              >
+                <OnlineMemberItem
+                  user={user}
+                  onClick={() => onUserClick?.(user.id, user.displayName)}
+                />
+              </div>
+            );
+          })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
