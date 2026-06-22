@@ -45,6 +45,7 @@ const MT5 = lazy(() => import("./pages/MT5"));
 const Robots = lazy(() => import("./pages/Robots"));
 const RobotDetail = lazy(() => import("./pages/RobotDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const WelcomeForm = lazy(() => import("./pages/WelcomeForm"));
 
 
 
@@ -80,6 +81,11 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/welcome-form" element={
+                <ProtectedRoute skipLeadCheck>
+                  <WelcomeForm />
+                </ProtectedRoute>
+              } />
               <Route path="/termos" element={<Terms />} />
               <Route path="/privacidade" element={<Privacy />} />
               <Route path="/install" element={<Install />} />
