@@ -10,146 +10,63 @@ export interface AchievementCheckData {
   totalTutorials: number;
   messagesCount: number;
   performanceStreak: number;
-  affiliateLevel: number;
+  affiliateEarnings: number;
   memberSince: Date | null;
   totalXp: number;
 }
 
 export const achievementDefinitions: AchievementDefinition[] = [
   // Consistência - Check-in streak
-  {
-    code: 'checkin_7',
-    category: 'consistency',
-    checkProgress: (data) => ({ current: data.checkinStreak, target: 7 }),
-  },
-  {
-    code: 'checkin_14',
-    category: 'consistency',
-    checkProgress: (data) => ({ current: data.checkinStreak, target: 14 }),
-  },
-  {
-    code: 'checkin_30',
-    category: 'consistency',
-    checkProgress: (data) => ({ current: data.checkinStreak, target: 30 }),
-  },
-  {
-    code: 'checkin_60',
-    category: 'consistency',
-    checkProgress: (data) => ({ current: data.checkinStreak, target: 60 }),
-  },
-  {
-    code: 'checkin_90',
-    category: 'consistency',
-    checkProgress: (data) => ({ current: data.checkinStreak, target: 90 }),
-  },
+  { code: 'checkin_14',  category: 'consistency', checkProgress: d => ({ current: d.checkinStreak, target: 14 }) },
+  { code: 'checkin_30',  category: 'consistency', checkProgress: d => ({ current: d.checkinStreak, target: 30 }) },
+  { code: 'checkin_60',  category: 'consistency', checkProgress: d => ({ current: d.checkinStreak, target: 60 }) },
+  { code: 'checkin_120', category: 'consistency', checkProgress: d => ({ current: d.checkinStreak, target: 120 }) },
+  { code: 'checkin_180', category: 'consistency', checkProgress: d => ({ current: d.checkinStreak, target: 180 }) },
 
-  // Aprendizado - Tutoriais
-  {
-    code: 'tutorial_1',
-    category: 'learning',
-    checkProgress: (data) => ({ current: data.tutorialsCompleted, target: 1 }),
-  },
-  {
-    code: 'tutorial_5',
-    category: 'learning',
-    checkProgress: (data) => ({ current: data.tutorialsCompleted, target: 5 }),
-  },
-  {
-    code: 'tutorial_all',
-    category: 'learning',
-    checkProgress: (data) => ({ current: data.tutorialsCompleted, target: data.totalTutorials || 10 }),
-  },
+  // Aprendizado
+  { code: 'tutorial_5',   category: 'learning', checkProgress: d => ({ current: d.tutorialsCompleted, target: 5 }) },
+  { code: 'tutorial_15',  category: 'learning', checkProgress: d => ({ current: d.tutorialsCompleted, target: 15 }) },
+  { code: 'tutorial_all', category: 'learning', checkProgress: d => ({ current: d.tutorialsCompleted, target: d.totalTutorials || 10 }) },
 
-  // Comunidade - Mensagens
-  {
-    code: 'message_1',
-    category: 'community',
-    checkProgress: (data) => ({ current: data.messagesCount, target: 1 }),
-  },
-  {
-    code: 'message_10',
-    category: 'community',
-    checkProgress: (data) => ({ current: data.messagesCount, target: 10 }),
-  },
-  {
-    code: 'message_50',
-    category: 'community',
-    checkProgress: (data) => ({ current: data.messagesCount, target: 50 }),
-  },
-  {
-    code: 'message_100',
-    category: 'community',
-    checkProgress: (data) => ({ current: data.messagesCount, target: 100 }),
-  },
+  // Comunidade
+  { code: 'message_50',   category: 'community', checkProgress: d => ({ current: d.messagesCount, target: 50 }) },
+  { code: 'message_100',  category: 'community', checkProgress: d => ({ current: d.messagesCount, target: 100 }) },
+  { code: 'message_500',  category: 'community', checkProgress: d => ({ current: d.messagesCount, target: 500 }) },
+  { code: 'message_1000', category: 'community', checkProgress: d => ({ current: d.messagesCount, target: 1000 }) },
 
-  // Performance - Streak verde
-  {
-    code: 'streak_3',
-    category: 'performance',
-    checkProgress: (data) => ({ current: data.performanceStreak, target: 3 }),
-  },
-  {
-    code: 'streak_7',
-    category: 'performance',
-    checkProgress: (data) => ({ current: data.performanceStreak, target: 7 }),
-  },
-  {
-    code: 'streak_14',
-    category: 'performance',
-    checkProgress: (data) => ({ current: data.performanceStreak, target: 14 }),
-  },
-  {
-    code: 'streak_30',
-    category: 'performance',
-    checkProgress: (data) => ({ current: data.performanceStreak, target: 30 }),
-  },
+  // Performance (MT5 pessoal)
+  { code: 'streak_5',  category: 'performance', checkProgress: d => ({ current: d.performanceStreak, target: 5 }) },
+  { code: 'streak_10', category: 'performance', checkProgress: d => ({ current: d.performanceStreak, target: 10 }) },
+  { code: 'streak_20', category: 'performance', checkProgress: d => ({ current: d.performanceStreak, target: 20 }) },
+  { code: 'streak_40', category: 'performance', checkProgress: d => ({ current: d.performanceStreak, target: 40 }) },
 
-  // Afiliados
-  {
-    code: 'affiliate_bronze',
-    category: 'affiliates',
-    checkProgress: (data) => ({ current: data.affiliateLevel, target: 1 }),
-  },
-  {
-    code: 'affiliate_silver',
-    category: 'affiliates',
-    checkProgress: (data) => ({ current: data.affiliateLevel, target: 2 }),
-  },
-  {
-    code: 'affiliate_gold',
-    category: 'affiliates',
-    checkProgress: (data) => ({ current: data.affiliateLevel, target: 3 }),
-  },
-  {
-    code: 'affiliate_diamond',
-    category: 'affiliates',
-    checkProgress: (data) => ({ current: data.affiliateLevel, target: 4 }),
-  },
+  // Afiliados (em R$)
+  { code: 'affiliate_bronze',  category: 'affiliates', checkProgress: d => ({ current: Math.floor(d.affiliateEarnings), target: 500 }) },
+  { code: 'affiliate_silver',  category: 'affiliates', checkProgress: d => ({ current: Math.floor(d.affiliateEarnings), target: 3000 }) },
+  { code: 'affiliate_gold',    category: 'affiliates', checkProgress: d => ({ current: Math.floor(d.affiliateEarnings), target: 10000 }) },
+  { code: 'affiliate_diamond', category: 'affiliates', checkProgress: d => ({ current: Math.floor(d.affiliateEarnings), target: 25000 }) },
 
   // Especiais
   {
     code: 'early_adopter',
     category: 'special',
-    checkProgress: (data) => {
-      const cutoffDate = new Date('2026-03-01');
-      const isEarlyAdopter = data.memberSince && data.memberSince < cutoffDate;
-      return { current: isEarlyAdopter ? 1 : 0, target: 1 };
+    checkProgress: d => {
+      const cutoff = new Date('2026-03-01');
+      const ok = d.memberSince && d.memberSince < cutoff;
+      return { current: ok ? 1 : 0, target: 1 };
     },
   },
   {
     code: 'veteran_1y',
     category: 'special',
-    checkProgress: (data) => {
-      if (!data.memberSince) return { current: 0, target: 365 };
-      const daysSinceMember = Math.floor((Date.now() - data.memberSince.getTime()) / (1000 * 60 * 60 * 24));
-      return { current: daysSinceMember, target: 365 };
+    checkProgress: d => {
+      if (!d.memberSince) return { current: 0, target: 365 };
+      const days = Math.floor((Date.now() - d.memberSince.getTime()) / 86400000);
+      return { current: days, target: 365 };
     },
   },
-  {
-    code: 'xp_1000',
-    category: 'special',
-    checkProgress: (data) => ({ current: data.totalXp, target: 1000 }),
-  },
+  { code: 'xp_5000',  category: 'special', checkProgress: d => ({ current: d.totalXp, target: 5000 }) },
+  { code: 'xp_25000', category: 'special', checkProgress: d => ({ current: d.totalXp, target: 25000 }) },
 ];
 
 export const categoryLabels: Record<string, string> = {
@@ -160,6 +77,13 @@ export const categoryLabels: Record<string, string> = {
   performance: 'Performance',
   affiliates: 'Afiliados',
   special: 'Especiais',
+};
+
+export const rarityLabels: Record<string, string> = {
+  common: 'Comum',
+  rare: 'Rara',
+  epic: 'Épica',
+  legendary: 'Lendária',
 };
 
 export const rarityColors: Record<string, { bg: string; text: string; border: string }> = {
