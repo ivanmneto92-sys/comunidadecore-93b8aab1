@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -12,7 +12,6 @@ import { MessageItem } from './MessageItem';
 import { MessageComposer } from './MessageComposer';
 import { PollCard } from './PollCard';
 import { CreatePollModal } from './CreatePollModal';
-import { ThreadView } from './ThreadView';
 import { TypingIndicator } from './TypingIndicator';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { MessageSearch } from './MessageSearch';
@@ -119,9 +118,7 @@ export function ChatView({
   const [showSearch, setShowSearch] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const parentRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
   // Track IDs we just inserted ourselves so we can ignore the realtime echo
   const recentlySentIds = useRef<Set<string>>(new Set());
@@ -335,55 +332,61 @@ export function ChatView({
     }
   }, [channel.id, user]);
 
+  // Virtualizer for chat messages — dynamic measurement
+  const rowVirtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 88,
+    overscan: 8,
+    getItemKey: (i) => messages[i]?.id ?? i,
+    measureElement: (el) =>
+      el?.getBoundingClientRect().height ?? 88,
+  });
+
+  const messageIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    messages.forEach((m, i) => map.set(m.id, i));
+    return map;
+  }, [messages]);
+
   const loadMoreMessages = useCallback(async () => {
     if (loadingMore || !hasMore || messages.length === 0) return;
 
     setLoadingMore(true);
-    
-    // Get the oldest message date
+
     const oldestMessage = messages[0];
     const olderMessages = await fetchMessages(oldestMessage.created_at);
-    
+
     if (olderMessages.length > 0) {
-      // Preserve scroll position
-      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-      const previousScrollHeight = scrollContainer?.scrollHeight || 0;
-      
       setMessages(prev => [...olderMessages, ...prev]);
-      
-      // Restore scroll position after render
+      // Anchor to the previously-first message after prepend
       requestAnimationFrame(() => {
-        if (scrollContainer) {
-          const newScrollHeight = scrollContainer.scrollHeight;
-          scrollContainer.scrollTop = newScrollHeight - previousScrollHeight;
-        }
+        rowVirtualizer.scrollToIndex(olderMessages.length, { align: 'start' });
       });
     }
-    
+
     setLoadingMore(false);
-  }, [loadingMore, hasMore, messages, fetchMessages]);
+  }, [loadingMore, hasMore, messages, fetchMessages, rowVirtualizer]);
 
   // Scroll to bottom and clear new messages indicator
-  const scrollToBottom = useCallback(() => {
-    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const el = parentRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior });
     setNewMessagesCount(0);
   }, []);
 
   // Scroll to a specific message by ID
   const scrollToMessage = useCallback(async (messageId: string) => {
-    // First check if message is already loaded
-    const messageElement = messageRefs.current.get(messageId);
-    if (messageElement) {
-      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const idx = messageIndexById.get(messageId);
+    if (idx !== undefined) {
+      rowVirtualizer.scrollToIndex(idx, { align: 'center' });
       setHighlightedMessageId(messageId);
-      // Remove highlight after 3 seconds
       setTimeout(() => setHighlightedMessageId(null), 3000);
       return;
     }
 
     // Message not in current view - need to fetch it and surrounding messages
     try {
-      // Get the target message to find its position
       const { data: targetMessage, error: targetError } = await supabase
         .from('messages')
         .select('id, created_at')
@@ -396,7 +399,6 @@ export function ChatView({
         return;
       }
 
-      // Fetch messages around the target message
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
         .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size, link_preview_url')
@@ -408,7 +410,6 @@ export function ChatView({
 
       if (messagesError) throw messagesError;
 
-      // Also fetch some messages before the target
       const { data: beforeMessages } = await supabase
         .from('messages')
         .select('id, content, created_at, user_id, is_bot_message, is_pinned, image_url, file_url, file_name, file_type, file_size, link_preview_url')
@@ -418,7 +419,6 @@ export function ChatView({
         .order('created_at', { ascending: false })
         .limit(25);
 
-      // Combine and sort messages
       const allMessages = [
         ...((beforeMessages || []).reverse()),
         ...(messagesData || [])
@@ -428,12 +428,11 @@ export function ChatView({
       setMessages(enrichedMessages);
       setHasMore(beforeMessages && beforeMessages.length >= 25);
 
-      // Wait for render, then scroll to message
       requestAnimationFrame(() => {
         setTimeout(() => {
-          const element = messageRefs.current.get(messageId);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const newIdx = enrichedMessages.findIndex(m => m.id === messageId);
+          if (newIdx >= 0) {
+            rowVirtualizer.scrollToIndex(newIdx, { align: 'center' });
             setHighlightedMessageId(messageId);
             setTimeout(() => setHighlightedMessageId(null), 3000);
           }
@@ -442,21 +441,21 @@ export function ChatView({
     } catch (error) {
       console.error('Error scrolling to message:', error);
     }
-  }, [channel.id, enrichMessages]);
+  }, [channel.id, enrichMessages, messageIndexById, rowVirtualizer]);
 
   // Handle scroll to detect when user scrolls near top or bottom
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLDivElement;
-    
+    const target = event.currentTarget;
+
     // Load more when scrolled to top (within 100px threshold)
     if (target.scrollTop < 100 && !loadingMore && hasMore) {
       loadMoreMessages();
     }
-    
+
     // Track if user is near bottom (within 200px)
     const nearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 200;
     setIsNearBottom(nearBottom);
-    
+
     // Clear new messages count when scrolled to bottom
     if (nearBottom && newMessagesCount > 0) {
       setNewMessagesCount(0);
@@ -503,7 +502,7 @@ export function ChatView({
               const isOwnMessage = payload.new.user_id === user?.id;
               if (!isOwnMessage) {
                 setNewMessagesCount(prev => {
-                  const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+                  const scrollContainer = parentRef.current;
                   if (scrollContainer) {
                     const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
                     if (!nearBottom) {
@@ -629,12 +628,13 @@ export function ChatView({
     };
   }, [channel.id, fetchMessages, fetchPolls, enrichMessages, user]);
 
-  // Scroll to bottom on initial load and when new messages arrive
+  // Scroll to bottom on initial load
   useEffect(() => {
     if (isInitialLoad.current && messages.length > 0) {
       isInitialLoad.current = false;
       requestAnimationFrame(() => {
-        scrollRef.current?.scrollIntoView({ behavior: 'auto' });
+        const el = parentRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
       });
     }
   }, [messages]);
@@ -642,12 +642,13 @@ export function ChatView({
   // Auto-scroll to bottom when a new message is added (not loading old messages)
   useEffect(() => {
     if (!loading && !loadingMore && messages.length > 0) {
-      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = parentRef.current;
       if (scrollContainer) {
-        // Only auto-scroll if near bottom (within 200px)
-        const isNearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
-        if (isNearBottom) {
-          scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+        if (nearBottom) {
+          requestAnimationFrame(() => {
+            scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+          });
         }
       }
     }
@@ -693,7 +694,8 @@ export function ChatView({
 
     setMessages(prev => [...prev, optimistic]);
     requestAnimationFrame(() => {
-      scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const el = parentRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     });
 
     const { data, error } = await supabase
@@ -883,11 +885,11 @@ export function ChatView({
         </div>
       )}
 
-      {/* Content area */}
-      <ScrollArea 
-        className="flex-1" 
-        ref={scrollAreaRef}
-        onScrollCapture={handleScroll}
+      {/* Content area — virtualized scroll container */}
+      <div
+        ref={parentRef}
+        className="flex-1 overflow-y-auto"
+        onScroll={handleScroll}
       >
         <div className="py-3 px-1">
           {/* Load more indicator */}
@@ -897,7 +899,7 @@ export function ChatView({
               <span className="text-xs text-muted-foreground">Carregando mensagens...</span>
             </div>
           )}
-          
+
           {/* Load more button (fallback) */}
           {hasMore && !loadingMore && messages.length > 0 && (
             <div className="flex justify-center py-2">
@@ -917,66 +919,81 @@ export function ChatView({
           {polls.length > 0 && (
             <div className="px-2 mb-4 space-y-3">
               {polls.slice(0, 2).map((poll) => (
-                <PollCard 
-                  key={poll.id} 
-                  poll={poll} 
+                <PollCard
+                  key={poll.id}
+                  poll={poll}
                   onVoteUpdate={fetchPolls}
                 />
               ))}
             </div>
           )}
 
-          {/* Messages */}
+          {/* Messages — virtualized */}
           {messages.length === 0 && polls.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground py-6">
               Nenhuma mensagem ainda. Seja o primeiro a enviar!
             </p>
           ) : (
-            messages.map((message, index) => {
-              const showDate = index === 0 ||
-                formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const index = virtualRow.index;
+                const message = messages[index];
+                if (!message) return null;
+                const showDate = index === 0 ||
+                  formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
 
-              return (
-                <div 
-                  key={message.id}
-                  ref={(el) => {
-                    if (el) messageRefs.current.set(message.id, el);
-                    else messageRefs.current.delete(message.id);
-                  }}
-                  className={highlightedMessageId === message.id ? 'animate-pulse bg-primary/10 rounded-lg transition-colors duration-300' : ''}
-                >
-                  {showDate && (
-                    <div className="flex items-center gap-2 my-3 px-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatDate(message.created_at)}
-                      </span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                  )}
+                return (
+                  <div
+                    key={virtualRow.key}
+                    data-index={index}
+                    ref={rowVirtualizer.measureElement}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    className={highlightedMessageId === message.id ? 'animate-pulse bg-primary/10 rounded-lg transition-colors duration-300' : ''}
+                  >
+                    {showDate && (
+                      <div className="flex items-center gap-2 my-3 px-2">
+                        <div className="flex-1 h-px bg-border" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatDate(message.created_at)}
+                        </span>
+                        <div className="flex-1 h-px bg-border" />
+                      </div>
+                    )}
 
-                  <MessageItem
-                    message={message}
-                    isAdmin={isAdmin}
-                    authorRole={message.author_role}
-                    onReply={() => onOpenThread?.(message)}
-                    onOpenThread={() => onOpenThread?.(message)}
-                    onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
-                    onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
-                  />
-                </div>
-              );
-            })
+                    <MessageItem
+                      message={message}
+                      isAdmin={isAdmin}
+                      authorRole={message.author_role}
+                      onReply={() => onOpenThread?.(message)}
+                      onOpenThread={() => onOpenThread?.(message)}
+                      onRetry={message.status === 'failed' ? () => retryMessage(message.id) : undefined}
+                      onDiscard={message.status === 'failed' ? () => discardMessage(message.id) : undefined}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           )}
-          <div ref={scrollRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* New messages indicator */}
       {newMessagesCount > 0 && !isNearBottom && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
           <Button
-            onClick={scrollToBottom}
+            onClick={() => scrollToBottom('smooth')}
             size="sm"
             className="rounded-full shadow-lg gap-1.5 px-4 animate-in slide-in-from-bottom-2"
           >
@@ -985,6 +1002,7 @@ export function ChatView({
           </Button>
         </div>
       )}
+
 
       {/* Typing indicator */}
       {canSendMessages && <TypingIndicator channelId={channel.id} />}
