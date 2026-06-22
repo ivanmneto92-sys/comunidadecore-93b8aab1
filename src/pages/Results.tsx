@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ResultsFilter } from '@/components/results/ResultsFilter';
 import { ResultsChart } from '@/components/results/ResultsChart';
 import { DailyResultItem } from '@/components/results/DailyResultItem';
@@ -186,32 +187,33 @@ export default function Results() {
           />
         </div>
 
-        {/* Today's Result */}
-        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <TodayResultCard 
-            pnlPercent={todayResult.pnlPercent} 
-            tradesCount={todayResult.tradesCount} 
-            winRate={todayResult.winRate} 
-          />
-        </div>
+        {/* Tabs */}
+        <Tabs defaultValue="overview" className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="charts">Gráficos</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
+          </TabsList>
 
-        {/* Performance Overview */}
-        <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <PerformanceOverview metrics={metrics} />
-        </div>
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <TodayResultCard
+              pnlPercent={todayResult.pnlPercent}
+              tradesCount={todayResult.tradesCount}
+              winRate={todayResult.winRate}
+            />
+            <PerformanceOverview metrics={metrics} />
+          </TabsContent>
 
-        {/* Growth Charts - Stack on mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <AccountGrowthChart data={growthData} />
-          <MonthlyReturnsChart data={monthlyReturns} />
-        </div>
+          <TabsContent value="charts" className="mt-4 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <AccountGrowthChart data={growthData} />
+              <MonthlyReturnsChart data={monthlyReturns} />
+            </div>
+            {chartData.length > 0 && <ResultsChart data={chartData} />}
+          </TabsContent>
 
-        {/* PnL Chart */}
-        {chartData.length > 0 && (
-          <div className="animate-fade-in" style={{ animationDelay: '250ms' }}>
-            <ResultsChart data={chartData} />
-          </div>
-        )}
+          <TabsContent value="history" className="mt-4">
+
 
         {/* Daily Results Feed - Grouped by month with sticky headers */}
         <div className="space-y-2 animate-fade-in" style={{ animationDelay: '300ms' }}>
@@ -289,6 +291,8 @@ export default function Results() {
             );
           })()}
         </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Compliance disclaimer */}
         <p className="text-center text-[10px] text-muted-foreground/60 pt-4 pb-2">
