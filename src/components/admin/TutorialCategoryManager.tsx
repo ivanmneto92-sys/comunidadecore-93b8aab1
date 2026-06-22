@@ -403,7 +403,7 @@ export function TutorialCategoryManager() {
                   <TableRow key={category.id} className={editingId === category.id ? 'bg-muted/50' : ''}>
                     <TableCell>
                       <div className="flex flex-col gap-1">
-                        <Button
+                        <Button aria-label="Ação"
                           size="icon"
                           variant="ghost"
                           className="h-6 w-6"
@@ -412,7 +412,7 @@ export function TutorialCategoryManager() {
                         >
                           <ArrowUp className="h-3 w-3" />
                         </Button>
-                        <Button
+                        <Button aria-label="Ação"
                           size="icon"
                           variant="ghost"
                           className="h-6 w-6"
@@ -444,7 +444,7 @@ export function TutorialCategoryManager() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
+                        <Button aria-label="Editar"
                           size="icon"
                           variant="ghost"
                           onClick={() => startEditing(category)}
@@ -452,7 +452,7 @@ export function TutorialCategoryManager() {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
+                        <Button aria-label="Ver"
                           size="icon"
                           variant="ghost"
                           onClick={() => toggleVisibility(category.id, category.is_visible)}
@@ -464,7 +464,7 @@ export function TutorialCategoryManager() {
                             <EyeOff className="h-4 w-4" />
                           )}
                         </Button>
-                        <Button
+                        <Button aria-label="Excluir"
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteCategory(category.id)}

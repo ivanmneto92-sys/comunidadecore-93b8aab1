@@ -360,7 +360,7 @@ export function HealthScoreForm() {
                         {score.drawdown_status ? ddLabels[score.drawdown_status] || score.drawdown_status : '-'}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
+                        <Button aria-label="Excluir"
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteScore(score.id)}

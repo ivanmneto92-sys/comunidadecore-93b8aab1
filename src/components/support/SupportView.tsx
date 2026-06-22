@@ -48,7 +48,7 @@ export function SupportView({ onGoBack }: SupportViewProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {onGoBack && (
-              <Button variant="ghost" size="icon" onClick={onGoBack} className="md:hidden">
+              <Button aria-label="Voltar" variant="ghost" size="icon" onClick={onGoBack} className="md:hidden">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}

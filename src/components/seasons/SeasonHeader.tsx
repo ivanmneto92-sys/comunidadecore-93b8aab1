@@ -35,7 +35,7 @@ export function SeasonHeader({ season, definition }: SeasonHeaderProps) {
       
       {/* Header nav */}
       <div className="relative flex items-center justify-between mb-6">
-        <Button 
+        <Button aria-label="Voltar" 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)}

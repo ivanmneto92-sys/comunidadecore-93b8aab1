@@ -534,7 +534,7 @@ export function CoreBotManager() {
                         </p>
                       </div>
                       <div className="flex gap-1 shrink-0">
-                        <Button
+                        <Button aria-label="Horário"
                           size="icon"
                           variant="ghost"
                           onClick={() => useTemplateForSchedule(template)}
@@ -542,14 +542,14 @@ export function CoreBotManager() {
                         >
                           <Clock className="h-4 w-4" />
                         </Button>
-                        <Button
+                        <Button aria-label="Editar"
                           size="icon"
                           variant="ghost"
                           onClick={() => editTemplate(template)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button
+                        <Button aria-label="Excluir"
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteTemplate(template.id)}
@@ -726,7 +726,7 @@ export function CoreBotManager() {
                       </div>
                       {post.status === 'pending' && (
                         <div className="flex gap-1 shrink-0">
-                          <Button
+                          <Button aria-label="Reproduzir"
                             size="icon"
                             variant="ghost"
                             onClick={() => executeScheduledPost(post)}
@@ -734,7 +734,7 @@ export function CoreBotManager() {
                           >
                             <Play className="h-4 w-4 text-green-500" />
                           </Button>
-                          <Button
+                          <Button aria-label="Pausar"
                             size="icon"
                             variant="ghost"
                             onClick={() => cancelScheduledPost(post.id)}

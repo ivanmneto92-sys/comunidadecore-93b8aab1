@@ -66,7 +66,7 @@ export default function Affiliates() {
           className="flex items-center gap-4 animate-fade-in"
           style={{ animationDelay: '0ms' }}
         >
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button aria-label="Voltar" variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">

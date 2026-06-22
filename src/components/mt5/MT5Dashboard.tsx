@@ -93,10 +93,10 @@ export function MT5Dashboard({ account }: Props) {
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="outline" size="icon" onClick={handleRegen} title="Regenerar token">
+            <Button aria-label="Recarregar" variant="outline" size="icon" onClick={handleRegen} title="Regenerar token">
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleDelete} title="Excluir conta">
+            <Button aria-label="Excluir" variant="outline" size="icon" onClick={handleDelete} title="Excluir conta">
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>

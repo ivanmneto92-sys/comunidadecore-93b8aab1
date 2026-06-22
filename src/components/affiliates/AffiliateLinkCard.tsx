@@ -78,7 +78,7 @@ export function AffiliateLinkCard({ affiliateCode }: AffiliateLinkCardProps) {
             readOnly
             className="font-mono text-sm bg-muted/50"
           />
-          <Button
+          <Button aria-label="Confirmar"
             variant={copied ? 'default' : 'outline'}
             size="icon"
             onClick={handleCopy}

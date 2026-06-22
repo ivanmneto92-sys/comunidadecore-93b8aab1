@@ -29,7 +29,7 @@
     --secondary-foreground: 210 22% 96%;
 
     --muted: 215 28% 17%;
-    --muted-foreground: 34 30% 72%;
+    --muted-foreground: 34 25% 82%;
 
     /* #EBD7BE — Dourado claro de apoio (accent) */
     --accent: 33 53% 83%;
@@ -103,7 +103,7 @@
     --secondary-foreground: 214 68% 14%;
 
     --muted: 210 22% 90%;
-    --muted-foreground: 214 20% 35%;
+    --muted-foreground: 214 25% 28%;
 
     /* #ebd7be - Dourado-claro (Accent) */
     --accent: 33 53% 83%;
@@ -152,6 +152,31 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+  }
+
+  /* A11y — global focus-visible ring on all interactive elements.
+     Tokenized via --ring so it adapts to light/dark themes. */
+  *:focus {
+    outline: none;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="link"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="option"]:focus-visible,
+  [role="checkbox"]:focus-visible,
+  [role="radio"]:focus-visible,
+  [role="switch"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius);
   }
 }
 

@@ -132,7 +132,7 @@ export function JournalEntryDrawer({
               <div className="space-y-2">
                 <Label className="text-sm">Gains</Label>
                 <div className="flex items-center gap-2">
-                  <Button
+                  <Button aria-label="Remover"
                     type="button"
                     variant="outline"
                     size="icon"
@@ -144,7 +144,7 @@ export function JournalEntryDrawer({
                   <div className="flex-1 text-center">
                     <span className="text-2xl font-bold text-success">{wins}</span>
                   </div>
-                  <Button
+                  <Button aria-label="Adicionar"
                     type="button"
                     variant="outline"
                     size="icon"
@@ -159,7 +159,7 @@ export function JournalEntryDrawer({
               <div className="space-y-2">
                 <Label className="text-sm">Losses</Label>
                 <div className="flex items-center gap-2">
-                  <Button
+                  <Button aria-label="Remover"
                     type="button"
                     variant="outline"
                     size="icon"
@@ -171,7 +171,7 @@ export function JournalEntryDrawer({
                   <div className="flex-1 text-center">
                     <span className="text-2xl font-bold text-destructive">{losses}</span>
                   </div>
-                  <Button
+                  <Button aria-label="Adicionar"
                     type="button"
                     variant="outline"
                     size="icon"
@@ -248,7 +248,7 @@ export function JournalEntryDrawer({
           <DrawerFooter className="pt-4">
             <div className="flex gap-2">
               {entry && onDelete && (
-                <Button
+                <Button aria-label="Excluir"
                   type="button"
                   variant="destructive"
                   size="icon"

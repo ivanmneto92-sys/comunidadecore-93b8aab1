@@ -350,7 +350,7 @@ export function MessageItem({
               disabled={isSaving}
               className="flex-1 text-sm h-8"
             />
-            <Button
+            <Button aria-label="Confirmar"
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-primary"
@@ -359,7 +359,7 @@ export function MessageItem({
             >
               <Check className="h-4 w-4" />
             </Button>
-            <Button
+            <Button aria-label="Ação"
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground"
@@ -443,7 +443,7 @@ export function MessageItem({
           <ReactionPicker onSelect={handleReaction} />
           
           {onReply && (
-            <Button
+            <Button aria-label="Responder"
               variant="ghost"
               size="icon"
               className="h-7 w-7"

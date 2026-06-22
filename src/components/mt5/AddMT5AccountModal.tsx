@@ -111,7 +111,7 @@ export function AddMT5AccountModal({ open, onOpenChange }: Props) {
                 <Label>API Token</Label>
                 <div className="flex gap-2">
                   <Input readOnly value={generated.token} className="font-mono text-xs" />
-                  <Button type="button" variant="outline" size="icon" onClick={copy}>
+                  <Button aria-label="Confirmar" type="button" variant="outline" size="icon" onClick={copy}>
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                 </div>

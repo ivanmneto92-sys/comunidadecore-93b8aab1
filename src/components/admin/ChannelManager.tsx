@@ -329,7 +329,7 @@ export function ChannelManager() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
+                      <Button aria-label="Excluir"
                         size="icon"
                         variant="ghost"
                         onClick={() => deleteChannel(channel.id)}

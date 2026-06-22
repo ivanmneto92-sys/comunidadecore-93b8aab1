@@ -565,7 +565,7 @@ export function TutorialManager() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
+                        <Button aria-label="Editar"
                           size="icon"
                           variant="ghost"
                           onClick={() => startEditing(tutorial)}
@@ -573,7 +573,7 @@ export function TutorialManager() {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
+                        <Button aria-label="Ação"
                           size="icon"
                           variant="ghost"
                           onClick={() => setQuizEditor({ id: tutorial.id, title: tutorial.title })}
@@ -581,7 +581,7 @@ export function TutorialManager() {
                         >
                           <Brain className="h-4 w-4" />
                         </Button>
-                        <Button
+                        <Button aria-label="Ocultar"
                           size="icon"
                           variant="ghost"
                           onClick={() => togglePublish(tutorial.id, tutorial.is_published)}
@@ -593,7 +593,7 @@ export function TutorialManager() {
                             <Eye className="h-4 w-4" />
                           )}
                         </Button>
-                        <Button
+                        <Button aria-label="Excluir"
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteTutorial(tutorial.id)}

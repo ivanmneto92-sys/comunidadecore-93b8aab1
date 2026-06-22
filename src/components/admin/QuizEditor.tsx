@@ -270,7 +270,7 @@ export function QuizEditor({ tutorialId, tutorialTitle, open, onClose }: Props) 
                         onChange={(e) => updateQuestion(qi, { explanation: e.target.value })}
                       />
                     </div>
-                    <Button
+                    <Button aria-label="Excluir"
                       size="icon"
                       variant="ghost"
                       onClick={() => setQuestions(questions.filter((_, i) => i !== qi))}
@@ -291,7 +291,7 @@ export function QuizEditor({ tutorialId, tutorialTitle, open, onClose }: Props) 
                           onChange={(e) => updateOption(qi, oi, { text: e.target.value })}
                         />
                         {q.options.length > 2 && (
-                          <Button
+                          <Button aria-label="Excluir"
                             size="icon"
                             variant="ghost"
                             onClick={() =>
