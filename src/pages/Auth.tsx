@@ -141,8 +141,7 @@ export default function Auth() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center space-y-3">
-          <img src={logoCore} alt="INSTITUTO TRADER" width={350} height={80} className="h-20 w-auto" />
-          <p className="text-sm text-muted-foreground">Comunidade de Copy Trading</p>
+          <img src={logoCore} alt="INSTITUTO TRADER" width={900} height={210} className="h-52 w-auto" />
         </div>
 
         <Card>
