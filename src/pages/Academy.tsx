@@ -10,6 +10,7 @@ import { CategoryTabs } from '@/components/academy/CategoryTabs';
 import { TutorialCard } from '@/components/academy/TutorialCard';
 import { TutorialDetailModal } from '@/components/academy/TutorialDetailModal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { hasTierAccess } from '@/lib/plans';
 
 interface TutorialCategory {
   id: string;
