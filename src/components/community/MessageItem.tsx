@@ -228,12 +228,7 @@ export function MessageItem({
         title: message.is_pinned ? 'Mensagem desafixada' : 'Mensagem fixada',
       });
     } catch (error) {
-      console.error('Error pinning message:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao fixar mensagem',
-        description: 'Tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: message.is_pinned ? 'desafixar mensagem' : 'fixar mensagem' }));
     }
   };
 
