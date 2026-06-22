@@ -12,7 +12,8 @@ import { ResultsSkeleton } from '@/components/results/ResultsSkeleton';
 import { useAccountMetrics, FilterPeriod } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
 import { TrendingUp } from 'lucide-react';
-import { subDays, parseISO, isAfter } from 'date-fns';
+import { subDays, parseISO, isAfter, format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface DailyReport {
@@ -212,7 +213,7 @@ export default function Results() {
           </div>
         )}
 
-        {/* Daily Results Feed - Virtualized */}
+        {/* Daily Results Feed - Grouped by month with sticky headers */}
         <div className="space-y-2 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Histórico Diário
@@ -221,29 +222,72 @@ export default function Results() {
             <p className="text-sm text-muted-foreground text-center py-8">
               Nenhum resultado para este período.
             </p>
-          ) : (
-            <div className="space-y-2">
-              {filteredReports.slice(0, visibleCount).map((report, index) => (
-                <div 
-                  key={report.id} 
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${Math.min(index * 20, 150)}ms` }}
-                >
-                  <DailyResultItem report={report} />
-                </div>
-              ))}
-              
-              {/* Load More Button */}
-              {visibleCount < filteredReports.length && (
-                <button
-                  onClick={() => setVisibleCount(prev => prev + 15)}
-                  className="w-full py-3 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Carregar mais ({filteredReports.length - visibleCount} restantes)
-                </button>
-              )}
-            </div>
-          )}
+          ) : (() => {
+            const visibleReports = filteredReports.slice(0, visibleCount);
+            const groups: { key: string; label: string; total: number; items: typeof visibleReports }[] = [];
+            visibleReports.forEach((r) => {
+              const d = parseISO(r.date);
+              const key = format(d, 'yyyy-MM');
+              let g = groups.find((x) => x.key === key);
+              if (!g) {
+                g = {
+                  key,
+                  label: format(d, "MMMM 'de' yyyy", { locale: ptBR }),
+                  total: 0,
+                  items: [],
+                };
+                groups.push(g);
+              }
+              g.items.push(r);
+              g.total += Number(r.pnl_percent);
+            });
+
+            let runningIndex = 0;
+            return (
+              <div className="space-y-4">
+                {groups.map((g) => (
+                  <section key={g.key} className="space-y-2">
+                    <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-background/85 backdrop-blur-md border-b border-border/50 flex items-center justify-between">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-foreground capitalize">
+                        {g.label}
+                      </h3>
+                      <span
+                        className={cn(
+                          'text-xs font-bold tabular-nums',
+                          g.total > 0 ? 'text-emerald-400' : g.total < 0 ? 'text-red-400' : 'text-muted-foreground'
+                        )}
+                      >
+                        {g.total > 0 ? '+' : ''}{g.total.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {g.items.map((report) => {
+                        const i = runningIndex++;
+                        return (
+                          <div
+                            key={report.id}
+                            className="animate-fade-in"
+                            style={{ animationDelay: `${Math.min(i * 20, 150)}ms` }}
+                          >
+                            <DailyResultItem report={report} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
+
+                {visibleCount < filteredReports.length && (
+                  <button
+                    onClick={() => setVisibleCount((prev) => prev + 15)}
+                    className="w-full py-3 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Carregar mais ({filteredReports.length - visibleCount} restantes)
+                  </button>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Compliance disclaimer */}
