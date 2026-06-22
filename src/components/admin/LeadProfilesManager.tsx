@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Download, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { QUESTION_FIELDS } from './leadFormOptions';
 
 type LeadProfile = {
   id: string;
@@ -27,23 +33,12 @@ type LeadProfile = {
   created_at: string;
 };
 
-const FIELDS: Array<[keyof LeadProfile, string]> = [
-  ['gender', 'Sexo'],
-  ['age_range', 'Idade'],
-  ['work_area', 'Área de trabalho'],
-  ['investment_experience', 'Experiência'],
-  ['is_trader', 'Opera como trader'],
-  ['prop_firm_status', 'Mesa proprietária'],
-  ['investor_profile', 'Perfil investidor'],
-  ['income_range', 'Renda mensal'],
-  ['initial_investment', 'Investimento inicial'],
-];
-
-function aggregate(rows: LeadProfile[], key: keyof LeadProfile) {
+function aggregateAll(rows: LeadProfile[], key: string, options: readonly string[]) {
   const counts: Record<string, number> = {};
+  options.forEach(o => { counts[o] = 0; });
   rows.forEach(r => {
-    const v = String(r[key] ?? '—');
-    counts[v] = (counts[v] ?? 0) + 1;
+    const v = String((r as any)[key] ?? '');
+    if (v) counts[v] = (counts[v] ?? 0) + 1;
   });
   return Object.entries(counts).sort((a, b) => b[1] - a[1]);
 }
@@ -54,17 +49,34 @@ function toCSV(rows: LeadProfile[]): string {
   return [headers.join(','), ...rows.map(r => headers.map(h => escape((r as any)[h])).join(','))].join('\n');
 }
 
+type Preset = '7' | '30' | '90' | 'all' | 'custom';
+
 export function LeadProfilesManager() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<LeadProfile | null>(null);
+  const [preset, setPreset] = useState<Preset>('all');
+  const [from, setFrom] = useState<Date | undefined>();
+  const [to, setTo] = useState<Date | undefined>();
+
+  const range = useMemo(() => {
+    const now = new Date();
+    if (preset === 'all') return { from: null, to: null };
+    if (preset === 'custom') return {
+      from: from ? new Date(from.setHours(0,0,0,0)) : null,
+      to: to ? new Date(new Date(to).setHours(23,59,59,999)) : null,
+    };
+    const days = preset === '7' ? 7 : preset === '30' ? 30 : 90;
+    const f = new Date(now); f.setDate(f.getDate() - days); f.setHours(0,0,0,0);
+    return { from: f, to: null };
+  }, [preset, from, to]);
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ['admin_lead_profiles'],
+    queryKey: ['admin_lead_profiles', range.from?.toISOString() ?? 'none', range.to?.toISOString() ?? 'none'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lead_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let q = supabase.from('lead_profiles').select('*').order('created_at', { ascending: false });
+      if (range.from) q = q.gte('created_at', range.from.toISOString());
+      if (range.to) q = q.lte('created_at', range.to.toISOString());
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as LeadProfile[];
     },
@@ -90,6 +102,8 @@ export function LeadProfilesManager() {
     URL.revokeObjectURL(url);
   };
 
+  const clearCustom = () => { setFrom(undefined); setTo(undefined); setPreset('all'); };
+
   if (isLoading) {
     return <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   }
@@ -97,42 +111,60 @@ export function LeadProfilesManager() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Resumo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="border border-border rounded-lg p-4">
-              <div className="text-xs text-muted-foreground">Total de leads</div>
-              <div className="text-2xl font-bold">{rows.length}</div>
-            </div>
+        <CardHeader className="pb-3"><CardTitle className="text-base">Filtros</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            {([
+              ['7', 'Últimos 7 dias'],
+              ['30', 'Últimos 30 dias'],
+              ['90', 'Últimos 90 dias'],
+              ['all', 'Tudo'],
+              ['custom', 'Personalizado'],
+            ] as Array<[Preset, string]>).map(([v, l]) => (
+              <Button key={v} size="sm" variant={preset === v ? 'default' : 'outline'} onClick={() => setPreset(v)}>{l}</Button>
+            ))}
           </div>
+
+          {preset === 'custom' && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <DateField label="De" value={from} onChange={setFrom} />
+              <DateField label="Até" value={to} onChange={setTo} />
+              <Button size="sm" variant="ghost" onClick={clearCustom}>Limpar</Button>
+            </div>
+          )}
+
+          <p className="text-sm text-muted-foreground">
+            Total no período: <span className="font-semibold text-foreground">{rows.length}</span> respostas
+          </p>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {FIELDS.map(([key, label]) => (
-          <Card key={key as string}>
-            <CardHeader className="pb-2"><CardTitle className="text-sm">{label}</CardTitle></CardHeader>
-            <CardContent className="space-y-1.5">
-              {aggregate(rows, key).map(([v, c]) => {
-                const pct = rows.length ? Math.round((c / rows.length) * 100) : 0;
-                return (
-                  <div key={v} className="text-xs">
-                    <div className="flex justify-between mb-0.5">
-                      <span className="truncate pr-2">{v}</span>
-                      <span className="text-muted-foreground shrink-0">{c} ({pct}%)</span>
+      <div>
+        <h2 className="text-sm font-semibold mb-3">Métricas por pergunta</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {QUESTION_FIELDS.map(({ key, label, options }) => (
+            <Card key={key}>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">{label}</CardTitle></CardHeader>
+              <CardContent className="space-y-1.5">
+                {aggregateAll(rows, key, options).map(([v, c]) => {
+                  const pct = rows.length ? Math.round((c / rows.length) * 100) : 0;
+                  const empty = c === 0;
+                  return (
+                    <div key={v} className={cn('text-xs', empty && 'opacity-50')}>
+                      <div className="flex justify-between mb-0.5 gap-2">
+                        <span className="truncate">{v}</span>
+                        <span className="text-muted-foreground shrink-0">{c} ({pct}%)</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                      </div>
                     </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-              {rows.length === 0 && <p className="text-xs text-muted-foreground">Sem dados</p>}
-            </CardContent>
-          </Card>
-        ))}
+                  );
+                })}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <Card>
@@ -166,7 +198,7 @@ export function LeadProfilesManager() {
                 </div>
               </button>
             ))}
-            {!filtered.length && <p className="text-sm text-muted-foreground text-center py-6">Nenhum lead encontrado</p>}
+            {!filtered.length && <p className="text-sm text-muted-foreground text-center py-6">Nenhum lead encontrado no período</p>}
           </div>
         </CardContent>
       </Card>
@@ -179,8 +211,8 @@ export function LeadProfilesManager() {
               <Row label="E-mail" value={selected.email} />
               <Row label="WhatsApp" value={selected.whatsapp} />
               <Row label="Cadastro" value={new Date(selected.created_at).toLocaleString('pt-BR')} />
-              {FIELDS.map(([k, l]) => (
-                <Row key={k as string} label={l} value={String(selected[k] ?? '—')} />
+              {QUESTION_FIELDS.map(({ key, label }) => (
+                <Row key={key} label={label} value={String((selected as any)[key] ?? '—')} />
               ))}
               {selected.work_area_other && <Row label="Área (outro)" value={selected.work_area_other} />}
             </div>
@@ -188,6 +220,22 @@ export function LeadProfilesManager() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function DateField({ label, value, onChange }: { label: string; value?: Date; onChange: (d?: Date) => void }) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className={cn('justify-start text-left font-normal', !value && 'text-muted-foreground')}>
+          <CalendarIcon className="h-4 w-4 mr-2" />
+          {value ? format(value, 'dd/MM/yyyy') : label}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className={cn('p-3 pointer-events-auto')} />
+      </PopoverContent>
+    </Popover>
   );
 }
 
