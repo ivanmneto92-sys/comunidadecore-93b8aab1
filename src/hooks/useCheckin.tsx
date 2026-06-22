@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   calculateCheckinXp, 
