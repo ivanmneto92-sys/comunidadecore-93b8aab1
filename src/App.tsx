@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { CommandPalette } from "@/components/CommandPalette";
 
 // Smart home: visitante vê a landing, logado vai pro Dashboard
 const HomeRoute = () => {
