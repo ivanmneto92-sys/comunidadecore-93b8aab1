@@ -272,8 +272,7 @@ export function MessageItem({
       toast({ title: 'Mensagem editada' });
       setIsEditing(false);
     } catch (error) {
-      console.error('Error editing message:', error);
-      toast({ variant: 'destructive', title: 'Erro ao editar mensagem' });
+      toast(buildErrorToast(error, { action: 'editar a mensagem' }));
     } finally {
       setIsSaving(false);
     }
