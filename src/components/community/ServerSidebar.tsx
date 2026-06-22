@@ -81,7 +81,7 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
       <Tooltip>
         <TooltipTrigger asChild>
           <button className={cn(
-            'mx-auto mb-1.5 rounded-2xl bg-secondary flex items-center justify-center overflow-hidden hover:rounded-xl transition-all p-1.5',
+            'mx-auto mb-1.5 rounded-2xl flex items-center justify-center overflow-hidden hover:rounded-xl transition-all',
             logoSize
           )}>
             <img 
