@@ -6,8 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   calculateCheckinXp, 
   getStreakMultiplier,
-  XP_CAPS,
 } from '@/lib/seasonXpCalculator';
+
 import { useSeason } from './useSeason';
 
 // Get local date string in YYYY-MM-DD format (user's timezone)
