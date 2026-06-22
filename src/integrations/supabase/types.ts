@@ -1687,6 +1687,78 @@ export type Database = {
         }
         Relationships: []
       }
+      robots: {
+        Row: {
+          category: string
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          external_cta_label: string
+          external_url: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          min_deposit: number | null
+          name: string
+          pairs: string[]
+          platform: string
+          risk_level: string
+          screenshots: string[]
+          slug: string
+          sort_order: number
+          tagline: string | null
+          tier_required: string
+          timeframe: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          external_cta_label?: string
+          external_url?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          min_deposit?: number | null
+          name: string
+          pairs?: string[]
+          platform?: string
+          risk_level?: string
+          screenshots?: string[]
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          tier_required?: string
+          timeframe?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          external_cta_label?: string
+          external_url?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          min_deposit?: number | null
+          name?: string
+          pairs?: string[]
+          platform?: string
+          risk_level?: string
+          screenshots?: string[]
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          tier_required?: string
+          timeframe?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       scheduled_posts: {
         Row: {
           channel_id: string
