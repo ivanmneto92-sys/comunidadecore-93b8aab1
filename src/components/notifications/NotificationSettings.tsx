@@ -49,6 +49,58 @@ export function NotificationSettings() {
           </div>
         ) : (
           <div className="space-y-6 py-4">
+            {/* Push (web) */}
+            <div className="rounded-lg border border-border/60 bg-card/40 p-3 space-y-2">
+              <div className="flex items-center gap-3">
+                {pushStatus === 'registered' ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Notificações no celular</p>
+                  <p className="text-xs text-muted-foreground">
+                    {pushStatus === 'registered'
+                      ? 'Ativadas neste dispositivo.'
+                      : permission === 'denied'
+                      ? 'Permissão bloqueada nas configurações do navegador.'
+                      : 'Receba alertas mesmo com o app fechado.'}
+                  </p>
+                </div>
+              </div>
+
+              {iosRequiresInstall && (
+                <div className="flex items-start gap-2 rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">
+                  <Smartphone className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>
+                    No iPhone, abra no Safari → Compartilhar → <strong>Adicionar à Tela de Início</strong>.
+                    Depois abra pelo ícone instalado para ativar as notificações.
+                  </span>
+                </div>
+              )}
+
+              {!pushSupported && !iosRequiresInstall && (
+                <p className="text-xs text-muted-foreground">
+                  Este navegador não suporta notificações push.
+                </p>
+              )}
+
+              {pushSupported && !iosRequiresInstall && pushStatus !== 'registered' && (
+                <Button
+                  size="sm"
+                  onClick={enablePush}
+                  disabled={pushStatus === 'registering' || permission === 'denied'}
+                  className="w-full"
+                >
+                  {pushStatus === 'registering' ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Ativando…</>
+                  ) : (
+                    'Ativar notificações'
+                  )}
+                </Button>
+              )}
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <AtSign className="h-5 w-5 text-muted-foreground" />
