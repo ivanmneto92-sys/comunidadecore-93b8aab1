@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UnreadBadge } from './UnreadBadge';
+import { usePlanAccess } from '@/components/plans/PlanGate';
 
 interface Channel {
   id: string;
