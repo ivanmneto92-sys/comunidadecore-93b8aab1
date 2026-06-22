@@ -71,6 +71,24 @@ serve(async (req) => {
   }
 
   try {
+    // Require authenticated caller to prevent quota abuse
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '').trim() ?? '';
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: { user }, error: authErr } = await supabaseAuth.auth.getUser(token);
+    if (authErr || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const now = Date.now();
     
     // Return cached data if valid
