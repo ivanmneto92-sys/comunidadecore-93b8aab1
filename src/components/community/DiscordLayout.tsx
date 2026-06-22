@@ -124,7 +124,7 @@ export function DiscordLayout() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
-      <CommunityWelcomeTour channels={channels} />
+      <CommunityWelcomeTour channels={channels} currentChannelSlug={selectedChannel?.slug ?? null} />
 
       {/* ===== MOBILE LAYOUT ===== */}
       <div className="flex h-full w-full md:hidden">

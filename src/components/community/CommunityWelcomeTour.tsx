@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface CommunityWelcomeTourProps {
   channels: { name: string; slug: string; icon: string | null }[];
+  currentChannelSlug?: string | null;
 }
 
 interface Step {
@@ -31,12 +32,14 @@ interface Step {
 }
 
 const storageKey = (userId: string) => `community_tour_v1_${userId}`;
+const WELCOME_SLUGS = ['bem-vindo', 'bem-vindos', 'boas-vindas', 'welcome'];
 
-export function CommunityWelcomeTour({ channels }: CommunityWelcomeTourProps) {
+export function CommunityWelcomeTour({ channels, currentChannelSlug }: CommunityWelcomeTourProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
+  // Auto-open on first visit to /community
   useEffect(() => {
     if (!user) return;
     const done = localStorage.getItem(storageKey(user.id));
@@ -45,6 +48,16 @@ export function CommunityWelcomeTour({ channels }: CommunityWelcomeTourProps) {
       return () => clearTimeout(t);
     }
   }, [user]);
+
+  // Auto-open when user lands on the official welcome channel (once per user)
+  useEffect(() => {
+    if (!user || !currentChannelSlug) return;
+    if (!WELCOME_SLUGS.includes(currentChannelSlug.toLowerCase())) return;
+    const done = localStorage.getItem(storageKey(user.id));
+    if (done) return;
+    setStep(0);
+    setOpen(true);
+  }, [user, currentChannelSlug]);
 
   // Expose a global trigger so a button elsewhere can replay it
   useEffect(() => {
