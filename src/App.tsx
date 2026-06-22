@@ -129,9 +129,11 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
