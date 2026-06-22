@@ -362,7 +362,7 @@ export function ChatView({
       setMessages(prev => [...olderMessages, ...prev]);
       // Anchor to the previously-first message after prepend
       requestAnimationFrame(() => {
-        rowVirtualizer.scrollToIndex(olderMessages.length, { align: 'start' });
+        rowVirtualizer.scrollToIndex(computeAnchorIndexAfterPrepend(olderMessages.length), { align: 'start' });
       });
     }
 
