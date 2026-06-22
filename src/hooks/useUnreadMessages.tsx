@@ -89,33 +89,35 @@ export function useUnreadMessages() {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('unread-messages')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        (payload) => {
-          const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
-          
-          // Don't count own messages or replies
-          if (message.user_id === user.id || message.parent_id) return;
+    // Unique channel name per user avoids reusing a singleton that's already subscribed
+    const channelName = `unread-messages-${user.id}`;
+    const channel = supabase.channel(channelName);
 
-          // Batch updates with debounce (500ms)
-          pendingUpdatesRef.current[message.channel_id] = 
-            (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
+    // Register ALL listeners BEFORE .subscribe()
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+      },
+      (payload) => {
+        const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
 
-          if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-          }
-          
-          debounceTimerRef.current = setTimeout(flushPendingUpdates, 500);
+        if (message.user_id === user.id || message.parent_id) return;
+
+        pendingUpdatesRef.current[message.channel_id] =
+          (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
+
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
         }
-      )
-      .subscribe();
+
+        debounceTimerRef.current = setTimeout(flushPendingUpdates, 500);
+      }
+    );
+
+    channel.subscribe();
 
     return () => {
       if (debounceTimerRef.current) {
@@ -124,6 +126,7 @@ export function useUnreadMessages() {
       supabase.removeChannel(channel);
     };
   }, [user, flushPendingUpdates]);
+
 
   const totalUnread = useMemo(() => 
     Object.values(unreadCounts).reduce((acc, count) => acc + count, 0),
