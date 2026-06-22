@@ -114,16 +114,16 @@
 
     --border: 214 20% 85%;
     --input: 0 0% 100%;
-    --ring: 35 50% 50%;
+    --ring: 46 68% 42%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 214 68% 14%;
-    --sidebar-primary: 35 50% 50%;
+    --sidebar-primary: 46 68% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 22% 92%;
     --sidebar-accent-foreground: 214 68% 14%;
     --sidebar-border: 214 20% 85%;
-    --sidebar-ring: 35 50% 50%;
+    --sidebar-ring: 46 68% 42%;
     --sidebar: 0 0% 100%;
 
     --shadow-sm: 0 1px 2px 0 hsl(214 68% 14% / 0.05);
