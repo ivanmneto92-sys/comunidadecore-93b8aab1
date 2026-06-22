@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BarChart3, GraduationCap, MessageCircle, User } from 'lucide-react';
+import { Home, Bot, GraduationCap, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
