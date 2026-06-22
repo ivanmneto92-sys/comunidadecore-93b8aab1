@@ -50,9 +50,11 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="core-hub-theme">
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+
         <Sonner />
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
