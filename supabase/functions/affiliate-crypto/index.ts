@@ -191,12 +191,12 @@ serve(async (req) => {
       }
 
       case 'get-masked-info': {
-        // Get masked payment info for display
+        // Get masked payment info for display — owner or admin only
         const { affiliate_id } = data;
-        
+
         const { data: affiliate, error: affError } = await supabase
           .from('affiliates')
-          .select('payment_email, pix_key')
+          .select('payment_email, pix_key, user_id')
           .eq('id', affiliate_id)
           .single();
 
@@ -207,18 +207,35 @@ serve(async (req) => {
           );
         }
 
+        // Ownership check (or admin role)
+        let isAdmin = false;
+        if (affiliate.user_id !== user.id) {
+          const { data: roles } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id);
+          isAdmin = (roles ?? []).some((r: { role: string }) => r.role === 'admin');
+          if (!isAdmin) {
+            return new Response(
+              JSON.stringify({ error: 'Forbidden' }),
+              { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+
         const decrypted_email = affiliate.payment_email ? await decrypt(affiliate.payment_email) : '';
         const decrypted_pix = affiliate.pix_key ? await decrypt(affiliate.pix_key) : '';
 
         return new Response(
-          JSON.stringify({ 
+          JSON.stringify({
             masked_email: maskData(decrypted_email, 'email'),
             masked_pix: maskData(decrypted_pix, 'pix'),
-            success: true 
+            success: true
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+
 
       case 'update-payment-info': {
         // Update affiliate payment info with encryption
