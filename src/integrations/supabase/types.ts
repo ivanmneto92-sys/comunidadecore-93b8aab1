@@ -2771,6 +2771,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_mod: { Args: { _user_id: string }; Returns: boolean }
+      recheck_achievements: { Args: { _user_id: string }; Returns: undefined }
       recompute_mt5_daily_metrics: {
         Args: { p_account: string; p_date: string }
         Returns: undefined
