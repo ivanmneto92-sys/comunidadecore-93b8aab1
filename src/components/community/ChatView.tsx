@@ -483,8 +483,11 @@ export function ChatView({
     loadData();
 
     // Realtime subscriptions - only for new messages
+    // Unique suffix per mount avoids reusing an already-subscribed channel
+    // (which would throw "cannot add postgres_changes after subscribe()")
+    const rtSuffix = `${channel.id}-${Math.random().toString(36).slice(2, 10)}`;
     const messagesChannel = supabase
-      .channel(`messages-${channel.id}`)
+      .channel(`messages-${rtSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -557,7 +560,7 @@ export function ChatView({
       .subscribe();
 
     const reactionsChannel = supabase
-      .channel(`reactions-${channel.id}`)
+      .channel(`reactions-${rtSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -602,7 +605,7 @@ export function ChatView({
       .subscribe();
 
     const pollsChannel = supabase
-      .channel(`polls-${channel.id}`)
+      .channel(`polls-${rtSuffix}`)
       .on(
         'postgres_changes',
         {
