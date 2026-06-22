@@ -90,7 +90,9 @@ export default function Admin() {
             <TabsTrigger value="affiliates" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Users className="h-4 w-4" /><span>Afiliados</span></TabsTrigger>
             <TabsTrigger value="logs" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><History className="h-4 w-4" /><span>Logs</span></TabsTrigger>
             <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Headphones className="h-4 w-4" /><span>Suporte</span></TabsTrigger>
+            <TabsTrigger value="robots" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Bot className="h-4 w-4" /><span>Robôs</span></TabsTrigger>
           </TabsList>
+
 
           <Suspense fallback={<TabFallback />}>
             <TabsContent value="dashboard" className="mt-4"><AdminDashboard /></TabsContent>
