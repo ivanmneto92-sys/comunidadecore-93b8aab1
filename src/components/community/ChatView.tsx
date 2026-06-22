@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -12,7 +12,6 @@ import { MessageItem } from './MessageItem';
 import { MessageComposer } from './MessageComposer';
 import { PollCard } from './PollCard';
 import { CreatePollModal } from './CreatePollModal';
-import { ThreadView } from './ThreadView';
 import { TypingIndicator } from './TypingIndicator';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { MessageSearch } from './MessageSearch';
