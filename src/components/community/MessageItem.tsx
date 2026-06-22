@@ -237,8 +237,7 @@ export function MessageItem({
       await supabase.from('messages').delete().eq('id', message.id);
       toast({ title: 'Mensagem apagada' });
     } catch (error) {
-      console.error('Error deleting message:', error);
-      toast({ variant: 'destructive', title: 'Erro ao apagar mensagem' });
+      toast(buildErrorToast(error, { action: 'apagar a mensagem' }));
     }
   };
 
