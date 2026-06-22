@@ -55,7 +55,7 @@ export function ImageUpload({ onImageSelected, disabled }: ImageUploadProps) {
       onImageSelected(publicUrl);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast({ variant: 'destructive', title: 'Erro ao enviar imagem' });
+      toast(buildErrorToast(error, { action: 'enviar a imagem', field: 'Imagem' }));
       setPreviewUrl(null);
       onImageSelected(null);
     } finally {
