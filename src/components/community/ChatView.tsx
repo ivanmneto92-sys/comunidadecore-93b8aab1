@@ -628,12 +628,13 @@ export function ChatView({
     };
   }, [channel.id, fetchMessages, fetchPolls, enrichMessages, user]);
 
-  // Scroll to bottom on initial load and when new messages arrive
+  // Scroll to bottom on initial load
   useEffect(() => {
     if (isInitialLoad.current && messages.length > 0) {
       isInitialLoad.current = false;
       requestAnimationFrame(() => {
-        scrollRef.current?.scrollIntoView({ behavior: 'auto' });
+        const el = parentRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
       });
     }
   }, [messages]);
@@ -641,12 +642,13 @@ export function ChatView({
   // Auto-scroll to bottom when a new message is added (not loading old messages)
   useEffect(() => {
     if (!loading && !loadingMore && messages.length > 0) {
-      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = parentRef.current;
       if (scrollContainer) {
-        // Only auto-scroll if near bottom (within 200px)
-        const isNearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
-        if (isNearBottom) {
-          scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+        const nearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 200;
+        if (nearBottom) {
+          requestAnimationFrame(() => {
+            scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
+          });
         }
       }
     }
