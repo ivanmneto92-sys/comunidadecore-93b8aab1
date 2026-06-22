@@ -102,8 +102,8 @@ export function QuizRunner({ tutorialId, open, onClose }: QuizRunnerProps) {
             </div>
             <div className="space-y-2 text-left">
               {questions.map((q, i) => {
-                const chosen = answers[q.id];
-                const correct = q.quiz_options.find((o) => o.id === chosen)?.is_correct;
+                const correct = result.perQuestion[q.id];
+
                 return (
                   <div key={q.id} className="rounded-lg border border-border p-3 text-sm">
                     <div className="flex items-start gap-2">
