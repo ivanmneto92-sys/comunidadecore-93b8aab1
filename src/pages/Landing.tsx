@@ -63,6 +63,7 @@ export default function Landing() {
           <nav className="hidden md:flex items-center gap-7 text-sm text-foreground/70">
             <a href="#ecossistema" className="hover:text-foreground transition">Ecossistema</a>
             <a href="#para-quem" className="hover:text-foreground transition">Para quem é</a>
+            <Link to="/planos" className="hover:text-foreground transition">Planos</Link>
             <a href="#marca" className="hover:text-foreground transition">A marca</a>
           </nav>
           <Link to="/auth">
