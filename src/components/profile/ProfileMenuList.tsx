@@ -9,8 +9,10 @@ import {
   LogOut,
   DollarSign,
   Trophy,
-  BookOpen
+  BookOpen,
+  Bot
 } from 'lucide-react';
+
 import { ProfileMenuItem } from './ProfileMenuItem';
 import { ThemeToggleItem } from './ThemeToggleItem';
 import { Badge } from '@/components/ui/badge';
