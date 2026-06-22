@@ -69,7 +69,7 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
   // Dynamic sizes based on compact mode
   const iconSize = compact ? 'w-8 h-8' : 'w-12 h-12';
   const iconClassSize = compact ? 'h-4 w-4' : 'h-5 w-5';
-  const logoSize = compact ? 'w-8 h-8' : 'w-12 h-12';
+  const logoSize = compact ? 'w-14 h-14' : 'w-20 h-20';
   const indicatorHeight = compact ? 'h-6' : 'h-10';
   const indicatorHoverHeight = compact ? 'group-hover:h-4' : 'group-hover:h-5';
   const containerPadding = compact ? 'py-2 px-1' : 'py-3 px-2';
@@ -81,7 +81,7 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
       <Tooltip>
         <TooltipTrigger asChild>
           <button className={cn(
-            'mx-auto mb-1.5 rounded-2xl bg-secondary flex items-center justify-center overflow-hidden hover:rounded-xl transition-all p-1.5',
+            'mx-auto mb-1.5 rounded-2xl flex items-center justify-center overflow-hidden hover:rounded-xl transition-all',
             logoSize
           )}>
             <img 

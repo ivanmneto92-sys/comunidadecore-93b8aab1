@@ -111,7 +111,7 @@ export default function ResetPassword() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-6 text-center">
-          <img src={logoCore} alt="INSTITUTO TRADER" width={175} height={40} className="mx-auto h-10 w-auto" />
+          <img src={logoCore} alt="INSTITUTO TRADER" width={350} height={80} className="mx-auto h-20 w-auto" />
           <Card>
             <CardContent className="pt-6">
               <p className="text-muted-foreground">
@@ -132,7 +132,7 @@ export default function ResetPassword() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="flex flex-col items-center space-y-3">
-            <img src={logoCore} alt="INSTITUTO TRADER" width={175} height={40} className="h-10 w-auto" />
+            <img src={logoCore} alt="INSTITUTO TRADER" width={350} height={80} className="h-20 w-auto" />
           </div>
 
           <Card>
@@ -158,7 +158,7 @@ export default function ResetPassword() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center space-y-3">
-          <img src={logoCore} alt="INSTITUTO TRADER" width={175} height={40} className="h-10 w-auto" />
+          <img src={logoCore} alt="INSTITUTO TRADER" width={350} height={80} className="h-20 w-auto" />
           <p className="text-sm text-muted-foreground">Redefinir senha</p>
         </div>
 
