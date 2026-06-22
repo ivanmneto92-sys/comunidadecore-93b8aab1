@@ -127,7 +127,7 @@ const App = () => (
                   <MT5 />
                 </ProtectedRoute>
               } />
-              <Route path="/redesign-preview" element={<RedesignPreview />} />
+              
               <Route path="*" element={<NotFound />} />
 
             </Routes>
