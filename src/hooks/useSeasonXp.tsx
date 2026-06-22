@@ -2,21 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSeason } from '@/hooks/useSeason';
-import { 
-  XP_CAPS, 
-  calculateTotalXp, 
-  calculateLevelFromXp,
-} from '@/lib/seasonXpCalculator';
+import { XP_CAPS } from '@/lib/seasonXpCalculator';
 
 export type XpSource = 'checkin' | 'performance' | 'community' | 'tutorial' | 'achievement' | 'affiliate' | 'bonus';
-
-interface XpTransaction {
-  source: XpSource;
-  xp_season: number;
-  xp_total: number;
-  multiplier?: number;
-  details?: Record<string, unknown>;
-}
 
 interface DailyCapUsage {
   source: string;
@@ -27,8 +15,9 @@ interface DailyCapUsage {
 
 export function useSeasonXp() {
   const { user } = useAuth();
-  const { currentSeason, userProgress, refetchProgress } = useSeason();
+  const { refetchProgress } = useSeason();
   const queryClient = useQueryClient();
+
 
   // Buscar uso de caps do dia
   const { data: dailyCaps, refetch: refetchCaps } = useQuery({
