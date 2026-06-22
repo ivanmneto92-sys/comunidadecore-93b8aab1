@@ -1,281 +1,268 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { InstitutoTraderLogo } from '@/components/brand/InstitutoTraderLogo';
-import {
-  GraduationCap,
-  Users,
-  LineChart,
-  Compass,
-  Radio,
-  Copy as CopyIcon,
-  Store,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  TrendingUp,
-  Building2,
-  Globe,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import heroImage from '@/assets/landing-hero.jpg';
 
-const valueProps = [
-  { icon: GraduationCap, title: 'Aprender', text: 'Trilhas práticas, linguagem clara e conteúdo organizado para evoluir com método.' },
-  { icon: Users, title: 'Conectar', text: 'Comunidade ativa, moderada e colaborativa — networking real entre traders.' },
-  { icon: LineChart, title: 'Operar', text: 'Copy trading, EAs, indicadores e ferramentas operacionais com transparência.' },
-  { icon: Compass, title: 'Evoluir', text: 'Rotina de aprendizado, acompanhamento e visão estratégica de mercado.' },
+const NAVY = '#0A1128';
+const GOLD = '#C5A059';
+
+const fontSerif = { fontFamily: "'Libre Baskerville', Georgia, serif" };
+const fontSans = { fontFamily: "'IBM Plex Sans', system-ui, sans-serif" };
+
+const pillars = [
+  {
+    n: '01',
+    title: 'Academy',
+    text: 'Trilhas, aulas e tutoriais com linguagem editorial. Conhecimento de mercado tratado como ofício, não como receita.',
+  },
+  {
+    n: '02',
+    title: 'Copy',
+    text: 'Estratégias replicáveis com transparência total: histórico, drawdown, consentimento e relatórios operacionais.',
+  },
+  {
+    n: '03',
+    title: 'Pro',
+    text: 'Bastidores, mentorias e acompanhamento próximo. Acesso ao núcleo institucional do Instituto.',
+  },
 ];
 
-const ecosystem = [
-  { icon: GraduationCap, title: 'Academy', text: 'Cursos, aulas, trilhas, tutoriais, glossário e gestão de risco.' },
-  { icon: Radio, title: 'Live', text: 'Lives, análises, calendário econômico e replays de sessão.' },
-  { icon: CopyIcon, title: 'Copy', text: 'Estratégias replicáveis, acompanhamento operacional e relatórios.' },
-  { icon: Store, title: 'Store', text: 'Marketplace de EAs, indicadores, robôs e ferramentas selecionadas.' },
-  { icon: Users, title: 'Club', text: 'Comunidade fechada, ranking, desafios e bastidores.' },
-  { icon: Sparkles, title: 'Pro', text: 'Plano premium com benefícios exclusivos e acompanhamento próximo.' },
-];
-
-const audiences = [
-  { title: 'Iniciantes', text: 'Quer começar com direção, base sólida e orientação prática.' },
-  { title: 'Intermediários', text: 'Busca método, constância, ferramentas e acompanhamento.' },
-  { title: 'Avançados', text: 'Procura estrutura, tecnologia, comunidade e soluções operacionais.' },
-];
-
-const journey = [
-  { n: '01', title: 'Entra na comunidade', text: 'Cria conta, aceita termos e escolhe o plano.' },
-  { n: '02', title: 'Aprende com método', text: 'Trilhas, aulas e materiais práticos.' },
-  { n: '03', title: 'Acompanha o mercado', text: 'Lives, análises e calendário econômico.' },
-  { n: '04', title: 'Opera e evolui', text: 'Ferramentas, rotina, suporte e visão estratégica.' },
-];
-
-const brand = [
-  { icon: ShieldCheck, title: 'Confiança', text: 'Transparência, ética e compromisso com o trader.' },
-  { icon: Building2, title: 'Estrutura', text: 'Organização, método e solidez para crescer.' },
-  { icon: TrendingUp, title: 'Evolução', text: 'Aprendizado contínuo e desenvolvimento constante.' },
-  { icon: Globe, title: 'Mercado global', text: 'Atuação alinhada ao Forex e às melhores práticas internacionais.' },
+const seals = [
+  { k: 'LGPD', v: 'Dados criptografados' },
+  { k: 'Educacional', v: 'Sem promessa de retorno' },
+  { k: 'Auditado', v: 'Histórico transparente' },
 ];
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-body">
-      {/* Top nav */}
-      <header className="sticky top-0 z-40 backdrop-blur bg-background/85 border-b border-accent/15">
-        <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
-          <InstitutoTraderLogo variant="horizontal" size={36} />
-          <nav className="hidden md:flex items-center gap-7 text-sm text-foreground/70">
-            <a href="#ecossistema" className="hover:text-foreground transition">Ecossistema</a>
-            <a href="#para-quem" className="hover:text-foreground transition">Para quem é</a>
-            <Link to="/planos" className="hover:text-foreground transition">Planos</Link>
-            <a href="#marca" className="hover:text-foreground transition">A marca</a>
-          </nav>
-          <Link to="/auth">
-            <Button size="sm" className="rounded-full px-5">Entrar</Button>
+    <div style={{ ...fontSans, backgroundColor: NAVY }} className="min-h-screen text-white selection:bg-[#C5A059]/30">
+      {/* Top Nav */}
+      <header className="absolute top-0 left-0 right-0 z-40">
+        <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 py-6">
+          <Link to="/" className="flex items-baseline gap-2">
+            <span className="text-white text-lg font-semibold tracking-tight">INSTITUTO</span>
+            <span style={fontSerif} className="text-[#C5A059] text-lg italic font-normal">Trader</span>
           </Link>
-        </div>
+          <div className="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[0.25em] text-white/70">
+            <Link to="/academy" className="hover:text-[#C5A059] transition-colors">Academy</Link>
+            <Link to="/community" className="hover:text-[#C5A059] transition-colors">Club</Link>
+            <Link to="/planos" className="hover:text-[#C5A059] transition-colors">Planos</Link>
+            <Link to="/auth" className="hover:text-[#C5A059] transition-colors">Entrar</Link>
+          </div>
+          <Link
+            to="/auth"
+            className="md:hidden text-[11px] uppercase tracking-[0.25em] text-[#C5A059] border-b border-[#C5A059]/40 pb-0.5"
+          >
+            Entrar
+          </Link>
+        </nav>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 20% 30%, hsl(var(--primary)) 0, transparent 45%), radial-gradient(circle at 80% 70%, hsl(var(--accent)) 0, transparent 45%)',
-          }}
-          aria-hidden
-        />
-        <div className="max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-28 md:pb-32 relative">
-          <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-primary/85 mb-6">
-              <span className="h-px w-8 bg-primary/60" />
-              Educação · Tecnologia · Comunidade
-            </span>
-            <h1 className="font-serif-display text-5xl md:text-7xl leading-[1.02] tracking-tight text-foreground">
-              Estrutura completa<br />
-              para evoluir no <em className="not-italic text-primary">mercado</em>.
-            </h1>
-            <p className="mt-7 text-lg md:text-xl text-foreground/70 max-w-2xl leading-relaxed">
-              O Instituto Trader reúne formação, comunidade, lives, ferramentas e copy trading em um só
-              ecossistema — para iniciantes que querem começar com método e para traders que querem operar
-              com consistência.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Link to="/auth">
-                <Button size="lg" className="rounded-full px-7 h-12 text-base">
-                  Entrar na plataforma <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <a href="#ecossistema">
-                <Button size="lg" variant="outline" className="rounded-full px-7 h-12 text-base border-accent/30">
-                  Conhecer o Instituto
-                </Button>
-              </a>
+      {/* HERO — Cinematic Asymmetric Split */}
+      <section className="relative min-h-screen flex items-stretch pt-20 pb-12 px-4 md:px-8">
+        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-12 overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)] min-h-[calc(100vh-8rem)]">
+          {/* Left: Content (7/12) */}
+          <div className="col-span-12 md:col-span-7 relative flex flex-col justify-center px-8 md:px-20 py-16 z-10" style={{ backgroundColor: NAVY }}>
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `radial-gradient(circle at 2px 2px, ${GOLD} 1px, transparent 0)`,
+                backgroundSize: '40px 40px',
+              }}
+            />
+            <div className="relative animate-fade-in">
+              <div className="flex items-center gap-4 mb-12">
+                <div className="h-px w-12 bg-[#C5A059]" />
+                <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] md:text-xs font-semibold">
+                  Excelência em Trading
+                </span>
+              </div>
+
+              <h1 style={fontSerif} className="text-4xl md:text-6xl text-white mb-8 leading-[1.1]">
+                Onde a <span className="italic text-[#C5A059]">estratégia</span>
+                <br />
+                encontra o legado.
+              </h1>
+
+              <p className="text-slate-400 text-lg md:text-xl max-w-md mb-12 leading-relaxed font-light">
+                Instituto Trader: comunidade, educação e tecnologia para quem trata o mercado com método, disciplina e visão de longo prazo.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
+                <Link
+                  to="/auth"
+                  className="group relative px-10 py-5 bg-[#C5A059] text-[#0A1128] font-bold text-sm tracking-widest uppercase transition-all duration-500 hover:bg-white overflow-hidden inline-flex items-center"
+                >
+                  <span className="relative z-10">Conhecer o Instituto</span>
+                  <div className="absolute inset-0 translate-y-full group-hover:translate-y-0 bg-white transition-transform duration-500" />
+                </Link>
+
+                <Link to="/planos" className="group flex items-center gap-3 text-white/80 hover:text-[#C5A059] transition-colors">
+                  <span className="text-xs uppercase tracking-widest font-semibold">Ver Planos</span>
+                  <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#C5A059] transition-all">
+                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
+                  </div>
+                </Link>
+              </div>
+            </div>
+
+            {/* Bottom Branding */}
+            <div className="absolute bottom-8 left-8 md:left-20 hidden md:flex items-baseline gap-2 opacity-40">
+              <span className="text-white text-xl font-bold tracking-tighter">INSTITUTO</span>
+              <span style={fontSerif} className="text-[#C5A059] text-xl font-normal italic">Trader</span>
             </div>
           </div>
+
+          {/* Right: Visual (5/12) */}
+          <div className="hidden md:block col-span-5 relative" style={{ backgroundColor: NAVY }}>
+            <div className="absolute inset-0">
+              <img
+                src={heroImage}
+                alt="Composição editorial azul-marinho com filete dourado"
+                width={1200}
+                height={1600}
+                className="w-full h-full object-cover grayscale-[0.2] contrast-110"
+              />
+              <div className="absolute inset-0" style={{ backgroundColor: NAVY, opacity: 0.55, mixBlendMode: 'multiply' }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0A1128] via-transparent to-transparent" />
+            </div>
+
+            {/* Floating Gold Geometric Element */}
+            <div className="absolute top-1/2 -left-12 -translate-y-1/2 w-24 h-[60%] border-l border-y border-[#C5A059]/30 backdrop-blur-sm" />
+
+            {/* Data/Stat Detail */}
+            <div className="absolute bottom-20 right-0 bg-[#C5A059] p-8 min-w-[200px] shadow-2xl">
+              <div className="text-[#0A1128] text-4xl font-bold mb-1">+15k</div>
+              <div className="text-[#0A1128]/70 text-[10px] uppercase tracking-widest font-bold">Membros do Instituto</div>
+            </div>
+
+            {/* Vertical Decorative Text */}
+            <div className="absolute top-12 right-12" style={{ writingMode: 'vertical-rl' }}>
+              <span className="text-white/10 uppercase tracking-[1em] text-4xl font-black select-none">INSTITUTIONAL</span>
+            </div>
+          </div>
+
+          {/* Decorative Split Divider */}
+          <div className="hidden md:block absolute left-[58.333333%] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[#C5A059]/40 to-transparent z-20" />
         </div>
       </section>
 
-      {/* Valor */}
-      <section className="border-t border-accent/15">
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-28">
-          <div className="max-w-2xl mb-14">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-foreground/50">Proposta de valor</span>
-            <h2 className="font-serif-display text-3xl md:text-4xl mt-3 leading-tight">
-              Quatro pilares, uma única jornada.
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-accent/15">
-            {valueProps.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="bg-background p-8 hover:bg-card/40 transition">
-                <Icon className="h-7 w-7 text-primary mb-5" strokeWidth={1.5} />
-                <h3 className="font-serif-display text-xl mb-2">{title}</h3>
-                <p className="text-sm text-foreground/65 leading-relaxed">{text}</p>
+      {/* PILLARS */}
+      <section className="relative px-4 md:px-8 py-24 md:py-32">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-12 gap-8 mb-16 md:mb-24">
+            <div className="col-span-12 md:col-span-5">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-px w-12 bg-[#C5A059]" />
+                <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">O Ecossistema</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Ecossistema */}
-      <section id="ecossistema" className="border-t border-accent/15 bg-card/20">
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-28">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-            <div className="max-w-xl">
-              <span className="text-[11px] uppercase tracking-[0.25em] text-foreground/50">Ecossistema</span>
-              <h2 className="font-serif-display text-3xl md:text-4xl mt-3 leading-tight">
-                Seis áreas, conectadas por uma só plataforma.
+              <h2 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15]">
+                Três frentes,<br />
+                <span className="italic text-[#C5A059]">um instituto</span>.
               </h2>
             </div>
-            <p className="text-sm text-foreground/55 max-w-sm">
-              Cada área foi pensada para um momento da jornada — do primeiro contato à operação avançada.
-            </p>
+            <div className="col-span-12 md:col-span-6 md:col-start-7 flex items-end">
+              <p className="text-slate-400 text-base md:text-lg leading-relaxed font-light">
+                Cada frente do Instituto é projetada com a mesma exigência editorial: clareza, transparência e respeito ao seu tempo de evolução.
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {ecosystem.map(({ icon: Icon, title, text }) => (
-              <article
-                key={title}
-                className="group relative rounded-md border border-accent/15 bg-background p-7 hover:border-primary/40 transition"
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#C5A059]/15">
+            {pillars.map((p) => (
+              <div
+                key={p.n}
+                className="p-10 md:p-12 transition-colors duration-500 hover:bg-[#0d1730] group"
+                style={{ backgroundColor: NAVY }}
               >
-                <div className="flex items-center justify-between mb-6">
-                  <Icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/40">Área</span>
+                <div style={fontSerif} className="text-[#C5A059] text-2xl mb-10">{p.n}</div>
+                <h3 style={fontSerif} className="text-white text-2xl md:text-3xl mb-5">{p.title}</h3>
+                <p className="text-slate-400 font-light leading-relaxed text-[15px]">{p.text}</p>
+                <div className="mt-10 flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#C5A059]/70 group-hover:text-[#C5A059] transition-colors">
+                  <span>Explorar</span>
+                  <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-serif-display text-2xl mb-2">{title}</h3>
-                <p className="text-sm text-foreground/65 leading-relaxed">{text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Para quem é */}
-      <section id="para-quem" className="border-t border-accent/15">
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-28">
-          <div className="max-w-2xl mb-14">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-foreground/50">Para quem é</span>
-            <h2 className="font-serif-display text-3xl md:text-4xl mt-3 leading-tight">
-              Feito para cada estágio do trader.
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {audiences.map((a, i) => (
-              <div key={a.title} className="rounded-md border border-accent/15 p-7">
-                <span className="text-[11px] tabular-nums text-primary/80">0{i + 1}</span>
-                <h3 className="font-serif-display text-xl mt-3 mb-2">{a.title}</h3>
-                <p className="text-sm text-foreground/65 leading-relaxed">{a.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Jornada */}
-      <section className="border-t border-accent/15 bg-card/20">
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-28">
-          <div className="max-w-2xl mb-14">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-foreground/50">Como funciona</span>
-            <h2 className="font-serif-display text-3xl md:text-4xl mt-3 leading-tight">
-              Uma jornada contínua, do primeiro passo à rotina.
-            </h2>
+      {/* MANIFESTO / PROOF */}
+      <section className="relative px-4 md:px-8 py-24 md:py-32 border-t border-[#C5A059]/10">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div className="h-px w-12 bg-[#C5A059]" />
+            <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Manifesto</span>
+            <div className="h-px w-12 bg-[#C5A059]" />
           </div>
-          <ol className="grid grid-cols-1 md:grid-cols-4 gap-px bg-accent/15">
-            {journey.map((step) => (
-              <li key={step.n} className="bg-background p-7">
-                <span className="font-serif-display text-3xl text-primary/80">{step.n}</span>
-                <h3 className="font-serif-display text-lg mt-4 mb-1.5">{step.title}</h3>
-                <p className="text-xs text-foreground/60 leading-relaxed">{step.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* Marca */}
-      <section id="marca" className="border-t border-accent/15">
-        <div className="max-w-6xl mx-auto px-5 py-20 md:py-28">
-          <div className="max-w-2xl mb-14">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-foreground/50">Nossos valores</span>
-            <h2 className="font-serif-display text-3xl md:text-4xl mt-3 leading-tight">
-              Confiança, estrutura e evolução — sempre.
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-accent/15">
-            {brand.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="bg-background p-7">
-                <Icon className="h-6 w-6 text-primary mb-4" strokeWidth={1.5} />
-                <h3 className="font-serif-display text-lg mb-1.5">{title}</h3>
-                <p className="text-xs text-foreground/60 leading-relaxed">{text}</p>
-              </div>
-            ))}
+          <blockquote style={fontSerif} className="text-white text-2xl md:text-4xl leading-[1.35] mb-12">
+            “O mercado não recompensa pressa. Recompensa <span className="italic text-[#C5A059]">método</span>, repetição e a coragem de operar dentro da própria régua.”
+          </blockquote>
+          <div className="inline-flex items-baseline gap-2 opacity-70">
+            <span className="text-white text-sm tracking-tight">INSTITUTO</span>
+            <span style={fontSerif} className="text-[#C5A059] text-sm italic">Trader</span>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="border-t border-accent/15">
-        <div className="max-w-4xl mx-auto px-5 py-24 md:py-32 text-center">
-          <InstitutoTraderLogo variant="mark" size={56} className="inline-flex mb-8" />
-          <h2 className="font-serif-display text-4xl md:text-5xl leading-tight tracking-tight">
-            Aprenda, acompanhe e <em className="not-italic text-primary">evolua</em><br />
-            com uma estrutura completa.
-          </h2>
-          <p className="mt-6 text-foreground/65 max-w-xl mx-auto leading-relaxed">
-            Educação, tecnologia e comunidade para traders. Comece sua jornada com método.
-          </p>
-          <div className="mt-10">
-            <Link to="/auth">
-              <Button size="lg" className="rounded-full px-8 h-12 text-base">
-                Entrar na plataforma <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+      {/* SEALS */}
+      <section className="px-4 md:px-8 py-16 border-t border-[#C5A059]/10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[#C5A059]/15">
+          {seals.map((s) => (
+            <div key={s.k} className="px-8 py-10 flex items-baseline justify-between" style={{ backgroundColor: NAVY }}>
+              <span style={fontSerif} className="text-[#C5A059] text-lg italic">{s.k}</span>
+              <span className="text-slate-400 text-xs uppercase tracking-[0.2em]">{s.v}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="relative px-4 md:px-8 py-24 md:py-32">
+        <div className="max-w-5xl mx-auto grid grid-cols-12 gap-8 items-end">
+          <div className="col-span-12 md:col-span-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-px w-12 bg-[#C5A059]" />
+              <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Começar</span>
+            </div>
+            <h2 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15]">
+              Entre no Instituto. <span className="italic text-[#C5A059]">Sem ruído.</span>
+            </h2>
+          </div>
+          <div className="col-span-12 md:col-span-4 flex md:justify-end">
+            <Link
+              to="/auth"
+              className="group relative px-10 py-5 bg-[#C5A059] text-[#0A1128] font-bold text-sm tracking-widest uppercase transition-all duration-500 hover:bg-white overflow-hidden inline-flex items-center"
+            >
+              <span className="relative z-10">Criar conta</span>
+              <div className="absolute inset-0 translate-y-full group-hover:translate-y-0 bg-white transition-transform duration-500" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Aviso de risco */}
-      <section className="border-t border-accent/15 bg-card/30">
-        <div className="max-w-4xl mx-auto px-5 py-10 text-center">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-foreground/45 mb-3">Aviso de risco</p>
-          <p className="text-sm text-foreground/60 leading-relaxed">
-            Forex envolve risco. Conteúdo educacional e informativo — não constitui recomendação de
-            investimento, consultoria financeira ou garantia de resultado. Resultados passados não garantem
-            resultados futuros.
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-accent/15">
-        <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-5 text-xs text-foreground/55">
-          <div className="flex items-center gap-3">
-            <InstitutoTraderLogo variant="mark" size={28} />
-            <span>© {new Date().getFullYear()} Instituto Trader</span>
+      {/* FOOTER + DISCLAIMER */}
+      <footer className="px-4 md:px-8 pt-16 pb-10 border-t border-[#C5A059]/15">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+            <Link to="/" className="flex items-baseline gap-2">
+              <span className="text-white text-base font-semibold tracking-tight">INSTITUTO</span>
+              <span style={fontSerif} className="text-[#C5A059] text-base italic">Trader</span>
+            </Link>
+            <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-[0.25em] text-white/60">
+              <Link to="/academy" className="hover:text-[#C5A059] transition-colors">Academy</Link>
+              <Link to="/community" className="hover:text-[#C5A059] transition-colors">Club</Link>
+              <Link to="/planos" className="hover:text-[#C5A059] transition-colors">Planos</Link>
+              <Link to="/terms" className="hover:text-[#C5A059] transition-colors">Termos</Link>
+              <Link to="/privacy" className="hover:text-[#C5A059] transition-colors">Privacidade</Link>
+            </div>
           </div>
-          <nav className="flex items-center gap-6">
-            <Link to="/planos" className="hover:text-foreground transition">Planos</Link>
-            <Link to="/termos" className="hover:text-foreground transition">Termos</Link>
-            <Link to="/privacidade" className="hover:text-foreground transition">Privacidade</Link>
-            <Link to="/install" className="hover:text-foreground transition">Instalar app</Link>
-            <Link to="/auth" className="hover:text-foreground transition">Entrar</Link>
-          </nav>
+          <p className="text-slate-500 text-xs leading-relaxed max-w-4xl font-light">
+            Conteúdo educacional. O Instituto Trader não comercializa sinais de entrada/saída nem garante retorno financeiro. Operações em mercados financeiros envolvem risco e podem resultar em perdas. Avalie sua tolerância ao risco antes de operar.
+          </p>
+          <p className="text-slate-600 text-[10px] uppercase tracking-[0.3em] mt-8">
+            © {new Date().getFullYear()} Instituto Trader. Todos os direitos reservados.
+          </p>
         </div>
       </footer>
     </div>
