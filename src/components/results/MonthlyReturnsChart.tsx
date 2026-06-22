@@ -51,14 +51,15 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
   const yAxisMin = hasNegative ? -yAxisMax : 0;
 
   return (
-    <Card className="p-4 min-w-0">
+    <Card className="p-4 min-w-0 overflow-hidden">
       <h3 className="text-sm font-semibold mb-3">Retornos Mensais</h3>
-      <div className="h-[180px] w-full min-w-0">
+      <div className="h-[240px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 10, right: 5, left: 0, bottom: 5 }}
+            margin={{ top: 24, right: 8, left: 0, bottom: 5 }}
           >
+
             <XAxis
               dataKey="month"
               tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
