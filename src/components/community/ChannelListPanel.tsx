@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock } from 'lucide-react';
+import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock, Sparkles } from 'lucide-react';
+import { openCommunityTour } from './CommunityWelcomeTour';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -87,8 +88,18 @@ export function ChannelListPanel({
       <div className="p-3 border-b border-border shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-foreground">CORE Community</h2>
-          {/* Visual indicator for navigation on mobile */}
-          <ChevronRight className="h-5 w-5 text-muted-foreground md:hidden" />
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={openCommunityTour}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              aria-label="Abrir tour da comunidade"
+              title="Tour da comunidade"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
+            <ChevronRight className="h-5 w-5 text-muted-foreground md:hidden" />
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
