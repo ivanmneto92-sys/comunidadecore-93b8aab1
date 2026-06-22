@@ -118,9 +118,7 @@ export function ChatView({
   const [showSearch, setShowSearch] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const parentRef = useRef<HTMLDivElement>(null);
   const isInitialLoad = useRef(true);
   // Track IDs we just inserted ourselves so we can ignore the realtime echo
   const recentlySentIds = useRef<Set<string>>(new Set());
