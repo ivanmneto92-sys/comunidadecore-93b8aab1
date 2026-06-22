@@ -1699,6 +1699,7 @@ export type Database = {
           is_featured: boolean
           is_published: boolean
           min_deposit: number | null
+          monthly_returns: Json
           name: string
           pairs: string[]
           platform: string
@@ -1722,6 +1723,7 @@ export type Database = {
           is_featured?: boolean
           is_published?: boolean
           min_deposit?: number | null
+          monthly_returns?: Json
           name: string
           pairs?: string[]
           platform?: string
@@ -1745,6 +1747,7 @@ export type Database = {
           is_featured?: boolean
           is_published?: boolean
           min_deposit?: number | null
+          monthly_returns?: Json
           name?: string
           pairs?: string[]
           platform?: string

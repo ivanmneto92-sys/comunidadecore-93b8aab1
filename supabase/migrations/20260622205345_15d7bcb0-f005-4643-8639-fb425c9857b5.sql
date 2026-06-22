@@ -1,0 +1,1 @@
+ALTER TABLE public.robots ADD COLUMN IF NOT EXISTS monthly_returns jsonb NOT NULL DEFAULT '[]'::jsonb;
