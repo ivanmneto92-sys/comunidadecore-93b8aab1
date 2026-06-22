@@ -109,7 +109,6 @@ export function ChatView({
   const { profile } = useUserProfile();
   const { toast } = useToast();
   const { markAsRead } = useUnreadMessages();
-  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(canSendMessages ? channel.id : '');
   const [messages, setMessages] = useState<Message[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +129,7 @@ export function ChatView({
   const canSendMessages = isAdmin 
     ? !channel.is_bot_only 
     : (!channel.is_admin_only && !channel.is_bot_only);
+  const { typingUsers, startTyping, stopTyping } = useTypingIndicator(canSendMessages ? channel.id : '');
 
   // Marcar canal como lido ao abrir
   useEffect(() => {
