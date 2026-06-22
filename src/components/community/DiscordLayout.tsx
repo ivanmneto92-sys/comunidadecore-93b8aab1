@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from 'react';
+import { ListSkeleton } from '@/components/skeletons';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommunityPresence } from '@/hooks/useOnlinePresence';
@@ -92,11 +93,12 @@ export function DiscordLayout() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="h-full bg-background p-3">
+        <ListSkeleton count={8} />
       </div>
     );
   }
+
 
   if (channels.length === 0) {
     return (

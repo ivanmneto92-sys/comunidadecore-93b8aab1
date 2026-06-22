@@ -4,13 +4,18 @@ import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
-// Prefetch map for lazy-loaded components
+// Prefetch map for lazy-loaded components — cobre tab bar + rotas internas
 const routePrefetchMap: Record<string, () => Promise<unknown>> = {
   '/app': () => import('@/pages/Dashboard'),
   '/results': () => import('@/pages/Results'),
   '/academy': () => import('@/pages/Academy'),
   '/community': () => import('@/pages/Community'),
   '/profile': () => import('@/pages/Profile'),
+  '/journal': () => import('@/pages/Journal'),
+  '/achievements': () => import('@/pages/Achievements'),
+  '/affiliates': () => import('@/pages/Affiliates'),
+  '/seasons': () => import('@/pages/Seasons'),
+  '/mt5': () => import('@/pages/MT5'),
 };
 
 const navItems = [
