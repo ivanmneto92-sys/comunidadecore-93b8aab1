@@ -78,6 +78,40 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    // --- Auth: require admin OR service-role caller ---
+    const supabaseAuthCheck = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const bearer = authHeader.replace('Bearer ', '').trim();
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const isServiceCall = bearer && bearer === serviceKey;
+
+    if (!isServiceCall) {
+      if (!bearer) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: { user }, error: authErr } = await supabaseAuthCheck.auth.getUser(bearer);
+      if (authErr || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: roles } = await supabaseAuthCheck
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+      const isAdmin = (roles ?? []).some(r => r.role === 'admin' || r.role === 'moderator');
+      if (!isAdmin) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     const { user_ids, title, body, data } = await req.json() as {
       user_ids: string[];
       title: string;
@@ -90,6 +124,7 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     const saJson = Deno.env.get('FCM_SERVICE_ACCOUNT_JSON');
     if (!saJson) {
