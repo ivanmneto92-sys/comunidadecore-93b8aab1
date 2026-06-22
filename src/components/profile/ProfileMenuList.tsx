@@ -65,6 +65,14 @@ export function ProfileMenuList({
           onClick={() => navigate('/journal')}
         />
         <ProfileMenuItem
+          icon={Bot}
+          iconColor="text-primary"
+          label="Marketplace de Robôs"
+          subtitle="EAs e automações curados"
+          onClick={() => navigate('/robots')}
+        />
+
+        <ProfileMenuItem
           icon={Users}
           iconColor="text-emerald-500"
           label="Programa de Afiliados"
