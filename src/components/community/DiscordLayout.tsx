@@ -151,11 +151,11 @@ export function DiscordLayout() {
               variant="ghost"
               size="icon"
               onClick={() => setMobileSidebarCollapsed(false)}
-              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="h-5 w-5 text-muted-foreground hover:text-primary hover:bg-primary/10"
               aria-label="Mostrar menu lateral"
               title="Mostrar menu"
             >
-              <PanelLeftOpen className="h-4 w-4" />
+              <PanelLeftOpen className="h-3.5 w-3.5" />
             </Button>
           </div>
         )}
