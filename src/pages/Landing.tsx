@@ -1,10 +1,28 @@
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { ArrowRight, TrendingUp, ShieldCheck, Quote } from 'lucide-react';
+import {
+  ArrowRight,
+  Users,
+  PlayCircle,
+  Copy as CopyIcon,
+  Code2,
+  BookOpen,
+  Wrench,
+  FileText,
+  ShieldCheck,
+  XCircle,
+  Star,
+  Crown,
+  Gem,
+  CheckCircle2,
+} from 'lucide-react';
 import { useReveal } from '@/hooks/useReveal';
 
-const NAVY = '#0A1128';
-const GOLD = '#C5A059';
+const NAVY = '#0b1f3a';
+const NAVY_DEEP = '#081628';
+const NAVY_PANEL = '#0f2748';
+const GOLD = '#cca268';
+const GOLD_LIGHT = '#ebd7be';
 
 const fontSerif = { fontFamily: "'Libre Baskerville', Georgia, serif" };
 const fontSans = { fontFamily: "'IBM Plex Sans', system-ui, sans-serif" };
@@ -23,373 +41,424 @@ function Reveal({ children, delay = 0, className = '' }: { children: ReactNode; 
   );
 }
 
-const pillars = [
-  { n: '01', title: 'Academy', text: 'Trilhas, aulas e tutoriais com linguagem editorial. Conhecimento de mercado tratado como ofício, não como receita.' },
-  { n: '02', title: 'Copy', text: 'Estratégias replicáveis com transparência total: histórico, drawdown, consentimento e relatórios operacionais.' },
-  { n: '03', title: 'Pro', text: 'Bastidores, mentorias e acompanhamento próximo. Acesso ao núcleo institucional do Instituto.' },
+const heroBullets = [
+  { icon: Users, label: '+15k', sub: 'membros na base' },
+  { icon: PlayCircle, label: 'Aulas e lives', sub: 'todas as semanas' },
+  { icon: ShieldCheck, label: 'Copy trader', sub: 'com gestão de risco' },
+  { icon: Code2, label: 'Tecnologia própria', sub: 'ferramentas exclusivas' },
 ];
 
-const seals = [
-  { k: 'LGPD', v: 'Dados criptografados' },
-  { k: 'Educacional', v: 'Sem promessa de retorno' },
-  { k: 'Auditado', v: 'Histórico transparente' },
+const ecosystem = [
+  { n: '01', icon: BookOpen, title: 'Academy', text: 'Aulas, tutoriais e trilhas educacionais para quem quer entender o mercado com método, risco e disciplina.' },
+  { n: '02', icon: CopyIcon, title: 'Copy Trader', text: 'Estratégias replicáveis com transparência, controle de risco, histórico operacional e relatórios.' },
+  { n: '03', icon: Users, title: 'Club', text: 'Comunidade ativa com lives, bastidores, suporte, networking e acompanhamento próximo.' },
+  { n: '04', icon: Code2, title: 'Tecnologia', text: 'Robôs, dashboards, automações, marketplace de EAs e ferramentas para traders.' },
 ];
 
-const metrics = [
-  { v: '15k+', k: 'Membros ativos' },
-  { v: '180+', k: 'Aulas publicadas' },
-  { v: '24/7', k: 'Comunidade moderada' },
-  { v: '5 anos', k: 'Operando no mercado' },
+const differentials = [
+  { icon: BookOpen, title: 'Educação antes da operação', text: 'Aprenda, entenda e depois opere com consciência.' },
+  { icon: Users, title: 'Comunidade ativa', text: 'Troque experiências, participe de lives e evolua junto.' },
+  { icon: Wrench, title: 'Tecnologia aplicada', text: 'Ferramentas, robôs e dashboards para melhor performance.' },
+  { icon: FileText, title: 'Transparência operacional', text: 'Histórico real, relatórios e dados sem maquiagens.' },
+  { icon: ShieldCheck, title: 'Gestão de risco', text: 'Método, disciplina e controle são a base de tudo.' },
+  { icon: XCircle, title: 'Sem promessa de lucro fácil', text: 'Aqui o foco é evolução, não promessas.' },
 ];
 
-const testimonials = [
-  {
-    quote: 'A primeira escola que tratou o mercado como ofício de longo prazo. O método mudou minha relação com risco.',
-    name: 'R. Almeida',
-    role: 'Trader · 3 anos no Instituto',
-  },
-  {
-    quote: 'Transparência rara: histórico, drawdown e regras visíveis. É o oposto do que se vê em grupos por aí.',
-    name: 'M. Carvalho',
-    role: 'Membro Pro',
-  },
-  {
-    quote: 'A comunidade silenciosa, a academy densa e o suporte próximo me fizeram parar de pular de método.',
-    name: 'J. Tavares',
-    role: 'Trader · 1 ano no Instituto',
-  },
+const plans = [
+  { icon: Star, name: 'Start', text: 'Para quem quer entrar na comunidade e acessar os primeiros conteúdos.', cta: 'Começar agora', highlight: false },
+  { icon: Crown, name: 'Trader', text: 'Para quem quer acesso às aulas, lives, comunidade e materiais completos.', cta: 'Ver plano Trader', highlight: true },
+  { icon: Gem, name: 'Pro', text: 'Para quem quer acompanhamento próximo, copy trader, tecnologia e bastidores.', cta: 'Entrar no Pro', highlight: false },
 ];
 
-// Mini ticker editorial — sem prometer retorno, apenas instrumento visual
-const ticker = [
-  { sym: 'WIN', spread: '0.05' },
-  { sym: 'WDO', spread: '0.50' },
-  { sym: 'BTC', spread: '0.02' },
-  { sym: 'EUR', spread: '0.01' },
+// Mock dashboard data
+const kpis = [
+  { label: 'EQUITY', value: 'R$ 126.840,00', delta: '+ 8,71%' },
+  { label: 'DRAWDOWN', value: '-4,32%', delta: 'controlado' },
+  { label: 'TRADES', value: '186', delta: '84% vencedores' },
+  { label: 'RETORNO (YTD)', value: '+ 27,34%', delta: 'em 2024' },
 ];
+
+// Sparkline path (mock) — relative coords on viewBox 400x120
+const sparkline = 'M0,90 L40,82 L80,88 L120,70 L160,75 L200,55 L240,60 L280,40 L320,48 L360,28 L400,22';
+
+// Bar chart heights for "Desempenho"
+const bars = [40, 55, 42, 60, 48, 70, 55, 78, 65, 85, 72, 92];
 
 export default function Landing() {
   return (
-    <div style={{ ...fontSans, backgroundColor: NAVY }} className="min-h-screen text-white selection:bg-[#C5A059]/30 overflow-x-hidden">
-      {/* Top Nav */}
-      <header className="absolute top-0 left-0 right-0 z-40">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 py-6">
-          <Link to="/" className="flex items-baseline gap-2">
-            <span className="text-white text-lg font-semibold tracking-tight">INSTITUTO</span>
-            <span style={fontSerif} className="text-[#C5A059] text-lg italic font-normal">Trader</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[0.25em] text-white/70">
-            <Link to="/academy" className="hover:text-[#C5A059] transition-colors">Academy</Link>
-            <Link to="/community" className="hover:text-[#C5A059] transition-colors">Club</Link>
-            <Link to="/planos" className="hover:text-[#C5A059] transition-colors">Planos</Link>
-            <Link to="/auth" className="hover:text-[#C5A059] transition-colors">Entrar</Link>
-          </div>
-          <Link to="/auth" className="md:hidden text-[11px] uppercase tracking-[0.25em] text-[#C5A059] border-b border-[#C5A059]/40 pb-0.5">
-            Entrar
-          </Link>
-        </nav>
-      </header>
+    <div style={{ ...fontSans, backgroundColor: NAVY_DEEP }} className="min-h-screen text-white selection:bg-[#cca268]/30 overflow-x-hidden">
+      {/* HERO CARD */}
+      <section className="px-4 md:px-8 pt-8 pb-12 md:pt-12 md:pb-20">
+        <div className="max-w-7xl mx-auto rounded-sm border border-[#cca268]/15 shadow-[0_30px_80px_rgba(0,0,0,0.45)] overflow-hidden" style={{ backgroundColor: NAVY }}>
+          {/* Nav */}
+          <nav className="flex items-center justify-between px-6 md:px-10 py-5 border-b border-[#cca268]/10">
+            <Link to="/" className="flex items-baseline gap-2">
+              <span className="text-white text-base font-semibold tracking-tight">INSTITUTO</span>
+              <span style={fontSerif} className="text-[#cca268] text-base italic">Trader</span>
+            </Link>
+            <div className="hidden lg:flex items-center gap-8 text-[10px] uppercase tracking-[0.25em] text-white/65">
+              <Link to="/academy" className="hover:text-[#cca268] transition-colors">Academy</Link>
+              <Link to="/community" className="hover:text-[#cca268] transition-colors">Club</Link>
+              <Link to="/planos" className="hover:text-[#cca268] transition-colors">Planos</Link>
+              <a href="#sobre" className="hover:text-[#cca268] transition-colors">Sobre</a>
+              <a href="#contato" className="hover:text-[#cca268] transition-colors">Contato</a>
+            </div>
+            <Link
+              to="/auth"
+              className="px-5 py-2.5 bg-[#cca268] text-[#0b1f3a] text-[10px] uppercase tracking-[0.25em] font-bold hover:bg-[#ebd7be] transition-colors"
+            >
+              Entrar
+            </Link>
+          </nav>
 
-      {/* HERO — Cinematic Asymmetric Split */}
-      <section className="relative min-h-screen flex items-stretch pt-20 pb-12 px-4 md:px-8">
-        <div className="relative w-full max-w-7xl mx-auto grid grid-cols-12 overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)] min-h-[calc(100vh-8rem)]">
-          {/* Left: Content (7/12) */}
-          <div className="col-span-12 md:col-span-7 relative flex flex-col justify-center px-8 md:px-20 py-16 z-10" style={{ backgroundColor: NAVY }}>
-            <div
-              className="absolute inset-0 opacity-10 pointer-events-none"
-              style={{
-                backgroundImage: `radial-gradient(circle at 2px 2px, ${GOLD} 1px, transparent 0)`,
-                backgroundSize: '40px 40px',
-              }}
-            />
-            <div className="relative animate-fade-in">
-              <div className="flex items-center gap-4 mb-12">
-                <div className="h-px w-12 bg-[#C5A059]" />
-                <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] md:text-xs font-semibold">
-                  Excelência em Trading
-                </span>
+          {/* Hero body */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 px-6 md:px-10 lg:px-14 py-12 md:py-16">
+            {/* Left content (6/12) */}
+            <div className="lg:col-span-6 flex flex-col justify-center">
+              <div className="flex items-center gap-4 mb-7">
+                <div className="h-px w-10 bg-[#cca268]" />
+                <span className="uppercase tracking-[0.3em] text-[#cca268] text-[10px] font-semibold">Excelência em Trading</span>
               </div>
 
-              <h1 style={fontSerif} className="text-4xl md:text-6xl text-white mb-8 leading-[1.1]">
-                Onde a <span className="italic text-[#C5A059]">estratégia</span>
-                <br />
-                encontra o legado.
+              <h1 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15] mb-7">
+                Onde traders aprendem, operam e evoluem com <span className="italic text-[#cca268]">método.</span>
               </h1>
 
-              <p className="text-slate-400 text-lg md:text-xl max-w-md mb-12 leading-relaxed font-light">
-                Instituto Trader: comunidade, educação e tecnologia para quem trata o mercado com método, disciplina e visão de longo prazo.
+              <p className="text-slate-300/80 text-base md:text-lg leading-relaxed font-light max-w-lg mb-9">
+                Educação, comunidade, copy trader e tecnologia para quem quer tratar o mercado com disciplina, transparência e visão de longo prazo.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
+              <div className="flex flex-wrap gap-3 mb-10">
                 <Link
                   to="/auth"
-                  className="group relative px-10 py-5 bg-[#C5A059] text-[#0A1128] font-bold text-sm tracking-widest uppercase transition-all duration-500 hover:bg-white overflow-hidden inline-flex items-center"
+                  className="px-7 py-4 bg-[#cca268] text-[#0b1f3a] text-[11px] uppercase tracking-[0.25em] font-bold hover:bg-[#ebd7be] transition-colors"
                 >
-                  <span className="relative z-10">Conhecer o Instituto</span>
-                  <div className="absolute inset-0 translate-y-full group-hover:translate-y-0 bg-white transition-transform duration-500" />
+                  Entrar para o Instituto
                 </Link>
-
-                <Link to="/planos" className="group flex items-center gap-3 text-white/80 hover:text-[#C5A059] transition-colors">
-                  <span className="text-xs uppercase tracking-widest font-semibold">Ver Planos</span>
-                  <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-[#C5A059] transition-all">
-                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={1.5} />
-                  </div>
+                <Link
+                  to="/planos"
+                  className="px-7 py-4 border border-[#cca268]/60 text-white text-[11px] uppercase tracking-[0.25em] font-semibold hover:bg-[#cca268]/10 transition-colors"
+                >
+                  Conhecer os planos
                 </Link>
               </div>
 
-              {/* Mobile-only condensed visual block */}
-              <div className="md:hidden mt-14 border border-[#C5A059]/20 p-5 flex items-center justify-between">
-                <div>
-                  <div style={fontSerif} className="text-[#C5A059] text-3xl">+15k</div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-slate-400 mt-1">Membros do Instituto</div>
-                </div>
-                <div className="flex flex-col gap-1 text-right">
-                  {ticker.slice(0, 3).map((t) => (
-                    <div key={t.sym} className="flex items-center justify-end gap-3 text-[10px] tracking-[0.2em] uppercase text-slate-400">
-                      <span>{t.sym}</span>
-                      <span className="text-[#C5A059]">{t.spread}</span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5 pt-7 border-t border-[#cca268]/10">
+                {heroBullets.map((b) => (
+                  <div key={b.label} className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full border border-[#cca268]/40 flex items-center justify-center shrink-0">
+                      <b.icon className="w-4 h-4 text-[#cca268]" strokeWidth={1.5} />
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Branding */}
-            <div className="absolute bottom-8 left-8 md:left-20 hidden md:flex items-baseline gap-2 opacity-40">
-              <span className="text-white text-xl font-bold tracking-tighter">INSTITUTO</span>
-              <span style={fontSerif} className="text-[#C5A059] text-xl font-normal italic">Trader</span>
-            </div>
-          </div>
-
-          {/* Right: Editorial Density Panel (5/12) */}
-          <div className="hidden md:flex col-span-5 relative flex-col justify-between p-10 lg:p-12 overflow-hidden" style={{ backgroundColor: '#0d1730' }}>
-            {/* Subtle grid backdrop */}
-            <div
-              className="absolute inset-0 opacity-[0.07] pointer-events-none"
-              style={{
-                backgroundImage:
-                  'linear-gradient(to right, #C5A059 1px, transparent 1px), linear-gradient(to bottom, #C5A059 1px, transparent 1px)',
-                backgroundSize: '48px 48px',
-              }}
-            />
-            <div
-              className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(197,160,89,0.18), transparent 60%)' }}
-            />
-
-            {/* Vertical Decorative Text */}
-            <div className="absolute top-10 right-6" style={{ writingMode: 'vertical-rl' }}>
-              <span className="text-white/10 uppercase tracking-[0.8em] text-3xl font-black select-none">INSTITUTIONAL</span>
-            </div>
-
-            {/* Top: ticker editorial */}
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <TrendingUp className="w-3.5 h-3.5 text-[#C5A059]" strokeWidth={1.5} />
-                <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Sessão de hoje</span>
-              </div>
-              <div className="divide-y divide-[#C5A059]/15 border-y border-[#C5A059]/15">
-                {ticker.map((t) => (
-                  <div key={t.sym} className="flex items-baseline justify-between py-3">
-                    <span style={fontSerif} className="text-white text-lg">{t.sym}</span>
-                    <span className="text-slate-400 text-[11px] uppercase tracking-[0.2em]">spread {t.spread}</span>
+                    <div className="min-w-0">
+                      <div className="text-white text-[13px] font-semibold leading-tight">{b.label}</div>
+                      <div className="text-slate-400 text-[11px] leading-tight mt-0.5">{b.sub}</div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <p className="text-slate-500 text-[10px] uppercase tracking-[0.2em] mt-3 leading-relaxed">
-                Instrumentos ilustrativos · sem recomendação operacional
-              </p>
             </div>
 
-            {/* Middle: pull quote */}
-            <div className="relative z-10 my-10">
-              <Quote className="w-5 h-5 text-[#C5A059]/40 mb-3" strokeWidth={1} />
-              <p style={fontSerif} className="text-white/85 text-base leading-relaxed italic">
-                Método antes de palpite. Repetição antes de pressa.
-              </p>
-            </div>
-
-            {/* Bottom: stat block dourado */}
-            <div className="relative z-10 bg-[#C5A059] p-7 shadow-[0_20px_50px_rgba(0,0,0,0.45)]">
-              <div className="text-[#0A1128] text-4xl font-bold mb-1" style={fontSerif}>+15k</div>
-              <div className="text-[#0A1128]/70 text-[10px] uppercase tracking-[0.25em] font-bold">Membros do Instituto</div>
-              <div className="mt-4 pt-4 border-t border-[#0A1128]/15 flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-[#0A1128]/80">
-                <ShieldCheck className="w-3 h-3" strokeWidth={2} />
-                <span>Comunidade verificada</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Decorative Split Divider */}
-          <div className="hidden md:block absolute left-[58.333333%] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-[#C5A059]/40 to-transparent z-20" />
-        </div>
-      </section>
-
-      {/* METRICS BAR */}
-      <Reveal>
-        <section className="px-4 md:px-8 border-t border-[#C5A059]/10">
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-px bg-[#C5A059]/10">
-            {metrics.map((m) => (
-              <div key={m.k} className="px-6 py-8 md:py-10" style={{ backgroundColor: NAVY }}>
-                <div style={fontSerif} className="text-white text-3xl md:text-4xl">{m.v}</div>
-                <div className="text-slate-400 text-[10px] uppercase tracking-[0.25em] mt-2">{m.k}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Reveal>
-
-      {/* PILLARS */}
-      <section className="relative px-4 md:px-8 py-24 md:py-32">
-        <div className="max-w-7xl mx-auto">
-          <Reveal>
-            <div className="grid grid-cols-12 gap-8 mb-16 md:mb-24">
-              <div className="col-span-12 md:col-span-5">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="h-px w-12 bg-[#C5A059]" />
-                  <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">O Ecossistema</span>
-                </div>
-                <h2 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15]">
-                  Três frentes,<br />
-                  <span className="italic text-[#C5A059]">um instituto</span>.
-                </h2>
-              </div>
-              <div className="col-span-12 md:col-span-6 md:col-start-7 flex items-end">
-                <p className="text-slate-400 text-base md:text-lg leading-relaxed font-light">
-                  Cada frente do Instituto é projetada com a mesma exigência editorial: clareza, transparência e respeito ao seu tempo de evolução.
-                </p>
-              </div>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#C5A059]/15">
-            {pillars.map((p, i) => (
-              <Reveal key={p.n} delay={i * 100}>
-                <div className="h-full p-10 md:p-12 transition-colors duration-500 hover:bg-[#0d1730] group" style={{ backgroundColor: NAVY }}>
-                  <div style={fontSerif} className="text-[#C5A059] text-2xl mb-10">{p.n}</div>
-                  <h3 style={fontSerif} className="text-white text-2xl md:text-3xl mb-5">{p.title}</h3>
-                  <p className="text-slate-400 font-light leading-relaxed text-[15px]">{p.text}</p>
-                  <div className="mt-10 flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#C5A059]/70 group-hover:text-[#C5A059] transition-colors">
-                    <span>Explorar</span>
-                    <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
+            {/* Right: dashboard mockup (6/12) */}
+            <div className="lg:col-span-6 relative">
+              <div
+                className="absolute inset-0 opacity-[0.08] pointer-events-none"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${GOLD} 1px, transparent 1px), linear-gradient(to bottom, ${GOLD} 1px, transparent 1px)`,
+                  backgroundSize: '40px 40px',
+                }}
+              />
+              <div className="relative rounded-sm border border-[#cca268]/20 shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden" style={{ backgroundColor: NAVY_PANEL }}>
+                {/* Dashboard header */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[#cca268]/10 bg-[#0a1f3e]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#cca268]" />
+                    <span className="text-white text-[11px] font-semibold tracking-wide">Dashboard</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-white/15" />
+                    <span className="w-2 h-2 rounded-full bg-white/15" />
+                    <span className="w-2 h-2 rounded-full bg-white/15" />
                   </div>
                 </div>
+
+                {/* Dashboard body */}
+                <div className="grid grid-cols-12 gap-3 p-4">
+                  {/* Sidebar */}
+                  <div className="col-span-3 space-y-1.5">
+                    {['Visão Geral', 'Desempenho', 'Operações', 'Histórico', 'Relatórios', 'Contas', 'Configurações', 'Suporte'].map((it, i) => (
+                      <div
+                        key={it}
+                        className={`text-[9px] uppercase tracking-[0.15em] px-2.5 py-1.5 rounded-sm ${
+                          i === 0 ? 'bg-[#cca268]/15 text-[#cca268] font-semibold' : 'text-slate-400/80'
+                        }`}
+                      >
+                        {it}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Main chart + KPIs */}
+                  <div className="col-span-9 space-y-3">
+                    {/* Equity chart */}
+                    <div className="rounded-sm border border-[#cca268]/10 p-3 bg-[#0a1f3e]">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400">Equity / Tempo</span>
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-[#cca268]">+27,34%</span>
+                      </div>
+                      <svg viewBox="0 0 400 120" className="w-full h-20" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={GOLD} stopOpacity="0.35" />
+                            <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path d={`${sparkline} L400,120 L0,120 Z`} fill="url(#eqFill)" />
+                        <path d={sparkline} fill="none" stroke={GOLD} strokeWidth="1.5" />
+                      </svg>
+                    </div>
+
+                    {/* KPIs */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {kpis.map((k) => (
+                        <div key={k.label} className="rounded-sm border border-[#cca268]/10 p-2.5 bg-[#0a1f3e]">
+                          <div className="text-[8px] uppercase tracking-[0.2em] text-slate-400 mb-1">{k.label}</div>
+                          <div className="text-white text-[11px] font-semibold leading-tight">{k.value}</div>
+                          <div className="text-[#cca268] text-[8px] mt-1 uppercase tracking-[0.15em]">{k.delta}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bars */}
+                    <div className="rounded-sm border border-[#cca268]/10 p-3 bg-[#0a1f3e]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400">Desempenho</span>
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-slate-500">Últimos meses</span>
+                      </div>
+                      <div className="flex items-end gap-1.5 h-14">
+                        {bars.map((h, i) => (
+                          <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: `linear-gradient(to top, ${GOLD}, ${GOLD_LIGHT})` }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subtle floating accent */}
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 border-r border-b border-[#cca268]/25 pointer-events-none hidden md:block" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ECOSYSTEM */}
+      <section className="px-4 md:px-8 py-20 md:py-28">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-14 md:mb-20">
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <div className="h-px w-8 bg-[#cca268]" />
+                <span className="uppercase tracking-[0.3em] text-[#cca268] text-[10px] font-semibold">O Ecossistema</span>
+                <div className="h-px w-8 bg-[#cca268]" />
+              </div>
+              <h2 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15] mb-5">
+                Um ecossistema completo<br />
+                para <span className="italic text-[#cca268]">evolução no mercado.</span>
+              </h2>
+              <p className="text-slate-400 text-sm md:text-base max-w-xl mx-auto font-light leading-relaxed">
+                Tudo que um trader precisa em um só ambiente: educação, comunidade, tecnologia e acompanhamento.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {ecosystem.map((e, i) => (
+              <Reveal key={e.n} delay={i * 80}>
+                <div className="h-full rounded-sm border border-[#cca268]/20 p-7 hover:border-[#cca268]/50 transition-colors" style={{ backgroundColor: NAVY }}>
+                  <div className="flex items-start justify-between mb-6">
+                    <span style={fontSerif} className="text-[#cca268] text-xl">{e.n}</span>
+                    <e.icon className="w-5 h-5 text-[#cca268]" strokeWidth={1.5} />
+                  </div>
+                  <h3 style={fontSerif} className="text-white text-xl mb-3">{e.title}</h3>
+                  <p className="text-slate-400 text-[13px] leading-relaxed font-light">{e.text}</p>
+                </div>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="relative px-4 md:px-8 py-24 md:py-32 border-t border-[#C5A059]/10">
+      {/* DIFFERENTIALS */}
+      <section id="sobre" className="px-4 md:px-8 py-20 md:py-28 border-t border-[#cca268]/10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="flex items-center gap-4 mb-16">
-              <div className="h-px w-12 bg-[#C5A059]" />
-              <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Vozes do Instituto</span>
+            <div className="text-center mb-14">
+              <span className="uppercase tracking-[0.3em] text-[#cca268] text-[10px] font-semibold">Por que o Instituto Trader é diferente?</span>
             </div>
           </Reveal>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {testimonials.map((t, i) => (
-              <Reveal key={t.name} delay={i * 120}>
-                <figure className="h-full flex flex-col border-t border-[#C5A059]/20 pt-8">
-                  <Quote className="w-5 h-5 text-[#C5A059]/60 mb-5" strokeWidth={1} />
-                  <blockquote style={fontSerif} className="text-white/90 text-lg leading-[1.55] mb-8 flex-1">
-                    “{t.quote}”
-                  </blockquote>
-                  <figcaption>
-                    <div className="text-white text-sm font-medium">{t.name}</div>
-                    <div className="text-slate-500 text-[10px] uppercase tracking-[0.25em] mt-1">{t.role}</div>
-                  </figcaption>
-                </figure>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+            {differentials.map((d, i) => (
+              <Reveal key={d.title} delay={i * 60}>
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-[#cca268]/40 flex items-center justify-center">
+                    <d.icon className="w-5 h-5 text-[#cca268]" strokeWidth={1.5} />
+                  </div>
+                  <h4 className="text-white text-[13px] font-semibold leading-tight mb-2">{d.title}</h4>
+                  <p className="text-slate-400 text-[11px] leading-snug font-light">{d.text}</p>
+                </div>
               </Reveal>
             ))}
           </div>
+          <Reveal>
+            <p className="text-center text-slate-400 text-sm md:text-base max-w-3xl mx-auto mt-14 font-light leading-relaxed">
+              O Instituto Trader foi criado para quem entende que o mercado não recompensa pressa. Recompensa <span className="text-[#cca268]">método, repetição, controle emocional e gestão de risco.</span>
+            </p>
+          </Reveal>
         </div>
       </section>
 
       {/* MANIFESTO */}
       <Reveal>
-        <section className="relative px-4 md:px-8 py-24 md:py-32 border-t border-[#C5A059]/10">
-          <div className="max-w-5xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-4 mb-10">
-              <div className="h-px w-12 bg-[#C5A059]" />
-              <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Manifesto</span>
-              <div className="h-px w-12 bg-[#C5A059]" />
-            </div>
-            <blockquote style={fontSerif} className="text-white text-2xl md:text-4xl leading-[1.35] mb-12">
-              “O mercado não recompensa pressa. Recompensa <span className="italic text-[#C5A059]">método</span>, repetição e a coragem de operar dentro da própria régua.”
+        <section className="px-4 md:px-8 py-20 md:py-24">
+          <div className="max-w-5xl mx-auto rounded-sm border border-[#cca268]/15 px-8 md:px-14 py-14 md:py-20 text-center" style={{ backgroundColor: NAVY }}>
+            <span className="uppercase tracking-[0.3em] text-[#cca268] text-[10px] font-semibold">Manifesto</span>
+            <blockquote style={fontSerif} className="text-white text-2xl md:text-3xl leading-[1.4] mt-8 mb-8">
+              “O mercado não recompensa pressa. Recompensa <span className="italic text-[#cca268]">método</span>, repetição e a coragem de operar dentro da própria régua.”
             </blockquote>
             <div className="inline-flex items-baseline gap-2 opacity-70">
               <span className="text-white text-sm tracking-tight">INSTITUTO</span>
-              <span style={fontSerif} className="text-[#C5A059] text-sm italic">Trader</span>
+              <span style={fontSerif} className="text-[#cca268] text-sm italic">Trader</span>
             </div>
           </div>
         </section>
       </Reveal>
 
-      {/* SEALS */}
-      <Reveal>
-        <section className="px-4 md:px-8 py-16 border-t border-[#C5A059]/10">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[#C5A059]/15">
-            {seals.map((s) => (
-              <div key={s.k} className="px-8 py-10 flex items-baseline justify-between" style={{ backgroundColor: NAVY }}>
-                <span style={fontSerif} className="text-[#C5A059] text-lg italic">{s.k}</span>
-                <span className="text-slate-400 text-xs uppercase tracking-[0.2em]">{s.v}</span>
+      {/* PLANS */}
+      <section className="px-4 md:px-8 py-20 md:py-28 border-t border-[#cca268]/10">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-14">
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <div className="h-px w-8 bg-[#cca268]" />
+                <span className="uppercase tracking-[0.3em] text-[#cca268] text-[10px] font-semibold">Planos</span>
+                <div className="h-px w-8 bg-[#cca268]" />
               </div>
-            ))}
-          </div>
-        </section>
-      </Reveal>
-
-      {/* CTA FINAL */}
-      <Reveal>
-        <section className="relative px-4 md:px-8 py-24 md:py-32">
-          <div className="max-w-5xl mx-auto grid grid-cols-12 gap-8 items-end">
-            <div className="col-span-12 md:col-span-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-px w-12 bg-[#C5A059]" />
-                <span className="uppercase tracking-[0.3em] text-[#C5A059] text-[10px] font-semibold">Começar</span>
-              </div>
-              <h2 style={fontSerif} className="text-3xl md:text-5xl text-white leading-[1.15]">
-                Entre no Instituto. <span className="italic text-[#C5A059]">Sem ruído.</span>
+              <h2 style={fontSerif} className="text-3xl md:text-4xl text-white leading-[1.2]">
+                Escolha como deseja <span className="italic text-[#cca268]">começar.</span>
               </h2>
             </div>
-            <div className="col-span-12 md:col-span-4 flex md:justify-end">
-              <Link
-                to="/auth"
-                className="group relative px-10 py-5 bg-[#C5A059] text-[#0A1128] font-bold text-sm tracking-widest uppercase transition-all duration-500 hover:bg-white overflow-hidden inline-flex items-center"
-              >
-                <span className="relative z-10">Criar conta</span>
-                <div className="absolute inset-0 translate-y-full group-hover:translate-y-0 bg-white transition-transform duration-500" />
-              </Link>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {plans.map((p, i) => (
+              <Reveal key={p.name} delay={i * 100}>
+                <div
+                  className={`h-full rounded-sm p-7 flex flex-col text-center border transition-colors ${
+                    p.highlight ? 'border-[#cca268] shadow-[0_20px_50px_rgba(0,0,0,0.4)]' : 'border-[#cca268]/20 hover:border-[#cca268]/50'
+                  }`}
+                  style={{ backgroundColor: p.highlight ? NAVY_PANEL : NAVY }}
+                >
+                  <div className="w-10 h-10 mx-auto mb-4 rounded-full border border-[#cca268]/50 flex items-center justify-center">
+                    <p.icon className="w-4 h-4 text-[#cca268]" strokeWidth={1.5} />
+                  </div>
+                  <h3 style={fontSerif} className="text-white text-2xl mb-3">{p.name}</h3>
+                  <p className="text-slate-400 text-[13px] leading-relaxed font-light flex-1 mb-6">{p.text}</p>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-[#cca268]/80 mb-4">Em breve</div>
+                  <Link
+                    to="/planos"
+                    className={`block py-3 text-[11px] uppercase tracking-[0.25em] font-bold transition-colors ${
+                      p.highlight
+                        ? 'bg-[#cca268] text-[#0b1f3a] hover:bg-[#ebd7be]'
+                        : 'border border-[#cca268]/50 text-white hover:bg-[#cca268]/10'
+                    }`}
+                  >
+                    {p.cta}
+                  </Link>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <Reveal>
+        <section className="px-4 md:px-8 py-20 md:py-24">
+          <div className="max-w-6xl mx-auto rounded-sm border border-[#cca268]/15 overflow-hidden" style={{ backgroundColor: NAVY }}>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center px-8 md:px-12 py-12 md:py-16">
+              <div className="md:col-span-8">
+                <h2 style={fontSerif} className="text-2xl md:text-4xl text-white leading-[1.25] mb-5">
+                  Entre para o Instituto Trader<br />
+                  e evolua com <span className="italic text-[#cca268]">método.</span>
+                </h2>
+                <p className="text-slate-400 text-sm md:text-base font-light leading-relaxed mb-6 max-w-lg">
+                  Uma comunidade criada para traders que buscam clareza, disciplina, tecnologia e visão de longo prazo.
+                </p>
+                <div className="flex items-center gap-2 text-slate-300 text-[12px]">
+                  <CheckCircle2 className="w-4 h-4 text-[#cca268]" strokeWidth={1.5} />
+                  <span>Acesso à comunidade, conteúdos, tecnologia e planos exclusivos</span>
+                </div>
+              </div>
+              <div className="md:col-span-4 flex md:justify-end">
+                <Link
+                  to="/auth"
+                  className="px-8 py-4 bg-[#cca268] text-[#0b1f3a] text-[11px] uppercase tracking-[0.25em] font-bold hover:bg-[#ebd7be] transition-colors inline-flex items-center gap-2"
+                >
+                  Criar minha conta
+                  <ArrowRight className="w-4 h-4" strokeWidth={2} />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </Reveal>
 
-      {/* FOOTER + DISCLAIMER */}
-      <footer className="px-4 md:px-8 pt-16 pb-10 border-t border-[#C5A059]/15">
+      {/* FOOTER */}
+      <footer id="contato" className="px-4 md:px-8 pt-16 pb-10 border-t border-[#cca268]/15">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
-            <Link to="/" className="flex items-baseline gap-2">
-              <span className="text-white text-base font-semibold tracking-tight">INSTITUTO</span>
-              <span style={fontSerif} className="text-[#C5A059] text-base italic">Trader</span>
-            </Link>
-            <div className="flex flex-wrap items-center gap-6 text-[11px] uppercase tracking-[0.25em] text-white/60">
-              <Link to="/academy" className="hover:text-[#C5A059] transition-colors">Academy</Link>
-              <Link to="/community" className="hover:text-[#C5A059] transition-colors">Club</Link>
-              <Link to="/planos" className="hover:text-[#C5A059] transition-colors">Planos</Link>
-              <Link to="/terms" className="hover:text-[#C5A059] transition-colors">Termos</Link>
-              <Link to="/privacy" className="hover:text-[#C5A059] transition-colors">Privacidade</Link>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            <div>
+              <Link to="/" className="flex items-baseline gap-2 mb-4">
+                <span className="text-white text-base font-semibold tracking-tight">INSTITUTO</span>
+                <span style={fontSerif} className="text-[#cca268] text-base italic">Trader</span>
+              </Link>
+              <p className="text-slate-400 text-[12px] leading-relaxed font-light">
+                Educação, comunidade e tecnologia para traders que querem evoluir com método e consistência.
+              </p>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#cca268] font-semibold mb-4">Navegação</div>
+              <ul className="space-y-2.5 text-[12px] text-slate-300">
+                <li><Link to="/academy" className="hover:text-[#cca268] transition-colors">Academy</Link></li>
+                <li><Link to="/community" className="hover:text-[#cca268] transition-colors">Club</Link></li>
+                <li><Link to="/planos" className="hover:text-[#cca268] transition-colors">Planos</Link></li>
+                <li><a href="#sobre" className="hover:text-[#cca268] transition-colors">Sobre</a></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#cca268] font-semibold mb-4">Institucional</div>
+              <ul className="space-y-2.5 text-[12px] text-slate-300">
+                <li><Link to="/terms" className="hover:text-[#cca268] transition-colors">Termos de Uso</Link></li>
+                <li><Link to="/privacy" className="hover:text-[#cca268] transition-colors">Privacidade</Link></li>
+                <li><Link to="/privacy" className="hover:text-[#cca268] transition-colors">Política de Cookies</Link></li>
+              </ul>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-[#cca268] font-semibold mb-4">Contato</div>
+              <ul className="space-y-2.5 text-[12px] text-slate-300">
+                <li>suporte@institutotrader.com</li>
+                <li>Atendimento via comunidade</li>
+              </ul>
             </div>
           </div>
-          <p className="text-slate-500 text-xs leading-relaxed max-w-4xl font-light">
-            Conteúdo educacional. O Instituto Trader não comercializa sinais de entrada/saída nem garante retorno financeiro. Operações em mercados financeiros envolvem risco e podem resultar em perdas. Avalie sua tolerância ao risco antes de operar.
-          </p>
-          <p className="text-slate-600 text-[10px] uppercase tracking-[0.3em] mt-8">
-            © {new Date().getFullYear()} Instituto Trader. Todos os direitos reservados.
-          </p>
+
+          <div className="border-t border-[#cca268]/10 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <p className="text-slate-500 text-[11px] leading-relaxed max-w-3xl font-light">
+              Conteúdo educacional. O Instituto Trader não garante retorno financeiro. Operações em mercados financeiros envolvem risco e podem resultar em perdas. Avalie sua tolerância ao risco antes de operar.
+            </p>
+            <p className="text-slate-600 text-[10px] uppercase tracking-[0.3em] shrink-0">
+              © {new Date().getFullYear()} Instituto Trader
+            </p>
+          </div>
         </div>
       </footer>
     </div>
