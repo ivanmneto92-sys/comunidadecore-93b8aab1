@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
-import { ThemeToggleItem } from './ThemeToggleItem';
+
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
