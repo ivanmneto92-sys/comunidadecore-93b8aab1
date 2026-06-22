@@ -94,7 +94,7 @@ export function useCheckin() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentSeason, userProgress, refetchProgress } = useSeason();
+  const { refetchProgress } = useSeason();
 
   const { data, isLoading } = useQuery({
     queryKey: ['checkin-data', user?.id],
