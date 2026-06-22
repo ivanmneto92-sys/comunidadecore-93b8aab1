@@ -12,6 +12,10 @@ createRoot(document.getElementById("root")!).render(
 // Register service worker after page load to avoid render-blocking
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.update());
+    });
+
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .catch(() => {
         // SW registration failed, app continues to work normally

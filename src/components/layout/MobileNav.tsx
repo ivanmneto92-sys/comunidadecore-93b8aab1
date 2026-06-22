@@ -43,7 +43,7 @@ export function MobileNav() {
   }, [queryClient]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/90"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex items-center justify-around px-2 py-2 h-14">
