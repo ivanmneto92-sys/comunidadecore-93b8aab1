@@ -80,8 +80,7 @@ export function PollCard({ poll, onVoteUpdate }: PollCardProps) {
       toast({ title: 'Voto registrado!' });
       onVoteUpdate?.();
     } catch (error) {
-      console.error('Error voting:', error);
-      toast({ variant: 'destructive', title: 'Erro ao votar' });
+      toast(buildErrorToast(error, { action: 'registrar seu voto' }));
     } finally {
       setVoting(false);
     }
