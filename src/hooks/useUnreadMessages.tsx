@@ -91,41 +91,41 @@ export function useUnreadMessages() {
   useEffect(() => {
     if (!userId) return;
 
-    // Supabase reuses channels by topic; make each effect run unique so StrictMode/HMR
-    // cannot reuse a channel that is still joining/subscribed while cleanup is pending.
+    let cancelled = false;
     const channelName = `unread-messages-${userId}-${Date.now()}-${channelSequenceRef.current++}`;
-    const channel = supabase.channel(channelName);
 
-    // Register ALL listeners BEFORE .subscribe()
-    channel.on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-      },
-      (payload) => {
-        const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
+    // Build the channel + register listeners BEFORE subscribing, all in one chain
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
+          if (message.user_id === userId || message.parent_id) return;
 
-        if (message.user_id === userId || message.parent_id) return;
+          pendingUpdatesRef.current[message.channel_id] =
+            (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
 
-        pendingUpdatesRef.current[message.channel_id] =
-          (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
-
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
+          if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+          debounceTimerRef.current = setTimeout(flushPendingUpdates, 500);
         }
+      );
 
-        debounceTimerRef.current = setTimeout(flushPendingUpdates, 500);
-      }
-    );
-
-    channel.subscribe();
+    // Defer subscribe to the next tick so StrictMode's synchronous mount/cleanup/mount
+    // cycle cannot leave a half-subscribed channel that rejects further .on() calls.
+    queueMicrotask(() => {
+      if (cancelled) return;
+      channel.subscribe();
+    });
 
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      cancelled = true;
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       supabase.removeChannel(channel);
     };
   }, [userId, flushPendingUpdates]);
