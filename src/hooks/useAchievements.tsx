@@ -80,7 +80,7 @@ export function useAchievements() {
           totalTutorials: 0,
           messagesCount: 0,
           performanceStreak: 0,
-          affiliateLevel: 0,
+          affiliateEarnings: 0,
           memberSince: null,
           totalXp: 0,
         };
@@ -120,18 +120,17 @@ export function useAchievements() {
           .from('messages')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id),
-        // Performance streak (from reports_daily)
+        // Performance streak: dias consecutivos com retorno positivo no MT5 pessoal
         supabase
-          .from('reports_daily')
-          .select('date, pnl_percent')
-          .order('date', { ascending: false })
-          .limit(30),
-        // Affiliate level
+          .from('mt5_accounts')
+          .select('id, mt5_daily_metrics(date, operational_return)')
+          .eq('user_id', user.id),
+        // Affiliate earnings
         supabase
           .from('affiliates')
           .select('total_earnings')
           .eq('user_id', user.id)
-          .single(),
+          .maybeSingle(),
         // Profile for member since
         supabase
           .from('profiles')
@@ -143,30 +142,22 @@ export function useAchievements() {
           .from('user_xp')
           .select('total_xp')
           .eq('user_id', user.id)
-          .single(),
+          .maybeSingle(),
       ]);
 
-      // Calculate performance streak (consecutive positive days)
+      // Performance streak — agrega dias de TODAS as contas MT5 do usuário,
+      // ordenados desc, conta os primeiros dias com operational_return > 0
       let performanceStreak = 0;
-      if (streakResult.data) {
-        for (const report of streakResult.data) {
-          if (report.pnl_percent > 0) {
-            performanceStreak++;
-          } else {
-            break;
-          }
-        }
+      const accountsAny = (streakResult.data ?? []) as Array<{ mt5_daily_metrics?: Array<{ date: string; operational_return: number | null }> }>;
+      const allDays: Array<{ date: string; ret: number }> = [];
+      accountsAny.forEach(acc => (acc.mt5_daily_metrics ?? []).forEach(d => allDays.push({ date: d.date, ret: Number(d.operational_return ?? 0) })));
+      allDays.sort((a, b) => b.date.localeCompare(a.date));
+      for (const d of allDays) {
+        if (d.ret > 0) performanceStreak++;
+        else break;
       }
 
-      // Calculate affiliate level based on earnings
-      let affiliateLevel = 0;
-      if (affiliateResult.data) {
-        const earnings = affiliateResult.data.total_earnings || 0;
-        if (earnings >= 10000) affiliateLevel = 4; // Diamond
-        else if (earnings >= 5000) affiliateLevel = 3; // Gold
-        else if (earnings >= 1000) affiliateLevel = 2; // Silver
-        else if (earnings >= 100) affiliateLevel = 1; // Bronze
-      }
+      const affiliateEarnings = Number(affiliateResult.data?.total_earnings ?? 0);
 
       return {
         checkinStreak: checkinResult.data?.[0]?.streak_count || 0,
@@ -174,7 +165,7 @@ export function useAchievements() {
         totalTutorials: totalTutorialsResult.data?.length || 10,
         messagesCount: messagesResult.count || 0,
         performanceStreak,
-        affiliateLevel,
+        affiliateEarnings,
         memberSince: profileResult.data?.created_at ? new Date(profileResult.data.created_at) : null,
         totalXp: xpResult.data?.total_xp || 0,
       };
