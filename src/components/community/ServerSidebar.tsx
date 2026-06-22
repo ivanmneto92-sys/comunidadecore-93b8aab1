@@ -1,7 +1,7 @@
 import { Newspaper, Megaphone, BarChart3, HelpCircle, Hash, MessageCircle, Wrench, PanelLeftClose } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import logoCoreImage from '@/assets/logo-core.png';
+import logoCoreImage from '@/assets/logo-instituto-trader.png';
 
 interface Channel {
   id: string;

@@ -12,7 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logoCore from '@/assets/logo-core.png';
+import logoCore from '@/assets/logo-instituto-trader.png';
 
 type Platform = 'ios' | 'android' | 'desktop' | 'unknown';
 
