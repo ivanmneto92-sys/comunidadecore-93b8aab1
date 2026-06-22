@@ -13,6 +13,7 @@ import { NewsChannelView } from './NewsChannelView';
 import { CommunityNewsPanel } from './CommunityNewsPanel';
 import { SupportView } from '@/components/support/SupportView';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { CommunityWelcomeTour } from './CommunityWelcomeTour';
 
 // Memoize NewsPanel to prevent re-renders on parent state changes
 const MemoizedNewsPanel = memo(CommunityNewsPanel);
@@ -123,6 +124,8 @@ export function DiscordLayout() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
+      <CommunityWelcomeTour channels={channels} />
+
       {/* ===== MOBILE LAYOUT ===== */}
       <div className="flex h-full w-full md:hidden">
         {/* ServerSidebar - ALWAYS visible, compact */}
