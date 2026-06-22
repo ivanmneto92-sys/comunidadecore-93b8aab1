@@ -211,7 +211,7 @@ export function DiscordLayout() {
 
         {/* Channel List Panel (collapsible) */}
         {!channelListCollapsed && (
-          <div className="w-[240px] shrink-0 h-full border-r border-border relative">
+          <div className="w-[240px] shrink-0 h-full border-r border-border">
             <ChannelListPanel
               channels={channels}
               selectedChannel={selectedChannel}
@@ -222,33 +222,27 @@ export function DiscordLayout() {
               }}
               unreadCounts={unreadCounts}
             />
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => setChannelListCollapsed(true)}
-              className="absolute top-3 right-2 h-7 w-7 z-10"
-              aria-label="Recolher menu de canais"
-              title="Recolher menu"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
           </div>
         )}
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-          {channelListCollapsed && (
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => setChannelListCollapsed(false)}
-              className="absolute top-3 left-2 h-7 w-7 z-20 shadow-md"
-              aria-label="Expandir menu de canais"
-              title="Mostrar menu"
-            >
+          {/* Toggle sidebar button - always visible on desktop */}
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setChannelListCollapsed((v) => !v)}
+            className="absolute top-3 left-3 h-8 w-8 z-30 shadow-md border border-border"
+            aria-label={channelListCollapsed ? 'Expandir menu de canais' : 'Recolher menu de canais'}
+            title={channelListCollapsed ? 'Mostrar menu' : 'Recolher menu'}
+          >
+            {channelListCollapsed ? (
               <PanelLeftOpen className="h-4 w-4" />
-            </Button>
-          )}
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </Button>
+
           {showSupport ? (
             <SupportView />
           ) : selectedChannel?.slug === 'noticias-mercado' ? (
