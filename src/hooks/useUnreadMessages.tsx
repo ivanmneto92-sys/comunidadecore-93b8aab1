@@ -4,13 +4,15 @@ import { useAuth } from './useAuth';
 
 export function useUnreadMessages() {
   const { user } = useAuth();
+  const userId = user?.id;
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingUpdatesRef = useRef<Record<string, number>>({});
+  const channelSequenceRef = useRef(0);
 
   const fetchUnreadCounts = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setUnreadCounts({});
       setLoading(false);
       return;
@@ -19,7 +21,7 @@ export function useUnreadMessages() {
     try {
       // Use the optimized RPC function instead of N+1 queries
       const { data, error } = await supabase.rpc('get_unread_counts', {
-        p_user_id: user.id
+        p_user_id: userId
       });
 
       if (error) throw error;
@@ -37,16 +39,16 @@ export function useUnreadMessages() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [userId]);
 
   const markAsRead = useCallback(async (channelId: string) => {
-    if (!user) return;
+    if (!userId) return;
 
     try {
       const { error } = await supabase
         .from('user_channel_read_status')
         .upsert({
-          user_id: user.id,
+          user_id: userId,
           channel_id: channelId,
           last_read_at: new Date().toISOString(),
         }, {
@@ -64,7 +66,7 @@ export function useUnreadMessages() {
     } catch (error) {
       console.error('Error marking channel as read:', error);
     }
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => {
     fetchUnreadCounts();
@@ -87,10 +89,11 @@ export function useUnreadMessages() {
 
   // Listen for new messages in realtime with debounce
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
-    // Unique channel name per user avoids reusing a singleton that's already subscribed
-    const channelName = `unread-messages-${user.id}`;
+    // Supabase reuses channels by topic; make each effect run unique so StrictMode/HMR
+    // cannot reuse a channel that is still joining/subscribed while cleanup is pending.
+    const channelName = `unread-messages-${userId}-${Date.now()}-${channelSequenceRef.current++}`;
     const channel = supabase.channel(channelName);
 
     // Register ALL listeners BEFORE .subscribe()
@@ -104,7 +107,7 @@ export function useUnreadMessages() {
       (payload) => {
         const message = payload.new as { channel_id: string; user_id: string; parent_id: string | null };
 
-        if (message.user_id === user.id || message.parent_id) return;
+        if (message.user_id === userId || message.parent_id) return;
 
         pendingUpdatesRef.current[message.channel_id] =
           (pendingUpdatesRef.current[message.channel_id] || 0) + 1;
@@ -125,7 +128,7 @@ export function useUnreadMessages() {
       }
       supabase.removeChannel(channel);
     };
-  }, [user, flushPendingUpdates]);
+  }, [userId, flushPendingUpdates]);
 
 
   const totalUnread = useMemo(() => 
