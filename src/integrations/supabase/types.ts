@@ -2540,6 +2540,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_xp: {
+        Args: {
+          _amount: number
+          _details?: Json
+          _multiplier?: number
+          _source: string
+        }
+        Returns: Json
+      }
       calculate_health_score: {
         Args: { target_date: string }
         Returns: {
@@ -2552,6 +2561,12 @@ export type Database = {
         }[]
       }
       calculate_season_level: { Args: { p_xp: number }; Returns: number }
+      claim_achievement: { Args: { _achievement_id: string }; Returns: Json }
+      claim_achievement_by_code: { Args: { _code: string }; Returns: Json }
+      claim_season_achievement: {
+        Args: { _achievement_id: string }
+        Returns: Json
+      }
       generate_affiliate_code: { Args: never; Returns: string }
       get_active_season: {
         Args: never
@@ -2595,6 +2610,26 @@ export type Database = {
       is_admin_or_mod: { Args: { _user_id: string }; Returns: boolean }
       recompute_mt5_daily_metrics: {
         Args: { p_account: string; p_date: string }
+        Returns: undefined
+      }
+      send_mention_notification: {
+        Args: {
+          _channel_id: string
+          _channel_name: string
+          _content: string
+          _message_id: string
+          _target_user_id: string
+        }
+        Returns: undefined
+      }
+      send_reply_notification: {
+        Args: {
+          _channel_id: string
+          _channel_name: string
+          _content: string
+          _reply_message_id: string
+          _target_user_id: string
+        }
         Returns: undefined
       }
     }
