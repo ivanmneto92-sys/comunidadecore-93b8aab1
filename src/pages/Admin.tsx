@@ -22,6 +22,8 @@ const CoreBotManager = lazy(() => import('@/components/admin/CoreBotManager').th
 const AffiliateManager = lazy(() => import('@/components/admin/AffiliateManager').then(m => ({ default: m.AffiliateManager })));
 const ActivityLogs = lazy(() => import('@/components/admin/ActivityLogs').then(m => ({ default: m.ActivityLogs })));
 const SupportManager = lazy(() => import('@/components/admin/SupportManager').then(m => ({ default: m.SupportManager })));
+const RobotManager = lazy(() => import('@/components/admin/RobotManager').then(m => ({ default: m.RobotManager })));
+
 
 const TabFallback = () => (
   <div className="flex items-center justify-center py-12">
