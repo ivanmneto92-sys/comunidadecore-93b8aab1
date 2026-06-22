@@ -204,13 +204,14 @@ export default function Results() {
             <PerformanceOverview metrics={metrics} />
           </TabsContent>
 
-          <TabsContent value="charts" className="mt-4 space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TabsContent value="charts" className="mt-4 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AccountGrowthChart data={growthData} />
               <MonthlyReturnsChart data={monthlyReturns} />
             </div>
             {chartData.length > 0 && <ResultsChart data={chartData} />}
           </TabsContent>
+
 
           <TabsContent value="history" className="mt-4">
 
