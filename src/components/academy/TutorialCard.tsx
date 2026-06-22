@@ -69,7 +69,7 @@ export function TutorialCard({
       {/* Thumbnail */}
       <div className="relative shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted">
         {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+          <img src={thumbnailUrl} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
             <Play className="h-5 w-5 text-primary/50" />
