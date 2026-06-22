@@ -38,6 +38,7 @@ const StreakHistory = lazy(() => import("./pages/StreakHistory"));
 const Achievements = lazy(() => import("./pages/Achievements"));
 const Journal = lazy(() => import("./pages/Journal"));
 const Seasons = lazy(() => import("./pages/Seasons"));
+const Plans = lazy(() => import("./pages/Plans"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
@@ -81,6 +82,7 @@ const App = () => (
               <Route path="/termos" element={<Terms />} />
               <Route path="/privacidade" element={<Privacy />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/planos" element={<Plans />} />
               <Route path="/" element={<HomeRoute />} />
               <Route path="/landing" element={<Landing />} />
               <Route path="/app" element={

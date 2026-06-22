@@ -63,6 +63,7 @@ export default function Landing() {
           <nav className="hidden md:flex items-center gap-7 text-sm text-foreground/70">
             <a href="#ecossistema" className="hover:text-foreground transition">Ecossistema</a>
             <a href="#para-quem" className="hover:text-foreground transition">Para quem é</a>
+            <Link to="/planos" className="hover:text-foreground transition">Planos</Link>
             <a href="#marca" className="hover:text-foreground transition">A marca</a>
           </nav>
           <Link to="/auth">
@@ -269,6 +270,7 @@ export default function Landing() {
             <span>© {new Date().getFullYear()} Instituto Trader</span>
           </div>
           <nav className="flex items-center gap-6">
+            <Link to="/planos" className="hover:text-foreground transition">Planos</Link>
             <Link to="/termos" className="hover:text-foreground transition">Termos</Link>
             <Link to="/privacidade" className="hover:text-foreground transition">Privacidade</Link>
             <Link to="/install" className="hover:text-foreground transition">Instalar app</Link>
