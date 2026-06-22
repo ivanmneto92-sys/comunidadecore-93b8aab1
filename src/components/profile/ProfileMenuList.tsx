@@ -12,8 +12,10 @@ import {
   BookOpen
 } from 'lucide-react';
 import { ProfileMenuItem } from './ProfileMenuItem';
+import { ThemeToggleItem } from './ThemeToggleItem';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+
 
 interface ProfileMenuListProps {
   affiliateBalance?: number;
@@ -77,6 +79,7 @@ export function ProfileMenuList({
 
       {/* Preferências */}
       <Card className="overflow-hidden divide-y divide-border/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <ThemeToggleItem />
         <ProfileMenuItem
           icon={Bell}
           label="Notificações"
@@ -90,6 +93,7 @@ export function ProfileMenuList({
           onClick={() => {}}
         />
       </Card>
+
 
       {/* Suporte */}
       <Card className="overflow-hidden animate-fade-in" style={{ animationDelay: '300ms' }}>

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+
 
 // Lazy load all pages for code splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -48,9 +50,11 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="core-hub-theme">
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+
         <Sonner />
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
@@ -125,9 +129,11 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+        </TooltipProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
+
 
 export default App;
