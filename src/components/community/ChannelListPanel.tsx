@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Hash, Megaphone, BarChart3, HelpCircle, ChevronRight, Newspaper, Crown, Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UnreadBadge } from './UnreadBadge';
+import { usePlanAccess } from '@/components/plans/PlanGate';
 
 interface Channel {
   id: string;
@@ -55,6 +57,7 @@ export function ChannelListPanel({
   unreadCounts = {}
 }: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { hasAccess: hasProAccess } = usePlanAccess('elite');
 
   const filteredChannels = channels.filter(channel =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -153,6 +156,31 @@ export function ChannelListPanel({
               </div>
             </div>
           ))}
+
+          {/* Pro channels — gated by elite tier */}
+          <div className="mt-2 mb-4">
+            <h3 className="px-2 mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+              <Crown className="h-3 w-3" /> Pro
+            </h3>
+            {hasProAccess ? (
+              <div className="px-2 py-3 text-xs text-muted-foreground italic">
+                Canais Pro em breve.
+              </div>
+            ) : (
+              <Link
+                to="/planos"
+                className="flex items-center gap-3 p-2 rounded-md text-left transition-colors text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+              >
+                <Lock className="h-5 w-5 shrink-0 text-primary/70" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">Canais Pro</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    Bastidores e mentorias — exclusivo Pro
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
         </div>
       </ScrollArea>
     </div>
