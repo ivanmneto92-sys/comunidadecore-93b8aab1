@@ -13,6 +13,8 @@ import { NewsChannelView } from './NewsChannelView';
 import { CommunityNewsPanel } from './CommunityNewsPanel';
 import { SupportView } from '@/components/support/SupportView';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { CommunityWelcomeTour } from './CommunityWelcomeTour';
 
 // Memoize NewsPanel to prevent re-renders on parent state changes
