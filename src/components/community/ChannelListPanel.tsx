@@ -57,6 +57,7 @@ export function ChannelListPanel({
   unreadCounts = {}
 }: ChannelListPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { hasAccess: hasProAccess } = usePlanAccess('elite');
 
   const filteredChannels = channels.filter(channel =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
