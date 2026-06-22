@@ -16,6 +16,7 @@ const routePrefetchMap: Record<string, () => Promise<unknown>> = {
   '/affiliates': () => import('@/pages/Affiliates'),
   '/seasons': () => import('@/pages/Seasons'),
   '/mt5': () => import('@/pages/MT5'),
+  '/robots': () => import('@/pages/Robots'),
 };
 
 const navItems = [

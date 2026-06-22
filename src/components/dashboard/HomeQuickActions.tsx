@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Users, GraduationCap } from 'lucide-react';
+import { BarChart3, Users, GraduationCap, Bot } from 'lucide-react';
 
 const quickActions = [
   { 
@@ -21,13 +21,19 @@ const quickActions = [
     label: 'Academia',
     sublabel: ''
   },
+  { 
+    to: '/robots', 
+    icon: Bot, 
+    label: 'Robôs',
+    sublabel: 'Marketplace'
+  },
 ];
 
 export function HomeQuickActions() {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-4 gap-2">
       {quickActions.map((action) => (
         <Button
           key={action.to}
