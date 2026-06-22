@@ -29,6 +29,8 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Install = lazy(() => import("./pages/Install"));
 const MT5 = lazy(() => import("./pages/MT5"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const RedesignPreview = lazy(() => import("./pages/RedesignPreview"));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
