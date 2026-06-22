@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
-import { ThemeToggleItem } from './ThemeToggleItem';
+
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
@@ -89,7 +89,6 @@ export function ProfileMenuList({
 
       {/* Preferências */}
       <Card className="overflow-hidden divide-y divide-border/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <ThemeToggleItem />
         <ProfileMenuItem
           icon={Bell}
           label="Notificações"
