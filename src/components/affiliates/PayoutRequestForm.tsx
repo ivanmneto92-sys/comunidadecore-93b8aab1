@@ -103,12 +103,7 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
         toast({ title: 'Solicitação enviada com sucesso!' });
       }
     } catch (error) {
-      console.error('Error requesting payout:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao solicitar saque',
-        description: 'Verifique seus dados e tente novamente.',
-      });
+      toast(buildErrorToast(error, { action: 'solicitar saque' }));
     } finally {
       setLoading(false);
     }
