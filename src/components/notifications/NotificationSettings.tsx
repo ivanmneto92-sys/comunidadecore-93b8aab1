@@ -16,6 +16,7 @@ import { useWebPushRegistration } from '@/hooks/useWebPushRegistration';
 
 export function NotificationSettings() {
   const { settings, loading, updateSettings } = useNotificationSettings();
+  const { status: pushStatus, permission, enable: enablePush, supported: pushSupported, iosRequiresInstall } = useWebPushRegistration();
   const { toast } = useToast();
 
   const handleToggle = async (key: 'notify_mentions' | 'notify_replies' | 'sound_enabled', value: boolean) => {
