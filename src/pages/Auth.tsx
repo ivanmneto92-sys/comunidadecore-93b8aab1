@@ -124,9 +124,11 @@ export default function Auth() {
           }
           
           toast({
-            title: 'Conta criada!',
-            description: 'Você já pode acessar o Instituto Trader'
+            title: 'Verifique seu e-mail',
+            description: 'Enviamos um link de confirmação para ' + email + '. Acesse sua caixa de entrada (e o spam) para ativar sua conta antes de entrar.',
+            duration: 10000,
           });
+          setIsLogin(true);
         }
       }
     } finally {
