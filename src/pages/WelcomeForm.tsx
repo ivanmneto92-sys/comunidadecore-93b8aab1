@@ -107,10 +107,22 @@ export default function WelcomeForm() {
     }
     setErrors({});
     setLoading(true);
+    const d = result.data;
     const { error } = await supabase.from('lead_profiles').insert({
       user_id: user.id,
-      ...result.data,
-      work_area_other: result.data.work_area === 'Outro' ? result.data.work_area_other : null,
+      full_name: d.full_name,
+      email: d.email,
+      whatsapp: d.whatsapp,
+      gender: d.gender,
+      age_range: d.age_range,
+      work_area: d.work_area,
+      work_area_other: d.work_area === 'Outro' ? (d.work_area_other ?? null) : null,
+      investment_experience: d.investment_experience,
+      is_trader: d.is_trader,
+      prop_firm_status: d.prop_firm_status,
+      investor_profile: d.investor_profile,
+      income_range: d.income_range,
+      initial_investment: d.initial_investment,
     });
     setLoading(false);
     if (error) {
