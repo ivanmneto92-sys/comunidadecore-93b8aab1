@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FeedSkeleton } from '@/components/skeletons';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';

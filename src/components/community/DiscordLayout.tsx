@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from 'react';
+import { ListSkeleton } from '@/components/skeletons';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommunityPresence } from '@/hooks/useOnlinePresence';
