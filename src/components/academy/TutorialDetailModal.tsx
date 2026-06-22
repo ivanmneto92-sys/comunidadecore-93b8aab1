@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { buildErrorToast } from '@/lib/toastError';
 import DOMPurify from 'dompurify';
 import { useTutorialQuiz } from '@/hooks/useTutorialQuiz';
 import { QuizRunner } from './QuizRunner';
