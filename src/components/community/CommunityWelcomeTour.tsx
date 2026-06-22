@@ -71,7 +71,7 @@ export function CommunityWelcomeTour({ channels, currentChannelSlug }: Community
   const steps: Step[] = [
     {
       icon: MessageCircleHeart,
-      title: 'Bem-vindo ao CORE HUB 👋',
+      title: 'Bem-vindo ao INSTITUTO TRADER HUB 👋',
       body: (
         <p className="text-sm text-muted-foreground leading-relaxed">
           Aqui você acompanha o operacional, troca ideia com outros traders, tira dúvidas e

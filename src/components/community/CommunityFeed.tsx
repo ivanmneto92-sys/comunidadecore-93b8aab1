@@ -157,7 +157,7 @@ export function CommunityFeed({ onOpenDiscussion }: CommunityFeedProps) {
 
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-sm">Nenhuma publicação encontrada.</p>
-              <p className="text-xs mt-1">O CORE publicará conteúdo em breve.</p>
+              <p className="text-xs mt-1">O INSTITUTO TRADER publicará conteúdo em breve.</p>
             </div>
           ) : (
             posts.map(renderPost)

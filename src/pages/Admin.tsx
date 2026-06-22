@@ -87,7 +87,7 @@ export default function Admin() {
             <TabsTrigger value="categories" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><FolderOpen className="h-4 w-4" /><span>Categorias</span></TabsTrigger>
             <TabsTrigger value="channels" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><MessageSquare className="h-4 w-4" /><span>Canais</span></TabsTrigger>
             <TabsTrigger value="broadcast" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Megaphone className="h-4 w-4" /><span>Broadcast</span></TabsTrigger>
-            <TabsTrigger value="corebot" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Bot className="h-4 w-4" /><span>CORE Bot</span></TabsTrigger>
+            <TabsTrigger value="corebot" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Bot className="h-4 w-4" /><span>INSTITUTO TRADER Bot</span></TabsTrigger>
             <TabsTrigger value="affiliates" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Users className="h-4 w-4" /><span>Afiliados</span></TabsTrigger>
             <TabsTrigger value="logs" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><History className="h-4 w-4" /><span>Logs</span></TabsTrigger>
             <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Headphones className="h-4 w-4" /><span>Suporte</span></TabsTrigger>

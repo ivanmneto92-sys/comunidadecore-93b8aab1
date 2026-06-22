@@ -86,13 +86,13 @@ export function ServerSidebar({ channels, selectedChannel, onSelectChannel, comp
           )}>
             <img 
               src={logoCoreImage} 
-              alt="CORE" 
+              alt="INSTITUTO TRADER" 
               className="w-full h-full object-contain"
             />
           </button>
         </TooltipTrigger>
         <TooltipContent side="right">
-          CORE Community
+          INSTITUTO TRADER Community
         </TooltipContent>
       </Tooltip>
 

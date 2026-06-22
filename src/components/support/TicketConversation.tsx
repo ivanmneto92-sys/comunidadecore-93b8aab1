@@ -135,7 +135,7 @@ export function TicketConversation({ ticket, onBack, isAdmin = false, onStatusCh
                 <div className={cn('flex-1 max-w-[80%]', isOwnMessage && !isAdmin ? 'flex flex-col items-end' : '')}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className={cn('text-sm font-medium', message.is_admin_reply && 'text-primary')}>
-                      {message.is_admin_reply ? 'Suporte CORE' : displayName}
+                      {message.is_admin_reply ? 'Suporte INSTITUTO TRADER' : displayName}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(message.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })}

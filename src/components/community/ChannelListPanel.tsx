@@ -89,7 +89,7 @@ export function ChannelListPanel({
       {/* Header */}
       <div className="p-3 border-b border-border shrink-0">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-foreground">CORE Community</h2>
+          <h2 className="font-semibold text-foreground">INSTITUTO TRADER Community</h2>
           <div className="flex items-center gap-1">
             <button
               type="button"

@@ -316,7 +316,7 @@ export function MessageItem({
         <div className="flex items-baseline gap-2">
           <span className="font-semibold text-sm">
             {message.is_bot_message 
-              ? 'CORE Bot' 
+              ? 'INSTITUTO TRADER Bot' 
               : message.profiles?.display_name || 'Usuário'}
           </span>
           {message.is_bot_message && (

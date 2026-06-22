@@ -17,5 +17,5 @@ export const QUESTION_FIELDS: Array<{ key: string; label: string; options: reado
   { key: 'prop_firm_status', label: 'Mesa proprietária', options: PROP_FIRM },
   { key: 'investor_profile', label: 'Perfil investidor', options: PROFILES },
   { key: 'income_range', label: 'Renda mensal', options: INCOMES },
-  { key: 'initial_investment', label: 'Investimento inicial no CORE', options: INVESTMENTS },
+  { key: 'initial_investment', label: 'Investimento inicial no INSTITUTO TRADER', options: INVESTMENTS },
 ];
