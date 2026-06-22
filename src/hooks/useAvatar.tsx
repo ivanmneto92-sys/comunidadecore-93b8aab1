@@ -4,35 +4,37 @@ import { getAvatarById, Avatar } from '@/lib/avatarLibrary';
 interface UseAvatarResult {
   avatar: Avatar | null;
   svg: string;
+  imageUrl: string | null;
   hasAvatar: boolean;
 }
 
 /**
- * Hook para obter o avatar SVG baseado no ID
- * Retorna o SVG do avatar ou gera iniciais como fallback
+ * Hook para obter o avatar do usuário.
+ * Prioridade: avatar_url (imagem custom) > avatar_id (biblioteca SVG) > iniciais
  */
-export function useAvatar(avatarId: string | null | undefined, displayName?: string): UseAvatarResult {
+export function useAvatar(
+  avatarId: string | null | undefined,
+  displayName?: string,
+  avatarUrl?: string | null,
+): UseAvatarResult {
   return useMemo(() => {
-    const avatar = getAvatarById(avatarId);
-    
-    if (avatar) {
-      return {
-        avatar,
-        svg: avatar.svg,
-        hasAvatar: true,
-      };
+    if (avatarUrl) {
+      return { avatar: null, svg: '', imageUrl: avatarUrl, hasAvatar: true };
     }
 
-    // Fallback: gera SVG com iniciais
-    const initials = getInitials(displayName);
-    const fallbackSvg = generateInitialsSvg(initials);
+    const avatar = getAvatarById(avatarId);
+    if (avatar) {
+      return { avatar, svg: avatar.svg, imageUrl: null, hasAvatar: true };
+    }
 
+    const initials = getInitials(displayName);
     return {
       avatar: null,
-      svg: fallbackSvg,
+      svg: generateInitialsSvg(initials),
+      imageUrl: null,
       hasAvatar: false,
     };
-  }, [avatarId, displayName]);
+  }, [avatarId, displayName, avatarUrl]);
 }
 
 function getInitials(name?: string): string {
@@ -53,7 +55,21 @@ function generateInitialsSvg(initials: string): string {
 }
 
 /**
- * Componente helper para renderizar SVG inline
+ * Renderiza um avatar (imagem custom ou SVG da biblioteca) dentro de um wrapper.
+ */
+export function renderAvatar(
+  result: Pick<UseAvatarResult, 'svg' | 'imageUrl'>,
+  className?: string,
+  alt = 'Avatar',
+): React.ReactElement {
+  if (result.imageUrl) {
+    return <img src={result.imageUrl} alt={alt} className={className} loading="lazy" />;
+  }
+  return <div className={className} dangerouslySetInnerHTML={{ __html: result.svg }} />;
+}
+
+/**
+ * Componente helper para renderizar SVG inline (mantido para compatibilidade).
  */
 export function renderAvatarSvg(svg: string, className?: string): React.ReactElement {
   return (
