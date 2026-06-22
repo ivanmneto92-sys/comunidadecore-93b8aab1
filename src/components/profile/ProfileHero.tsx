@@ -1,4 +1,4 @@
-import { useAvatar, renderAvatarSvg } from '@/hooks/useAvatar';
+import { useAvatar, renderAvatar } from '@/hooks/useAvatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Camera, Edit3, Shield, Crown, Star } from 'lucide-react';
@@ -38,7 +38,7 @@ const statusLabels = {
 
 export function ProfileHero({ profile, tier, roles, onEditClick, onAvatarClick }: ProfileHeroProps) {
   const displayName = profile?.display_name || profile?.username || 'Usuário';
-  const { svg } = useAvatar(profile?.avatar_id, displayName);
+  const avatarResult = useAvatar(profile?.avatar_id, displayName, profile?.avatar_url);
   const { currentStatus } = useUserStatus();
   
   const isAdmin = roles.includes('admin');
@@ -64,7 +64,7 @@ export function ProfileHero({ profile, tier, roles, onEditClick, onAvatarClick }
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-primary via-amber-400 to-primary rounded-full opacity-75 blur-sm group-hover:opacity-100 transition-opacity" />
           <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-background">
-            {renderAvatarSvg(svg, 'w-full h-full')}
+            {renderAvatar(avatarResult, 'w-full h-full object-cover')}
           </div>
           <div className="absolute bottom-0 right-0 p-2 bg-primary rounded-full shadow-lg group-hover:scale-110 transition-transform">
             <Camera className="w-4 h-4 text-primary-foreground" />

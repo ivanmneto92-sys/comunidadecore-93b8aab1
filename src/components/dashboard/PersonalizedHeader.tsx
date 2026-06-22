@@ -29,8 +29,9 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
 
   const greeting = getGreeting();
 
-  // Get avatar from library
+  // Get avatar from library or custom upload
   const avatarData = profile?.avatar_id ? getAvatarById(profile.avatar_id) : null;
+  const customUrl = profile?.avatar_url;
   const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
@@ -42,10 +43,12 @@ export function PersonalizedHeader({ streakDays = 0 }: PersonalizedHeaderProps) 
           className="shrink-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-full"
         >
           <Avatar className="h-12 w-12 border-2 border-primary/30 hover:border-primary/60 transition-colors">
-            {avatarData ? (
-              <div 
+            {customUrl ? (
+              <img src={customUrl} alt={displayName} className="w-full h-full object-cover" />
+            ) : avatarData ? (
+              <div
                 className="w-full h-full"
-                dangerouslySetInnerHTML={{ __html: avatarData.svg }} 
+                dangerouslySetInnerHTML={{ __html: avatarData.svg }}
               />
             ) : (
               <AvatarFallback className="bg-primary/20 text-primary font-semibold">

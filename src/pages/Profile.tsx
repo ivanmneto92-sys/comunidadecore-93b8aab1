@@ -111,6 +111,7 @@ export default function Profile() {
             open={showAvatarModal}
             onOpenChange={setShowAvatarModal}
             currentAvatarId={profile.avatar_id}
+            currentAvatarUrl={profile.avatar_url}
             userId={profile.id}
             onAvatarUpdated={handleProfileUpdated}
           />
