@@ -85,11 +85,10 @@ export function PayoutRequestForm({ affiliate, onRequest }: PayoutRequestFormPro
       );
 
       if (!saveSuccess) {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao processar dados de pagamento',
-          description: 'Verifique seus dados e tente novamente.',
-        });
+        toast(buildErrorToast(new Error('Não foi possível processar seus dados de pagamento'), {
+          action: 'solicitar saque',
+          field: method === 'pix' ? 'Chave PIX' : 'E-mail PayPal',
+        }));
         return;
       }
 
