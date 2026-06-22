@@ -257,7 +257,7 @@ export function MonthlyReturnsManager() {
                   <div className="flex justify-end gap-1">
                     {editingMonth === row.month ? (
                       <>
-                        <Button
+                        <Button aria-label="Ação"
                           size="icon"
                           variant="ghost"
                           onClick={confirmEdit}
@@ -269,13 +269,13 @@ export function MonthlyReturnsManager() {
                             <Check className="h-4 w-4 text-status-success" />
                           )}
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={cancelEdit}>
+                        <Button aria-label="Ação" size="icon" variant="ghost" onClick={cancelEdit}>
                           <X className="h-4 w-4" />
                         </Button>
                       </>
                     ) : (
                       <>
-                        <Button
+                        <Button aria-label="Editar"
                           size="icon"
                           variant="ghost"
                           onClick={() => startEdit(row.month, row.saved_return)}
@@ -284,7 +284,7 @@ export function MonthlyReturnsManager() {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         {row.has_daily_data && (
-                          <Button
+                          <Button aria-label="Ação"
                             size="icon"
                             variant="ghost"
                             onClick={() => handleSyncFromDaily(row.month)}

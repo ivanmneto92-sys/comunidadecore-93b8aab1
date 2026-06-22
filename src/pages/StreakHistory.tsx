@@ -18,7 +18,7 @@ export default function StreakHistory() {
       <div className="px-4 py-6 space-y-5">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button
+          <Button aria-label="Voltar"
             variant="ghost"
             size="icon"
             onClick={() => navigate('/')}

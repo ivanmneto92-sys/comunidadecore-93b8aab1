@@ -57,7 +57,7 @@ export function NewsChannelView({ channel, onGoBack, onlineCount }: NewsChannelV
       {/* Header */}
       <div className="flex items-center gap-3 px-4 h-12 border-b border-border shrink-0">
         {onGoBack && (
-          <Button
+          <Button aria-label="Voltar"
             variant="ghost"
             size="icon"
             className="h-8 w-8 md:hidden"
@@ -70,7 +70,7 @@ export function NewsChannelView({ channel, onGoBack, onlineCount }: NewsChannelV
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-sm truncate">{channel.name}</h2>
         </div>
-        <Button
+        <Button aria-label="Recarregar"
           variant="ghost"
           size="icon"
           className="h-8 w-8"

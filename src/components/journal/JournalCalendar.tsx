@@ -97,7 +97,7 @@ export function JournalCalendar({
     <Card className="p-4">
       {/* Header with navigation */}
       <div className="flex items-center justify-between mb-4">
-        <Button
+        <Button aria-label="Voltar"
           variant="ghost"
           size="icon"
           onClick={goToPreviousMonth}
@@ -108,7 +108,7 @@ export function JournalCalendar({
         
         <h3 className="text-sm font-semibold capitalize">{monthLabel}</h3>
         
-        <Button
+        <Button aria-label="Avançar"
           variant="ghost"
           size="icon"
           onClick={goToNextMonth}

@@ -789,7 +789,7 @@ export function ChatView({
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border shrink-0 bg-background">
         {/* Mobile back button */}
         {onGoBack && (
-          <Button 
+          <Button aria-label="Voltar" 
             variant="ghost" 
             size="icon" 
             className="h-8 w-8 md:hidden"
@@ -815,7 +815,7 @@ export function ChatView({
         )}
         
         {/* Search button */}
-        <Button 
+        <Button aria-label="Buscar" 
           variant="ghost" 
           size="icon" 
           className="h-8 w-8"
@@ -829,7 +829,7 @@ export function ChatView({
         </Button>
         
         {/* Members button */}
-        <Button 
+        <Button aria-label="Membros" 
           variant="ghost" 
           size="icon" 
           className="h-8 w-8"

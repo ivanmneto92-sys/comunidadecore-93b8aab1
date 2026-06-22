@@ -153,7 +153,7 @@ export function CreatePollModal({
                     maxLength={100}
                   />
                   {options.length > 2 && (
-                    <Button
+                    <Button aria-label="Remover"
                       type="button"
                       variant="ghost"
                       size="icon"

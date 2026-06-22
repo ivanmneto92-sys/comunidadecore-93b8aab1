@@ -79,7 +79,7 @@ export function MiniResultsCalendar() {
             Calendário do Mês
           </CardTitle>
           <div className="flex items-center gap-1">
-            <Button
+            <Button aria-label="Voltar"
               variant="ghost"
               size="icon"
               className="h-7 w-7"
@@ -90,7 +90,7 @@ export function MiniResultsCalendar() {
             <span className="text-sm font-medium min-w-[100px] text-center">
               {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
             </span>
-            <Button
+            <Button aria-label="Avançar"
               variant="ghost"
               size="icon"
               className="h-7 w-7"

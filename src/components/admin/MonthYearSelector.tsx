@@ -59,7 +59,7 @@ export function MonthYearSelector({
   return (
     <div className="flex items-center justify-between gap-2 mb-4">
       <div className="flex items-center gap-1">
-        <Button
+        <Button aria-label="Voltar"
           variant="outline"
           size="icon"
           onClick={goToPreviousMonth}
@@ -67,7 +67,7 @@ export function MonthYearSelector({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Button
+        <Button aria-label="Avançar"
           variant="outline"
           size="icon"
           onClick={goToNextMonth}

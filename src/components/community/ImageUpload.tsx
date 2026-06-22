@@ -88,7 +88,7 @@ export function ImageUpload({ onImageSelected, disabled }: ImageUploadProps) {
             alt="Preview"
             className="h-20 w-20 object-cover rounded-lg border border-border"
           />
-          <Button
+          <Button aria-label="Ação"
             type="button"
             size="icon"
             variant="destructive"
@@ -105,7 +105,7 @@ export function ImageUpload({ onImageSelected, disabled }: ImageUploadProps) {
           )}
         </div>
       ) : (
-        <Button
+        <Button aria-label="Ação"
           type="button"
           variant="ghost"
           size="icon"

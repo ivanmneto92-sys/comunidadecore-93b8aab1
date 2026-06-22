@@ -29,7 +29,7 @@ export function NotificationSettings() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button aria-label="Ação" variant="ghost" size="icon" className="h-8 w-8">
           <Settings2 className="h-4 w-4" />
         </Button>
       </DialogTrigger>

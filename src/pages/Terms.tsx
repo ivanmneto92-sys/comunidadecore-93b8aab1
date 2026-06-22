@@ -10,7 +10,7 @@ export default function Terms() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8 animate-fade-in">
           <Link to="/auth">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button aria-label="Voltar" variant="ghost" size="icon" className="rounded-full">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>

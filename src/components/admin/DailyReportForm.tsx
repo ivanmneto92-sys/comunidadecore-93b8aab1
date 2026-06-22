@@ -687,7 +687,7 @@ export function DailyReportForm() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button
+                        <Button aria-label="Editar"
                           size="icon"
                           variant="ghost"
                           onClick={() => handleDateSelect(parseISO(report.date))}
@@ -696,7 +696,7 @@ export function DailyReportForm() {
                           <Pencil className="h-4 w-4" />
                         </Button>
                         {!report.published_at && (
-                          <Button
+                          <Button aria-label="Enviar"
                             size="icon"
                             variant="ghost"
                             onClick={() => publishReport(report.id)}
@@ -705,7 +705,7 @@ export function DailyReportForm() {
                             <Send className="h-4 w-4" />
                           </Button>
                         )}
-                        <Button
+                        <Button aria-label="Excluir"
                           size="icon"
                           variant="ghost"
                           onClick={() => deleteReport(report.id)}

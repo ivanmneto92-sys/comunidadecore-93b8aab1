@@ -70,7 +70,7 @@ export default function Achievements() {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40">
         <div className="flex items-center gap-3 px-4 py-3">
-          <Button
+          <Button aria-label="Voltar"
             variant="ghost"
             size="icon"
             className="h-9 w-9"
