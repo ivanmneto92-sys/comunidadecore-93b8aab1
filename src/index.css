@@ -219,6 +219,13 @@
     font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   }
 
+  /* Instituto Trader — serif institucional para landing/headlines */
+  .font-serif-display {
+    font-family: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: -0.02em;
+    font-optical-sizing: auto;
+  }
+
   .editorial-divider {
     border-top: 1px solid hsl(var(--accent) / 0.13);
   }
