@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 export interface QuizOption {
   id: string;
   text: string;
-  is_correct: boolean;
   order_index: number;
 }
 export interface QuizQuestion {
@@ -37,31 +36,52 @@ export function useTutorialQuiz(tutorialId: string | undefined) {
     queryKey: ['tutorial-quiz', tutorialId],
     queryFn: async (): Promise<TutorialQuiz | null> => {
       if (!tutorialId) return null;
-      const { data, error } = await supabase
+      const { data: quiz, error } = await supabase
         .from('tutorial_quizzes')
         .select(`
           id, tutorial_id, passing_score, xp_reward, max_attempts,
-          quiz_questions (
-            id, question, explanation, order_index,
-            quiz_options ( id, text, is_correct, order_index )
-          )
+          quiz_questions ( id, question, explanation, order_index )
         `)
         .eq('tutorial_id', tutorialId)
         .maybeSingle();
       if (error) throw error;
-      if (!data) return null;
-      const sorted = {
-        ...data,
-        quiz_questions: [...(data.quiz_questions || [])]
+      if (!quiz) return null;
+
+      const questionIds = ((quiz.quiz_questions as Array<{ id: string }>) || []).map((q) => q.id);
+      let optionsByQ: Record<string, QuizOption[]> = {};
+      if (questionIds.length > 0) {
+        // Read from view that omits is_correct
+        const { data: opts, error: optErr } = await (supabase as unknown as {
+          from: (t: string) => {
+            select: (s: string) => {
+              in: (col: string, vals: string[]) => Promise<{ data: Array<QuizOption & { question_id: string }> | null; error: unknown }>;
+            };
+          };
+        })
+          .from('quiz_options_public')
+          .select('id, question_id, text, order_index')
+          .in('question_id', questionIds);
+        if (optErr) throw optErr as Error;
+        optionsByQ = (opts ?? []).reduce<Record<string, QuizOption[]>>((acc, o) => {
+          (acc[o.question_id] ||= []).push({ id: o.id, text: o.text, order_index: o.order_index });
+          return acc;
+        }, {});
+      }
+
+      const sorted: TutorialQuiz = {
+        id: quiz.id,
+        tutorial_id: quiz.tutorial_id,
+        passing_score: quiz.passing_score,
+        xp_reward: quiz.xp_reward,
+        max_attempts: quiz.max_attempts,
+        quiz_questions: ([...(quiz.quiz_questions as QuizQuestion[] || [])])
           .sort((a, b) => a.order_index - b.order_index)
           .map((q) => ({
             ...q,
-            quiz_options: [...(q.quiz_options || [])].sort(
-              (a, b) => a.order_index - b.order_index
-            ),
+            quiz_options: (optionsByQ[q.id] || []).sort((a, b) => a.order_index - b.order_index),
           })),
       };
-      return sorted as TutorialQuiz;
+      return sorted;
     },
     enabled: !!tutorialId,
   });
