@@ -199,8 +199,7 @@ export function ThreadView({ parentMessage, channelId, channelName, onClose }: T
       setNewReply('');
       setReplyingTo(null);
     } catch (err) {
-      console.error('Error sending reply:', err);
-      toast({ variant: 'destructive', title: 'Erro ao enviar resposta' });
+      toast(buildErrorToast(err, { action: 'enviar a resposta' }));
     } finally {
       setSending(false);
     }
