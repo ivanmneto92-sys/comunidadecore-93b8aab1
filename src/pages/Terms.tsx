@@ -31,7 +31,7 @@ export default function Terms() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              Ao acessar e utilizar a plataforma CORE HUB, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossos serviços.
+              Ao acessar e utilizar a plataforma Instituto Trader, você concorda em cumprir e estar vinculado aos seguintes termos e condições de uso. Se você não concordar com qualquer parte destes termos, não deverá utilizar nossos serviços.
             </p>
           </CardContent>
         </Card>
@@ -42,7 +42,7 @@ export default function Terms() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              O CORE HUB é uma plataforma de comunidade e educação financeira que oferece:
+              O Instituto Trader é uma plataforma de comunidade e educação financeira que oferece:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Acesso a conteúdo educacional sobre mercado financeiro</li>
@@ -61,7 +61,7 @@ export default function Terms() {
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
               <p className="font-medium text-destructive mb-2">⚠️ AVISO IMPORTANTE</p>
               <p>
-                Todo o conteúdo disponibilizado na plataforma CORE HUB é exclusivamente para fins educacionais e informativos. <strong>NÃO constitui recomendação de investimento, consultoria financeira ou qualquer tipo de aconselhamento.</strong>
+                Todo o conteúdo disponibilizado na plataforma Instituto Trader é exclusivamente para fins educacionais e informativos. <strong>NÃO constitui recomendação de investimento, consultoria financeira ou qualquer tipo de aconselhamento.</strong>
               </p>
             </div>
             <p>
@@ -82,7 +82,7 @@ export default function Terms() {
               Para utilizar certos recursos da plataforma, você deverá criar uma conta fornecendo informações precisas e atualizadas. Você é responsável por manter a confidencialidade de suas credenciais de acesso.
             </p>
             <p>
-              Você concorda em notificar imediatamente a equipe CORE HUB sobre qualquer uso não autorizado de sua conta.
+              Você concorda em notificar imediatamente a equipe Instituto Trader sobre qualquer uso não autorizado de sua conta.
             </p>
           </CardContent>
         </Card>
@@ -109,7 +109,7 @@ export default function Terms() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              Todo o conteúdo da plataforma, incluindo textos, gráficos, logos, vídeos e software, é propriedade do CORE HUB ou de seus licenciadores e está protegido por leis de propriedade intelectual.
+              Todo o conteúdo da plataforma, incluindo textos, gráficos, logos, vídeos e software, é propriedade do Instituto Trader ou de seus licenciadores e está protegido por leis de propriedade intelectual.
             </p>
           </CardContent>
         </Card>
@@ -120,7 +120,7 @@ export default function Terms() {
           </CardHeader>
           <CardContent className="space-y-4 text-muted-foreground">
             <p>
-              O CORE HUB não se responsabiliza por quaisquer perdas financeiras decorrentes de decisões de investimento tomadas com base no conteúdo da plataforma. O uso da plataforma é por sua conta e risco.
+              O Instituto Trader não se responsabiliza por quaisquer perdas financeiras decorrentes de decisões de investimento tomadas com base no conteúdo da plataforma. O uso da plataforma é por sua conta e risco.
             </p>
           </CardContent>
         </Card>

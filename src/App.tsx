@@ -66,7 +66,7 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="core-hub-theme">
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="instituto-trader-theme">
       <AuthProvider>
         <TooltipProvider>
           <Toaster />

@@ -148,7 +148,7 @@ export default function Auth() {
           
           toast({
             title: 'Conta criada!',
-            description: 'Você já pode acessar o CORE HUB'
+            description: 'Você já pode acessar o Instituto Trader'
           });
         }
       }

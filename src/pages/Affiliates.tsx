@@ -105,7 +105,7 @@ export default function Affiliates() {
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold">Torne-se um Afiliado</h2>
               <p className="text-muted-foreground max-w-md">
-                Ganhe comissões indicando o CORE HUB para seus amigos e seguidores.
+                Ganhe comissões indicando o Instituto Trader para seus amigos e seguidores.
               </p>
             </div>
 

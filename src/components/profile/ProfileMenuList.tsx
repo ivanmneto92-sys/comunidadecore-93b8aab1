@@ -117,7 +117,7 @@ export function ProfileMenuList({
 
       {/* Footer */}
       <p className="text-center text-xs text-muted-foreground pt-2 animate-fade-in" style={{ animationDelay: '500ms' }}>
-        CORE HUB • v1.0.0
+        Instituto Trader • v1.0.0
       </p>
     </div>
   );

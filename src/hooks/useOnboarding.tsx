@@ -99,7 +99,7 @@ export function useOnboarding() {
     await supabase.rpc('claim_achievement_by_code', { _code: 'onboarding_complete' });
 
 
-    toast({ title: '🎯 Primeiros Passos desbloqueado!', description: '+50 XP — bem-vindo ao CORE HUB.' });
+    toast({ title: '🎯 Primeiros Passos desbloqueado!', description: '+50 XP — bem-vindo ao Instituto Trader.' });
     setCompletedAt(nowIso);
   }, [user, completedAt, toast]);
 
