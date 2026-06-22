@@ -189,7 +189,7 @@ export function MessageSearch({ channelId, onResultClick, onClose }: MessageSear
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">
                     {result.is_bot_message 
-                      ? 'CORE Bot' 
+                      ? 'INSTITUTO TRADER Bot' 
                       : result.profiles?.display_name || 'Usuário'}
                   </span>
                   {!channelId && result.channels && (

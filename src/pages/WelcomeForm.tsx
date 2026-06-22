@@ -130,7 +130,7 @@ export default function WelcomeForm() {
       return;
     }
     await qc.invalidateQueries({ queryKey: ['lead_profile', user.id] });
-    toast({ title: 'Tudo certo!', description: 'Bem-vindo ao CORE.' });
+    toast({ title: 'Tudo certo!', description: 'Bem-vindo ao INSTITUTO TRADER.' });
     navigate('/app', { replace: true });
   };
 
@@ -179,7 +179,7 @@ export default function WelcomeForm() {
           <RadioField label="Você opera ou investe em Mesas Proprietárias?" name="prop_firm_status" options={propFirm} value={form.prop_firm_status} onChange={set('prop_firm_status')} error={errors.prop_firm_status} />
           <RadioField label="Qual seu perfil investidor?" name="investor_profile" options={profiles} value={form.investor_profile} onChange={set('investor_profile')} error={errors.investor_profile} />
           <RadioField label="Qual sua faixa de renda mensal?" name="income_range" options={incomes} value={form.income_range} onChange={set('income_range')} error={errors.income_range} />
-          <RadioField label="Quanto você pretende investir inicialmente no CORE?" name="initial_investment" options={investments} value={form.initial_investment} onChange={set('initial_investment')} error={errors.initial_investment} />
+          <RadioField label="Quanto você pretende investir inicialmente no INSTITUTO TRADER?" name="initial_investment" options={investments} value={form.initial_investment} onChange={set('initial_investment')} error={errors.initial_investment} />
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

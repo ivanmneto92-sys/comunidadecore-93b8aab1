@@ -93,7 +93,7 @@ const Install = () => {
           <div>
             <h1 className="text-2xl font-bold mb-2">App Instalado!</h1>
             <p className="text-muted-foreground">
-              O Comunidade CORE já está na sua tela inicial. Aproveite a experiência completa!
+              O Comunidade INSTITUTO TRADER já está na sua tela inicial. Aproveite a experiência completa!
             </p>
           </div>
           <Button onClick={() => navigate('/')} className="w-full">
@@ -110,12 +110,12 @@ const Install = () => {
       {/* Header */}
       <div className="p-6 pb-0">
         <div className="flex items-center justify-center mb-8">
-          <img src={logoCore} alt="CORE" width={280} height={64} className="h-16 w-auto" />
+          <img src={logoCore} alt="INSTITUTO TRADER" width={280} height={64} className="h-16 w-auto" />
         </div>
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Instale o App</h1>
           <p className="text-muted-foreground">
-            Adicione o Comunidade CORE à sua tela inicial para acesso rápido e experiência nativa.
+            Adicione o Comunidade INSTITUTO TRADER à sua tela inicial para acesso rápido e experiência nativa.
           </p>
         </div>
       </div>

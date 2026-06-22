@@ -89,7 +89,7 @@ export function useWebPushRegistration() {
 
       // Foreground messages -> show local notification
       onMessage(messaging, (payload) => {
-        const title = payload.notification?.title || payload.data?.title || 'CORE';
+        const title = payload.notification?.title || payload.data?.title || 'INSTITUTO TRADER';
         const body = payload.notification?.body || payload.data?.body || '';
         try {
           new Notification(title, { body, icon: '/app-icon.png' });

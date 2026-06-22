@@ -35,7 +35,7 @@ export function AnnouncementCard({
             </div>
             <div>
               <h3 className="font-semibold text-foreground">{title}</h3>
-              <p className="text-xs text-muted-foreground">CORE</p>
+              <p className="text-xs text-muted-foreground">INSTITUTO TRADER</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

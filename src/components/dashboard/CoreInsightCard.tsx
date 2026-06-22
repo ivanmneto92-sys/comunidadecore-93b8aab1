@@ -11,7 +11,7 @@ export function CoreInsightCard({ insightText }: CoreInsightCardProps) {
       <CardContent className="pt-4 pb-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-medium text-foreground">Insight do CORE</h3>
+          <h3 className="text-sm font-medium text-foreground">Insight do INSTITUTO TRADER</h3>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
           {insightText}

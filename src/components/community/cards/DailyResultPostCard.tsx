@@ -55,7 +55,7 @@ export function DailyResultPostCard({
             </div>
             <div>
               <h3 className="font-semibold text-foreground">{title}</h3>
-              <p className="text-xs text-muted-foreground">CORE</p>
+              <p className="text-xs text-muted-foreground">INSTITUTO TRADER</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ export function DailyResultPostCard({
             <div className="flex items-start gap-2">
               <Lightbulb className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-xs font-medium text-primary mb-1">Comentário CORE AI</p>
+                <p className="text-xs font-medium text-primary mb-1">Comentário INSTITUTO TRADER AI</p>
                 <p className="text-sm text-foreground/80 leading-relaxed">{metadata.aiComment}</p>
               </div>
             </div>

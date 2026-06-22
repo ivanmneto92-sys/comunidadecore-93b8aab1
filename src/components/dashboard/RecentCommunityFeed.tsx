@@ -145,7 +145,7 @@ export function RecentCommunityFeed() {
   }, [fetchMessageWithProfile]);
 
   const getAuthorName = (message: Message) => {
-    if (message.is_bot_message) return 'CORE Bot';
+    if (message.is_bot_message) return 'INSTITUTO TRADER Bot';
     if (message.profile?.display_name) return message.profile.display_name;
     if (message.profile?.username) return message.profile.username;
     return 'Usuário';

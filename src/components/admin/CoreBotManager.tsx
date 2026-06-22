@@ -121,7 +121,7 @@ export function CoreBotManager() {
 
       if (error) throw error;
 
-      toast.success('Mensagem do CORE Bot enviada!');
+      toast.success('Mensagem do INSTITUTO TRADER Bot enviada!');
       setQuickContent('');
       setQuickPinned(false);
     } catch (error) {
@@ -383,7 +383,7 @@ export function CoreBotManager() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Bot className="h-5 w-5 text-primary" />
-                Enviar Mensagem do CORE Bot
+                Enviar Mensagem do INSTITUTO TRADER Bot
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -441,7 +441,7 @@ export function CoreBotManager() {
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Enviar como CORE Bot
+                    Enviar como INSTITUTO TRADER Bot
                   </>
                 )}
               </Button>
@@ -692,7 +692,7 @@ export function CoreBotManager() {
               <CardContent className="py-8 text-center text-muted-foreground">
                 <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>Nenhum agendamento</p>
-                <p className="text-sm">Agende postagens automáticas do CORE Bot</p>
+                <p className="text-sm">Agende postagens automáticas do INSTITUTO TRADER Bot</p>
               </CardContent>
             </Card>
           ) : (
