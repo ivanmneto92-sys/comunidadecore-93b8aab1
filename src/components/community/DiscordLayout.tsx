@@ -14,7 +14,7 @@ import { CommunityNewsPanel } from './CommunityNewsPanel';
 import { SupportView } from '@/components/support/SupportView';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftOpen } from 'lucide-react';
 import { CommunityWelcomeTour } from './CommunityWelcomeTour';
 
 // Memoize NewsPanel to prevent re-renders on parent state changes
@@ -221,28 +221,28 @@ export function DiscordLayout() {
                 setShowSupport(channel.icon === '🔧' || channel.slug === 'suporte');
               }}
               unreadCounts={unreadCounts}
+              onCollapse={() => setChannelListCollapsed(true)}
             />
+          </div>
+        )}
+
+        {channelListCollapsed && (
+          <div className="w-11 shrink-0 h-full border-r border-border bg-background flex justify-center pt-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setChannelListCollapsed(false)}
+              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+              aria-label="Mostrar menu de canais"
+              title="Mostrar menu"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-          {/* Toggle sidebar button - always visible on desktop */}
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => setChannelListCollapsed((v) => !v)}
-            className="absolute top-3 left-3 h-8 w-8 z-30 shadow-md border border-border"
-            aria-label={channelListCollapsed ? 'Expandir menu de canais' : 'Recolher menu de canais'}
-            title={channelListCollapsed ? 'Mostrar menu' : 'Recolher menu'}
-          >
-            {channelListCollapsed ? (
-              <PanelLeftOpen className="h-4 w-4" />
-            ) : (
-              <PanelLeftClose className="h-4 w-4" />
-            )}
-          </Button>
-
           {showSupport ? (
             <SupportView />
           ) : selectedChannel?.slug === 'noticias-mercado' ? (
