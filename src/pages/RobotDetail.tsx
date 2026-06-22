@@ -17,6 +17,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { useRobot } from '@/hooks/useRobots';
+import { RobotPerformanceChart } from '@/components/robots/RobotPerformanceChart';
 
 const riskConfig: Record<string, { label: string; icon: typeof Shield; className: string }> = {
   baixo: { label: 'Risco Baixo', icon: ShieldCheck, className: 'text-emerald-500' },
@@ -117,6 +118,15 @@ export default function RobotDetail() {
         />
         <Spec icon={Shield} label="Categoria" value={robot.category} />
       </Card>
+      {/* Performance chart */}
+      <Card className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Resultados mensais</h2>
+          <span className="text-[11px] text-muted-foreground">% por mês</span>
+        </div>
+        <RobotPerformanceChart data={robot.monthly_returns ?? []} height={220} />
+      </Card>
+
 
       {/* Description */}
       {robot.description && (

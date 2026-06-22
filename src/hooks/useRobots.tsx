@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+export interface MonthlyReturn {
+  month: string; // YYYY-MM
+  return: number; // %
+}
+
 export interface Robot {
   id: string;
   slug: string;
@@ -21,6 +26,7 @@ export interface Robot {
   is_published: boolean;
   is_featured: boolean;
   sort_order: number;
+  monthly_returns: MonthlyReturn[];
   created_at: string;
   updated_at: string;
 }
