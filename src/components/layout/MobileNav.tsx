@@ -21,7 +21,7 @@ const routePrefetchMap: Record<string, () => Promise<unknown>> = {
 
 const navItems = [
   { to: '/app', icon: Home, label: 'Hub', prefetchKey: null },
-  { to: '/results', icon: BarChart3, label: 'Resultados', prefetchKey: 'reports-prefetch' },
+  { to: '/robots', icon: Bot, label: 'Robôs', prefetchKey: null },
   { to: '/academy', icon: GraduationCap, label: 'Academy', prefetchKey: 'tutorials-prefetch' },
   { to: '/community', icon: MessageCircle, label: 'Club', prefetchKey: 'channels-prefetch' },
   { to: '/profile', icon: User, label: 'Perfil', prefetchKey: null },
