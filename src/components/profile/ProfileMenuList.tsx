@@ -10,7 +10,8 @@ import {
   DollarSign,
   Trophy,
   BookOpen,
-  Bot
+  Bot,
+  Building2
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
