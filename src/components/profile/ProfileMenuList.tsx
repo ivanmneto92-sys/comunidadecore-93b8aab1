@@ -10,7 +10,8 @@ import {
   DollarSign,
   Trophy,
   BookOpen,
-  Bot
+  Bot,
+  Building2
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
@@ -84,6 +85,20 @@ export function ProfileMenuList({
             </Badge>
           ) : undefined}
           onClick={() => navigate('/affiliates')}
+        />
+      </Card>
+
+      {/* Corretora Parceira */}
+      <Card className="overflow-hidden animate-fade-in" style={{ animationDelay: '150ms' }}>
+        <ProfileMenuItem
+          icon={Building2}
+          iconColor="text-primary"
+          label="Moneta Markets"
+          subtitle="Corretora parceira oficial — abrir conta"
+          onClick={() => {
+            const url = 'https://www.monetamarkets.com/';
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }}
         />
       </Card>
 
