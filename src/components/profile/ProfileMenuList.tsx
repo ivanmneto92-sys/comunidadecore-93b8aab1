@@ -96,7 +96,7 @@ export function ProfileMenuList({
           label="Moneta Markets"
           subtitle="Corretora parceira oficial — abrir conta"
           onClick={() => {
-            const url = 'https://www.monetamarkets.com/';
+            const url = 'https://mmsa.ltd/la-com/CYnKB4g6';
             window.open(url, '_blank', 'noopener,noreferrer');
           }}
         />
