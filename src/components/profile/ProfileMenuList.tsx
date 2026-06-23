@@ -88,6 +88,20 @@ export function ProfileMenuList({
         />
       </Card>
 
+      {/* Corretora Parceira */}
+      <Card className="overflow-hidden animate-fade-in" style={{ animationDelay: '150ms' }}>
+        <ProfileMenuItem
+          icon={Building2}
+          iconColor="text-primary"
+          label="Moneta Markets"
+          subtitle="Corretora parceira oficial — abrir conta"
+          onClick={() => {
+            const url = 'https://www.monetamarkets.com/';
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }}
+        />
+      </Card>
+
       {/* Preferências */}
       <Card className="overflow-hidden divide-y divide-border/50 animate-fade-in" style={{ animationDelay: '200ms' }}>
         <ProfileMenuItem
