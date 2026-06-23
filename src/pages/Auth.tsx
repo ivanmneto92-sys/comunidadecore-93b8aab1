@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import logoCore from '@/assets/logo-instituto-trader.png';
+import monetaLogo from '@/assets/moneta-markets-logo.png.asset.json';
 import { ForgotPasswordModal } from '@/components/auth/ForgotPasswordModal';
 
 const emailSchema = z.string().email('Email inválido');
