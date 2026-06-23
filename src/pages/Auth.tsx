@@ -267,6 +267,19 @@ export default function Auth() {
           </CardContent>
         </Card>
 
+        {/* Corretora parceira oficial */}
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            Corretora parceira oficial
+          </span>
+          <img
+            src={monetaLogo.url}
+            alt="Moneta Markets"
+            className="h-8 w-auto opacity-80"
+          />
+        </div>
+
+
         {/* Legal links */}
         <div className="flex justify-center gap-4 text-xs text-muted-foreground">
           <a href="/termos" className="hover:text-primary hover:underline">
