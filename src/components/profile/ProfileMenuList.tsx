@@ -11,7 +11,8 @@ import {
   Trophy,
   BookOpen,
   Bot,
-  Building2
+  Building2,
+  BarChart3
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
@@ -44,6 +45,13 @@ export function ProfileMenuList({
           label="Editar Perfil"
           subtitle="Nome, username e bio"
           onClick={onEditProfile}
+        />
+        <ProfileMenuItem
+          icon={BarChart3}
+          iconColor="text-primary"
+          label="Resultados"
+          subtitle="Performance e estatísticas"
+          onClick={() => navigate('/results')}
         />
         <ProfileMenuItem
           icon={Palette}
