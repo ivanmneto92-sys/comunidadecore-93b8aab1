@@ -10,22 +10,9 @@ interface TodayResultCardProps {
 
 export function TodayResultCard({ pnlPercent, tradesCount, winRate }: TodayResultCardProps) {
   if (tradesCount === 0 || pnlPercent === null) {
-    return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-              <Activity className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Resultado do Dia</p>
-              <p className="text-xs text-muted-foreground">Sem operações até o momento</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
+
 
   const isPositive = pnlPercent >= 0;
   const Icon = isPositive ? TrendingUp : TrendingDown;
