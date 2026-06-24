@@ -11,7 +11,8 @@ import {
   Trophy,
   BookOpen,
   Bot,
-  Building2
+  Building2,
+  BarChart3
 } from 'lucide-react';
 
 import { ProfileMenuItem } from './ProfileMenuItem';
