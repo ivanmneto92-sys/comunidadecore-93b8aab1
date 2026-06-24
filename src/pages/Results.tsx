@@ -2,20 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ResultsFilter } from '@/components/results/ResultsFilter';
-import { ResultsChart } from '@/components/results/ResultsChart';
 import { DailyResultItem } from '@/components/results/DailyResultItem';
 import { TodayResultCard } from '@/components/results/TodayResultCard';
 import { PerformanceOverview } from '@/components/results/PerformanceOverview';
-import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
-import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
-import { PositiveStreakBadge } from '@/components/results/PositiveStreakBadge';
+import { ChartSwitcher } from '@/components/results/ChartSwitcher';
+import { PeriodSummaryBanner } from '@/components/results/PeriodSummaryBanner';
 import { ResultsSkeleton } from '@/components/results/ResultsSkeleton';
 import { useAccountMetrics, FilterPeriod } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, LayoutDashboard, LineChart as LineChartIcon, CalendarDays } from 'lucide-react';
 import { subDays, parseISO, isAfter, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+
 
 interface DailyReport {
   id: string;
@@ -178,21 +177,31 @@ export default function Results() {
           <ResultsFilter value={filter} onChange={setFilter} />
         </div>
 
-        {/* Positive Days Streak Badge */}
+        {/* Period summary banner (substitui badge solto) */}
         <div className="animate-fade-in" style={{ animationDelay: '75ms' }}>
-          <PositiveStreakBadge
+          <PeriodSummaryBanner
+            reports={filteredReports}
+            period={filter}
             currentStreak={streakStats.currentStreak}
             bestStreak={streakStats.bestStreak}
-            period={filter}
           />
         </div>
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="charts">Gráficos</TabsTrigger>
-            <TabsTrigger value="history">Histórico</TabsTrigger>
+            <TabsTrigger value="overview" className="gap-1.5 text-xs">
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Resumo
+            </TabsTrigger>
+            <TabsTrigger value="charts" className="gap-1.5 text-xs">
+              <LineChartIcon className="h-3.5 w-3.5" />
+              Gráficos
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-1.5 text-xs">
+              <CalendarDays className="h-3.5 w-3.5" />
+              Diário
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4 space-y-4">
@@ -204,13 +213,14 @@ export default function Results() {
             <PerformanceOverview metrics={metrics} />
           </TabsContent>
 
-          <TabsContent value="charts" className="mt-4 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AccountGrowthChart data={growthData} />
-              <MonthlyReturnsChart data={monthlyReturns} />
-            </div>
-            {chartData.length > 0 && <ResultsChart data={chartData} />}
+          <TabsContent value="charts" className="mt-4">
+            <ChartSwitcher
+              growthData={growthData}
+              monthlyReturns={monthlyReturns}
+              chartData={chartData}
+            />
           </TabsContent>
+
 
 
           <TabsContent value="history" className="mt-4">
