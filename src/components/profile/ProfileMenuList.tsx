@@ -47,6 +47,13 @@ export function ProfileMenuList({
           onClick={onEditProfile}
         />
         <ProfileMenuItem
+          icon={BarChart3}
+          iconColor="text-primary"
+          label="Resultados"
+          subtitle="Performance e estatísticas"
+          onClick={() => navigate('/results')}
+        />
+        <ProfileMenuItem
           icon={Palette}
           label="Trocar Avatar"
           subtitle="Escolha um novo avatar"
