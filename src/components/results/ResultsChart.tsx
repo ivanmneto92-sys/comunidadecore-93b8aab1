@@ -3,9 +3,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
-  Cell,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -13,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -155,11 +153,15 @@ export function ResultsChart({ data }: ResultsChartProps) {
               </LineChart>
 
             ) : (
-              <BarChart
+              <LineChart
                 data={data}
                 margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
-                barCategoryGap="20%"
               >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatDate}
@@ -175,31 +177,42 @@ export function ResultsChart({ data }: ResultsChartProps) {
                   tickFormatter={(value) => `${value}%`}
                   width={35}
                 />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 {chartType === 'daily' && (
                   <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
                 )}
-                <Bar
+                <Line
+                  type="monotone"
                   dataKey={chartType === 'daily' ? 'pnl' : 'drawdown'}
-                  radius={[3, 3, 0, 0]}
-                >
-                  {data.map((entry, index) => {
+                  stroke={chartType === 'drawdown' ? negativeColor : lineColor}
+                  strokeWidth={2}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
                     const value =
-                      chartType === 'daily' ? entry.pnl : entry.drawdown;
+                      chartType === 'daily' ? payload.pnl : payload.drawdown;
                     const fill =
                       chartType === 'drawdown'
                         ? negativeColor
                         : value >= 0
                           ? positiveColor
                           : negativeColor;
-                    return <Cell key={`cell-${index}`} fill={fill} />;
-                  })}
-                </Bar>
-              </BarChart>
+                    return (
+                      <circle
+                        key={`dot-${index}`}
+                        cx={cx}
+                        cy={cy}
+                        r={3}
+                        fill={fill}
+                        stroke="hsl(var(--background))"
+                        strokeWidth={1}
+                      />
+                    );
+                  }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
             )}
+
           </ResponsiveContainer>
         </div>
       </CardContent>

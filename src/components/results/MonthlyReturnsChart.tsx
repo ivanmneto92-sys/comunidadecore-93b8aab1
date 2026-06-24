@@ -1,12 +1,12 @@
 import { Card } from '@/components/ui/card';
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
   ResponsiveContainer,
-  Cell,
   LabelList,
 } from 'recharts';
 
@@ -24,8 +24,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-lg">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-sm font-bold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-          {isPositive ? '+' : ''}{value.toFixed(2)}%
+        <p
+          className={`text-sm font-bold ${isPositive ? 'text-emerald-500' : 'text-destructive'}`}
+        >
+          {isPositive ? '+' : ''}
+          {value.toFixed(2)}%
         </p>
       </div>
     );
@@ -47,19 +50,27 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
 
   const maxReturn = Math.max(...data.map((d) => Math.abs(d.returnPercent)));
   const yAxisMax = Math.ceil(maxReturn / 5) * 5 + 5;
-  const hasNegative = data.some(d => d.returnPercent < 0);
+  const hasNegative = data.some((d) => d.returnPercent < 0);
   const yAxisMin = hasNegative ? -yAxisMax : 0;
+
+  const positiveColor = 'hsl(var(--chart-2))';
+  const negativeColor = 'hsl(var(--destructive))';
+  const lineColor = 'hsl(var(--chart-1))';
 
   return (
     <Card className="p-4 min-w-0 overflow-hidden">
       <h3 className="text-sm font-semibold mb-3">Retornos Mensais</h3>
       <div className="h-[240px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+          <LineChart
             data={data}
-            margin={{ top: 24, right: 8, left: 0, bottom: 5 }}
+            margin={{ top: 24, right: 12, left: 0, bottom: 5 }}
           >
-
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="hsl(var(--border))"
+              vertical={false}
+            />
             <XAxis
               dataKey="month"
               tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }}
@@ -74,31 +85,44 @@ export function MonthlyReturnsChart({ data }: MonthlyReturnsChartProps) {
               axisLine={false}
               width={35}
             />
-            <Tooltip 
-              content={<CustomTooltip />}
-              cursor={{ fill: 'transparent' }}
-            />
-            <Bar dataKey="returnPercent" radius={[4, 4, 0, 0]} maxBarSize={40} fill="transparent">
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.returnPercent >= 0 ? '#22C55E' : '#EF4444'}
-                  stroke={entry.returnPercent >= 0 ? '#22C55E' : '#EF4444'}
-                  fillOpacity={1}
-                />
-              ))}
+            <Tooltip content={<CustomTooltip />} />
+            <Line
+              type="monotone"
+              dataKey="returnPercent"
+              stroke={lineColor}
+              strokeWidth={2}
+              dot={(props: any) => {
+                const { cx, cy, payload, index } = props;
+                const fill =
+                  payload.returnPercent >= 0 ? positiveColor : negativeColor;
+                return (
+                  <circle
+                    key={`dot-${index}`}
+                    cx={cx}
+                    cy={cy}
+                    r={4}
+                    fill={fill}
+                    stroke="hsl(var(--background))"
+                    strokeWidth={1.5}
+                  />
+                );
+              }}
+              activeDot={{ r: 6 }}
+            >
               <LabelList
                 dataKey="returnPercent"
                 position="top"
-                formatter={(value: number) => `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`}
-                style={{ 
-                  fontSize: '10px', 
-                  fontWeight: 400,
-                  fill: 'hsl(var(--foreground))'
+                formatter={(value: number) =>
+                  `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`
+                }
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  fill: 'hsl(var(--foreground))',
                 }}
               />
-            </Bar>
-          </BarChart>
+            </Line>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </Card>
