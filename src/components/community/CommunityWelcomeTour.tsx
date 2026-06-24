@@ -168,7 +168,13 @@ export function CommunityWelcomeTour({ channels, currentChannelSlug }: Community
   const isLast = step === total - 1;
 
   const handleClose = () => {
-    if (user) localStorage.setItem(storageKey(user.id), new Date().toISOString());
+    if (user) {
+      localStorage.setItem(storageKey(user.id), new Date().toISOString());
+      // Persist across devices via user_metadata
+      supabase.auth.updateUser({
+        data: { community_tour_completed_at: new Date().toISOString() },
+      }).catch(() => { /* non-blocking */ });
+    }
     setOpen(false);
   };
 
