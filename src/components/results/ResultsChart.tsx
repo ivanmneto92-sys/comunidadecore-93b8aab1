@@ -118,16 +118,15 @@ export function ResultsChart({ data }: ResultsChartProps) {
         <div className="h-[240px] min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'cumulative' ? (
-              <AreaChart
+              <LineChart
                 data={data}
                 margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
               >
-                <defs>
-                  <linearGradient id="resultColorGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={lineColor} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="hsl(var(--border))"
+                  vertical={false}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatDate}
@@ -145,14 +144,16 @@ export function ResultsChart({ data }: ResultsChartProps) {
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
-                <Area
+                <Line
                   type="monotone"
                   dataKey="cumulativePnl"
                   stroke={lineColor}
                   strokeWidth={2}
-                  fill="url(#resultColorGradient)"
+                  dot={false}
+                  activeDot={{ r: 4, fill: lineColor }}
                 />
-              </AreaChart>
+              </LineChart>
+
             ) : (
               <BarChart
                 data={data}
