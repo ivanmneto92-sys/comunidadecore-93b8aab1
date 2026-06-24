@@ -58,35 +58,31 @@ export function DailyResultItem({ report }: DailyResultItemProps) {
       <CardContent className="p-3">
         <div className="flex items-center gap-3">
           {/* Status indicator */}
-          <div className={cn('w-1 h-10 rounded-full shrink-0', config.color)} />
-          
+          <div className={cn('w-1 h-12 rounded-full shrink-0', config.color)} />
+
           {/* Date and stats */}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">{formattedDate}</p>
-            <p className="text-xs text-muted-foreground">
-              {report.trades_count} trades • {Number(report.win_rate).toFixed(0)}% win
+            <p className="text-sm font-semibold capitalize">{formattedDate}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {report.trades_count} ops · {Number(report.win_rate).toFixed(0)}% win
             </p>
           </div>
-          
-          {/* PnL and expand */}
-          <div className="flex items-center gap-2">
-            <div className="text-right">
-              <p className={cn(
-                'text-sm font-bold',
-                isPositive ? 'text-emerald-500' : 'text-destructive'
-              )}>
-                {isPositive ? '+' : ''}{Number(report.pnl_percent).toFixed(2)}%
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                DD {Number(report.drawdown_percent).toFixed(1)}%
-              </p>
-            </div>
+
+          {/* PnL dominante */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <p className={cn(
+              'text-lg font-bold tabular-nums leading-none',
+              isPositive ? 'text-emerald-500' : 'text-destructive'
+            )}>
+              {isPositive ? '+' : ''}{Number(report.pnl_percent).toFixed(2)}%
+            </p>
             <ChevronDown className={cn(
               'h-4 w-4 text-muted-foreground transition-transform duration-200',
               expanded && 'rotate-180'
             )} />
           </div>
         </div>
+
 
         {/* Expanded content */}
         <div className={cn(
