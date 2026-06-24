@@ -1,10 +1,11 @@
 import { Card } from '@/components/ui/card';
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
 
