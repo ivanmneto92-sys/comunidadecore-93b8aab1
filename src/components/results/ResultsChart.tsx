@@ -3,9 +3,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
-  Cell,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -13,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
