@@ -2,20 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ResultsFilter } from '@/components/results/ResultsFilter';
-import { ResultsChart } from '@/components/results/ResultsChart';
 import { DailyResultItem } from '@/components/results/DailyResultItem';
 import { TodayResultCard } from '@/components/results/TodayResultCard';
 import { PerformanceOverview } from '@/components/results/PerformanceOverview';
-import { AccountGrowthChart } from '@/components/results/AccountGrowthChart';
-import { MonthlyReturnsChart } from '@/components/results/MonthlyReturnsChart';
-import { PositiveStreakBadge } from '@/components/results/PositiveStreakBadge';
+import { ChartSwitcher } from '@/components/results/ChartSwitcher';
+import { PeriodSummaryBanner } from '@/components/results/PeriodSummaryBanner';
 import { ResultsSkeleton } from '@/components/results/ResultsSkeleton';
 import { useAccountMetrics, FilterPeriod } from '@/hooks/useAccountMetrics';
 import { supabase } from '@/integrations/supabase/client';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, LayoutDashboard, LineChart as LineChartIcon, CalendarDays } from 'lucide-react';
 import { subDays, parseISO, isAfter, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+
 
 interface DailyReport {
   id: string;
