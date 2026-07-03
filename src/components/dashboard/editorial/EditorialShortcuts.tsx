@@ -1,8 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Sparkles, MessageSquare, Trophy, ExternalLink } from 'lucide-react';
-import monetaLogo from '@/assets/moneta-markets-logo.png.asset.json';
-
-const MONETA_URL = 'https://mmsa.ltd/la-com/CYnKB4g6';
+import { BookOpen, Sparkles, MessageSquare, Trophy } from 'lucide-react';
 
 const shortcuts = [
   { to: '/journal', icon: BookOpen, label: 'Diário' },
@@ -19,33 +16,6 @@ export function EditorialShortcuts() {
       <h2 className="font-display text-xl font-medium tracking-tight mb-4">
         Atalhos
       </h2>
-
-      {/* Featured: Moneta Markets — corretora parceira */}
-      <a
-        href={MONETA_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group block mb-3 p-4 rounded-md bg-card border border-primary/30 transition-all hover:-translate-y-0.5 hover:border-primary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <img
-              src={monetaLogo.url}
-              alt="Moneta Markets"
-              className="h-7 w-auto shrink-0"
-            />
-            <div className="min-w-0">
-              <div className="font-display text-sm text-foreground truncate">
-                Abra sua conta na Moneta
-              </div>
-              <div className="text-xs text-muted-foreground truncate">
-                Corretora parceira oficial — clique para abrir
-              </div>
-            </div>
-          </div>
-          <ExternalLink className="w-4 h-4 text-primary shrink-0" aria-hidden />
-        </div>
-      </a>
 
       <div className="grid grid-cols-2 gap-3">
         {shortcuts.map(({ to, icon: Icon, label }) => (
