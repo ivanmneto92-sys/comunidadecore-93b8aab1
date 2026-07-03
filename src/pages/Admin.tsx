@@ -77,7 +77,7 @@ export default function Admin() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="flex w-full overflow-x-auto scrollbar-hidden bg-card gap-1 p-1">
+          <TabsList className="flex flex-wrap h-auto w-full bg-card gap-1 p-1 justify-start">
             <TabsTrigger value="dashboard" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><LayoutDashboard className="h-4 w-4" /><span>Dashboard</span></TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Users className="h-4 w-4" /><span>Usuários</span></TabsTrigger>
             <TabsTrigger value="moderation" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><AlertTriangle className="h-4 w-4" /><span>Moderação</span></TabsTrigger>
