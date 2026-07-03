@@ -31,6 +31,8 @@ export interface AurusSummary {
     deposits: number;
     withdrawals: number;
     trades: number;
+    /** ISO 4217, ex.: "USD" ou "BRL". Opcional até o backend Aurus expor. */
+    currency?: string | null;
   };
 }
 
@@ -40,6 +42,10 @@ export interface AurusAccount {
   accountType: 'REAL' | 'DEMO' | string;
   expiresAt: string;
   active: boolean;
+  /** ISO 4217 da conta MT5 (opcional). */
+  currency?: string | null;
+  balance?: number | null;
+  profit?: number | null;
   status: {
     code: string;
     label: string;

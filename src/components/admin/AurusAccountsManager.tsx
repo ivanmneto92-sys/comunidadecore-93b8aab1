@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { AlertCircle, RefreshCw, Users } from 'lucide-react';
+import { formatMoney } from '@/lib/formatMoney';
 
 const FILTERS: { value: AurusStatusFilter; label: string }[] = [
   { value: 'active', label: 'Ativas' },
@@ -117,6 +118,7 @@ export function AurusAccountsManager() {
                     <TableHead>Status</TableHead>
                     <TableHead>Expira em</TableHead>
                     <TableHead className="text-right">Dias restantes</TableHead>
+                    <TableHead className="text-right">Balance</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -149,6 +151,11 @@ export function AurusAccountsManager() {
                       <TableCell className="text-right text-sm">
                         {acc.status.daysUntilExpiration >= 0
                           ? `${acc.status.daysUntilExpiration}d`
+                          : '—'}
+                      </TableCell>
+                      <TableCell className="text-right text-sm font-mono">
+                        {typeof acc.balance === 'number'
+                          ? formatMoney(acc.balance, acc.currency)
                           : '—'}
                       </TableCell>
                     </TableRow>

@@ -11,12 +11,8 @@ import {
   RefreshCw,
   AlertCircle,
 } from 'lucide-react';
+import { formatMoney } from '@/lib/formatMoney';
 
-const USD = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2,
-});
 const NUM = new Intl.NumberFormat('pt-BR');
 
 function formatDateTime(iso: string | null): string {
@@ -86,13 +82,13 @@ export function AurusSummaryCard() {
               <Kpi
                 icon={<Wallet className="h-4 w-4" />}
                 label="Balance"
-                value={USD.format(data.financialTotals.balance)}
-                sub={`Equity ${USD.format(data.financialTotals.equity)}`}
+                value={formatMoney(data.financialTotals.balance, data.financialTotals.currency)}
+                sub={`Equity ${formatMoney(data.financialTotals.equity, data.financialTotals.currency)}`}
               />
               <Kpi
                 icon={<TrendingUp className="h-4 w-4" />}
                 label="Profit"
-                value={USD.format(data.financialTotals.profit)}
+                value={formatMoney(data.financialTotals.profit, data.financialTotals.currency)}
                 positive={data.financialTotals.profit > 0}
                 negative={data.financialTotals.profit < 0}
               />
