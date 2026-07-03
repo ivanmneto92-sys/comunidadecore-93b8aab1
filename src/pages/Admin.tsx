@@ -24,6 +24,7 @@ const ActivityLogs = lazy(() => import('@/components/admin/ActivityLogs').then(m
 const SupportManager = lazy(() => import('@/components/admin/SupportManager').then(m => ({ default: m.SupportManager })));
 const RobotManager = lazy(() => import('@/components/admin/RobotManager').then(m => ({ default: m.RobotManager })));
 const LeadProfilesManager = lazy(() => import('@/components/admin/LeadProfilesManager').then(m => ({ default: m.LeadProfilesManager })));
+const AurusAccountsManager = lazy(() => import('@/components/admin/AurusAccountsManager').then(m => ({ default: m.AurusAccountsManager })));
 
 
 const TabFallback = () => (
