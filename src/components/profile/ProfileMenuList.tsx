@@ -11,7 +11,7 @@ import {
   Trophy,
   BookOpen,
   Bot,
-  Building2,
+  
   BarChart3
 } from 'lucide-react';
 
