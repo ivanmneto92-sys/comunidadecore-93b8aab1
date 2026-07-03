@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, MessageSquare, Hash, UserCheck, AlertTriangle, CreditCard, Crown, TrendingUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { AurusSummaryCard } from './AurusSummaryCard';
 
 export function AdminDashboard() {
   const { stats, loading } = useAdminStats();
