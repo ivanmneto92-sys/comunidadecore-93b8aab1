@@ -119,6 +119,7 @@ export default function Admin() {
             <TabsContent value="support" className="mt-4"><SupportManager /></TabsContent>
             <TabsContent value="robots" className="mt-4"><RobotManager /></TabsContent>
             <TabsContent value="leads" className="mt-4"><LeadProfilesManager /></TabsContent>
+            <TabsContent value="aurus" className="mt-4"><AurusAccountsManager /></TabsContent>
           </Suspense>
 
         </Tabs>
