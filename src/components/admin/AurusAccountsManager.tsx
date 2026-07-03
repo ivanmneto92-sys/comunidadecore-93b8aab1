@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { AlertCircle, RefreshCw, Users } from 'lucide-react';
+import { formatMoney } from '@/lib/formatMoney';
 
 const FILTERS: { value: AurusStatusFilter; label: string }[] = [
   { value: 'active', label: 'Ativas' },
