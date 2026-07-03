@@ -12,9 +12,9 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-const BRL = new Intl.NumberFormat('pt-BR', {
+const USD = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
-  currency: 'BRL',
+  currency: 'USD',
   maximumFractionDigits: 2,
 });
 const NUM = new Intl.NumberFormat('pt-BR');
