@@ -11,12 +11,8 @@ import {
   RefreshCw,
   AlertCircle,
 } from 'lucide-react';
+import { formatMoney } from '@/lib/formatMoney';
 
-const USD = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2,
-});
 const NUM = new Intl.NumberFormat('pt-BR');
 
 function formatDateTime(iso: string | null): string {
