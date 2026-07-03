@@ -82,13 +82,13 @@ export function AurusSummaryCard() {
               <Kpi
                 icon={<Wallet className="h-4 w-4" />}
                 label="Balance"
-                value={formatMoney(data.financialTotals.balance)}
-                sub={`Equity ${formatMoney(data.financialTotals.equity)}`}
+                value={formatMoney(data.financialTotals.balance, data.financialTotals.currency)}
+                sub={`Equity ${formatMoney(data.financialTotals.equity, data.financialTotals.currency)}`}
               />
               <Kpi
                 icon={<TrendingUp className="h-4 w-4" />}
                 label="Profit"
-                value={formatMoney(data.financialTotals.profit)}
+                value={formatMoney(data.financialTotals.profit, data.financialTotals.currency)}
                 positive={data.financialTotals.profit > 0}
                 negative={data.financialTotals.profit < 0}
               />
