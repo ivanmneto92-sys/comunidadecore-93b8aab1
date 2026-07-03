@@ -94,6 +94,7 @@ export default function Admin() {
             <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Headphones className="h-4 w-4" /><span>Suporte</span></TabsTrigger>
             <TabsTrigger value="robots" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Bot className="h-4 w-4" /><span>Robôs</span></TabsTrigger>
             <TabsTrigger value="leads" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><ClipboardList className="h-4 w-4" /><span>Leads</span></TabsTrigger>
+            <TabsTrigger value="aurus" className="flex items-center gap-1.5 text-xs px-3 shrink-0"><Activity className="h-4 w-4" /><span>Aurus</span></TabsTrigger>
           </TabsList>
 
 
