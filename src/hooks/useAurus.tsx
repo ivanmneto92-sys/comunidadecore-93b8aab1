@@ -12,14 +12,57 @@ async function callAurus<T>(path: string, query?: Record<string, string>): Promi
 }
 
 export interface AurusSummary {
-  [key: string]: unknown;
+  serverTime: string;
+  clients: { total: number; active: number; inactive: number };
+  accounts: {
+    total: number;
+    active: number;
+    expiringSoon: number;
+    expired: number;
+    blocked: number;
+    demo: number;
+    real: number;
+  };
+  reports: { total: number; lastUpdatedAt: string | null };
+  financialTotals: {
+    balance: number;
+    equity: number;
+    profit: number;
+    deposits: number;
+    withdrawals: number;
+    trades: number;
+  };
 }
 
 export interface AurusAccount {
-  id?: string;
-  status?: string;
-  [key: string]: unknown;
+  id: string;
+  login: string;
+  accountType: 'REAL' | 'DEMO' | string;
+  expiresAt: string;
+  active: boolean;
+  status: {
+    code: string;
+    label: string;
+    expired: boolean;
+    daysUntilExpiration: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    active: boolean;
+  };
+  report?: { id: string; updatedAt: string } | null;
 }
+
+export interface AurusAccountsResponse {
+  accounts: AurusAccount[];
+}
+
+export type AurusStatusFilter = 'active' | 'expiring' | 'expired' | 'blocked';
 
 export function useAurusSummary() {
   return useQuery({
@@ -29,13 +72,11 @@ export function useAurusSummary() {
   });
 }
 
-export function useAurusAccounts(status: string = 'active') {
+export function useAurusAccounts(status: AurusStatusFilter = 'active') {
   return useQuery({
     queryKey: ['aurus', 'accounts', status],
-    queryFn: () => callAurus<{ data?: AurusAccount[] } | AurusAccount[]>(
-      '/api/external/accounts',
-      { status },
-    ),
+    queryFn: () =>
+      callAurus<AurusAccountsResponse>('/api/external/accounts', { status }),
     staleTime: 60_000,
   });
 }

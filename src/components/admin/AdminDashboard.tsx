@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, MessageSquare, Hash, UserCheck, AlertTriangle, CreditCard, Crown, TrendingUp } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { AurusSummaryCard } from './AurusSummaryCard';
 
 export function AdminDashboard() {
   const { stats, loading } = useAdminStats();
@@ -53,6 +54,9 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Aurus Licensing block */}
+      <AurusSummaryCard />
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (
